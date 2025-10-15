@@ -18,12 +18,16 @@ export const authOptions: NextAuthOptions = {
           return null;
         }
 
-        // For demo, use a hardcoded admin user. In production, query DB.
-        const adminEmail = "nomanirshad0324@gmail.com";
-        const adminPassword = "Noman@123";
+        // For demo, use hardcoded admin users. In production, query DB.
+        const superAdminEmail = "nomanirshad0324@gmail.com";
+        const superAdminPassword = "Noman@123";
+        const accountAdminEmail = "alishahids519@gmail.com";
+        const accountAdminPassword = "Ali@1234";
 
-        if (credentials.email === adminEmail && credentials.password === adminPassword) {
-          return { id: "1", email: adminEmail, name: "Admin" };
+        if (credentials.email === superAdminEmail && credentials.password === superAdminPassword) {
+          return { id: "1", email: superAdminEmail, name: "Super Admin" };
+        } else if (credentials.email === accountAdminEmail && credentials.password === accountAdminPassword) {
+          return { id: "2", email: accountAdminEmail, name: "Account Admin" };
         }
 
         return null;

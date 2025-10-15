@@ -1,12 +1,64 @@
 "use client";
 
 import { useSession } from "next-auth/react";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 
 export default function Dashboard() {
   const { data: session, status } = useSession();
   const router = useRouter();
+  const [recentActivities, setRecentActivities] = useState([
+    {
+      id: 1,
+      type: 'product',
+      action: 'New product added',
+      details: '"Wireless Headphones"',
+      timestamp: '2 hours ago',
+      icon: '📦',
+      color: 'blue'
+    },
+    {
+      id: 2,
+      type: 'order',
+      action: 'Order completed',
+      details: 'Order #1234',
+      timestamp: '4 hours ago',
+      icon: '✅',
+      color: 'green'
+    },
+    {
+      id: 3,
+      type: 'user',
+      action: 'New user registered',
+      details: 'john@example.com',
+      timestamp: '1 day ago',
+      icon: '👤',
+      color: 'purple'
+    },
+    {
+      id: 4,
+      type: 'category',
+      action: 'New category added',
+      details: '"Electronics"',
+      timestamp: '3 hours ago',
+      icon: '🏷️',
+      color: 'orange'
+    }
+  ]);
+
+  // Function to add new activity (can be called from other components)
+  const addActivity = (type: string, action: string, details: string) => {
+    const newActivity = {
+      id: recentActivities.length + 1,
+      type,
+      action,
+      details,
+      timestamp: 'Just now',
+      icon: type === 'product' ? '📦' : type === 'order' ? '✅' : type === 'user' ? '👤' : '🏷️',
+      color: type === 'product' ? 'blue' : type === 'order' ? 'green' : type === 'user' ? 'purple' : 'orange'
+    };
+    setRecentActivities([newActivity, ...recentActivities.slice(0, 4)]);
+  };
 
   useEffect(() => {
     if (status === "unauthenticated") {
@@ -75,42 +127,20 @@ export default function Dashboard() {
         <div className="bg-white p-8 rounded-xl shadow-lg">
           <h2 className="text-2xl font-semibold text-gray-900 mb-6">Recent Activity</h2>
           <ul className="space-y-4">
-            <li className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
-              <div className="flex items-center space-x-3">
-                <div className="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center">
-                  <span className="text-blue-600">📦</span>
+            {recentActivities.map((activity) => (
+              <li key={activity.id} className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
+                <div className="flex items-center space-x-3">
+                  <div className={`w-10 h-10 bg-${activity.color}-100 rounded-full flex items-center justify-center`}>
+                    <span className={`text-${activity.color}-600`}>{activity.icon}</span>
+                  </div>
+                  <div>
+                    <p className="font-medium text-gray-900">{activity.action}</p>
+                    <p className="text-sm text-gray-600">{activity.details}</p>
+                  </div>
                 </div>
-                <div>
-                  <p className="font-medium text-gray-900">New product added</p>
-                  <p className="text-sm text-gray-600">"Wireless Headphones"</p>
-                </div>
-              </div>
-              <span className="text-sm text-gray-500">2 hours ago</span>
-            </li>
-            <li className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
-              <div className="flex items-center space-x-3">
-                <div className="w-10 h-10 bg-green-100 rounded-full flex items-center justify-center">
-                  <span className="text-green-600">✅</span>
-                </div>
-                <div>
-                  <p className="font-medium text-gray-900">Order completed</p>
-                  <p className="text-sm text-gray-600">Order #1234</p>
-                </div>
-              </div>
-              <span className="text-sm text-gray-500">4 hours ago</span>
-            </li>
-            <li className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
-              <div className="flex items-center space-x-3">
-                <div className="w-10 h-10 bg-purple-100 rounded-full flex items-center justify-center">
-                  <span className="text-purple-600">👤</span>
-                </div>
-                <div>
-                  <p className="font-medium text-gray-900">New user registered</p>
-                  <p className="text-sm text-gray-600">john@example.com</p>
-                </div>
-              </div>
-              <span className="text-sm text-gray-500">1 day ago</span>
-            </li>
+                <span className="text-sm text-gray-500">{activity.timestamp}</span>
+              </li>
+            ))}
           </ul>
         </div>
 

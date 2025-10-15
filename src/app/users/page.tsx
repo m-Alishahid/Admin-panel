@@ -3,49 +3,27 @@
 const mockUsers = [
   {
     id: "1",
-    name: "John Doe",
-    email: "john@example.com",
-    role: "Customer",
+    name: "Super Admin",
+    email: "nomanirshad0324@gmail.com",
+    role: "Super Admin",
     status: "Active",
-    joinDate: "2023-06-15",
-    orders: 5,
+    joinDate: "2023-01-01",
+    orders: 0,
+    permissions: "Full Control",
   },
   {
     id: "2",
-    name: "Jane Smith",
-    email: "jane@example.com",
-    role: "Customer",
+    name: "Account Admin",
+    email: "alishahids519@gmail.com",
+    role: "Account Admin",
     status: "Active",
-    joinDate: "2023-07-20",
-    orders: 3,
-  },
-  {
-    id: "3",
-    name: "Bob Johnson",
-    email: "bob@example.com",
-    role: "Admin",
-    status: "Active",
-    joinDate: "2023-01-10",
+    joinDate: "2023-02-01",
     orders: 0,
+    permissions: "View Accounts, Orders",
   },
-  {
-    id: "4",
-    name: "Alice Brown",
-    email: "alice@example.com",
-    role: "Customer",
-    status: "Inactive",
-    joinDate: "2023-08-05",
-    orders: 2,
-  },
-  {
-    id: "5",
-    name: "Charlie Wilson",
-    email: "charlie@example.com",
-    role: "Customer",
-    status: "Active",
-    joinDate: "2023-09-12",
-    orders: 7,
-  },
+
+
+
 ];
 
 export default function Users() {
@@ -73,7 +51,7 @@ export default function Users() {
                 Join Date
               </th>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                Orders
+                Permissions
               </th>
             </tr>
           </thead>
@@ -87,7 +65,13 @@ export default function Users() {
                   {user.email}
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                  {user.role}
+                  <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
+                    user.role === 'Super Admin' ? 'bg-red-100 text-red-800' :
+                    user.role === 'Account Admin' ? 'bg-blue-100 text-blue-800' :
+                    'bg-gray-100 text-gray-800'
+                  }`}>
+                    {user.role}
+                  </span>
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap">
                   <span
@@ -104,7 +88,7 @@ export default function Users() {
                   {user.joinDate}
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                  {user.orders}
+                  {user.permissions}
                 </td>
               </tr>
             ))}
