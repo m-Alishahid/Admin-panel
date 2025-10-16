@@ -57,7 +57,7 @@ export default function Categories() {
                 id="name"
                 value={newCategory.name}
                 onChange={(e) => setNewCategory({ ...newCategory, name: e.target.value })}
-                className="mt-1 block w-full border border-black rounded-md shadow-sm py-2 px-3  text-black"
+                className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 bg-white text-black"
                 placeholder="Enter category name"
               />
             </div>
