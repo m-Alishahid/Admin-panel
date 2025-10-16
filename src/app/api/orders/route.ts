@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { Order, mockOrders } from '../../../lib/orders';
 
-let orders: Order[] = [...mockOrders];
+const orders: Order[] = [...mockOrders];
 
 export async function GET() {
   return NextResponse.json(orders);

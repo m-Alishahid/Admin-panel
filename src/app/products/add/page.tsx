@@ -7,42 +7,43 @@ import { mockCategories, Category } from "@/lib/categories";
 export default function AddProduct() {
   const [formData, setFormData] = useState({
     name: "",
+    description: "",
     price: "",
     category: "",
-    subcategory: "",
     stock: "",
-    variants: {
-      size: "",
-      color: "",
-      fabric: "",
-    },
+    variants: [{ size: "", colors: [] as string[], fabric: "", stock: "" }],
     image: [] as File[],
   });
   const [loading, setLoading] = useState(false);
   const [categories, setCategories] = useState<Category[]>(mockCategories);
-  const [showAddCategory, setShowAddCategory] = useState(false);
-  const [newCategoryName, setNewCategoryName] = useState("");
-  const [selectedCategory, setSelectedCategory] = useState<Category | null>(null);
+
   const router = useRouter();
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
     if (name === "category") {
-      const selectedCat = categories.find(cat => cat.name === value);
-      setSelectedCategory(selectedCat || null);
-      setFormData({ ...formData, [name]: value, subcategory: "" });
+      setFormData({ ...formData, category: value });
     } else if (name.startsWith("variants.")) {
-      const variantKey = name.split(".")[1];
-      setFormData({
-        ...formData,
-        variants: {
-          ...formData.variants,
-          [variantKey]: value,
-        },
-      });
+      const parts = name.split(".");
+      const index = parseInt(parts[1]);
+      const key = parts[2];
+      const newVariants = [...formData.variants];
+      if (key === "colors") {
+        newVariants[index][key] = value.split(",").map(c => c.trim());
+      } else {
+        (newVariants[index] as Record<string, unknown>)[key] = value;
+      }
+      setFormData({ ...formData, variants: newVariants });
     } else {
       setFormData({ ...formData, [name]: value });
     }
+  };
+
+  const addVariant = () => {
+    setFormData({
+      ...formData,
+      variants: [...formData.variants, { size: "", colors: [], fabric: "", stock: "" }],
+    });
   };
 
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -50,19 +51,7 @@ export default function AddProduct() {
     setFormData({ ...formData, image: files });
   };
 
-  const handleAddCategory = () => {
-    if (newCategoryName.trim()) {
-      const newCategory: Category = {
-        id: categories.length + 1,
-        name: newCategoryName,
-        description: `${newCategoryName} category`,
-        status: "Active",
-      };
-      setCategories([...categories, newCategory]);
-      setNewCategoryName("");
-      setShowAddCategory(false);
-    }
-  };
+
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -88,216 +77,222 @@ export default function AddProduct() {
   };
 
   return (
-    <div className="max-w-md mx-auto">
-      <h1 className="text-3xl font-bold text-gray-900 mb-6">Add Product</h1>
-
-      <form onSubmit={handleSubmit} className="space-y-4">
-        <div>
-          <label htmlFor="name" className="block text-sm font-medium text-gray-700">
-            Name
-          </label>
-          <input
-            type="text"
-            id="name"
-            name="name"
-            value={formData.name}
-            onChange={handleChange}
-            required
-            className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 bg-white text-black"
-          />
-        </div>
-
-        <div>
-          <label htmlFor="category" className="block text-sm font-medium text-gray-700">
-            Category
-          </label>
-          <div className="flex space-x-2">
-            <select
-              id="category"
-              name="category"
-              value={formData.category}
-              onChange={handleChange}
-              required
-              className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 bg-white text-black"
-            >
-              <option value="">Select category</option>
-              {categories.map((category) => (
-                <option key={category.id} value={category.name}>
-                  {category.name}
-                </option>
-              ))}
-            </select>
-            <button
-              type="button"
-              onClick={() => setShowAddCategory(!showAddCategory)}
-              className="mt-1 px-3 py-2 bg-green-600 hover:bg-green-700 text-white rounded-md text-sm"
-            >
-              +
-            </button>
+    <div className="min-h-screen bg-gray-50 py-8">
+      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="bg-white shadow-lg rounded-lg overflow-hidden">
+          <div className="bg-indigo-600 px-6 py-4">
+            <h1 className="text-2xl font-bold text-white">Add New Product</h1>
+            <p className="text-indigo-100 mt-1">Fill in the details to add a product to your inventory.</p>
           </div>
-          {showAddCategory && (
-            <div className="mt-2 p-3 bg-gray-50 rounded-md">
-              <input
-                type="text"
-                value={newCategoryName}
-                onChange={(e) => setNewCategoryName(e.target.value)}
-                placeholder="New category name"
-                className="block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 bg-white text-black"
-              />
-              <div className="flex space-x-2 mt-2">
-                <button
-                  type="button"
-                  onClick={handleAddCategory}
-                  className="px-3 py-1 bg-blue-600 hover:bg-blue-700 text-white rounded text-sm"
+
+          <form onSubmit={handleSubmit} className="p-6 space-y-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div>
+                <label htmlFor="name" className="block text-sm font-semibold text-gray-700 mb-2">
+                  Product Name
+                </label>
+                <input
+                  type="text"
+                  id="name"
+                  name="name"
+                  value={formData.name}
+                  onChange={handleChange}
+                  required
+                  className="w-full border border-gray-300 rounded-lg shadow-sm py-3 px-4 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 bg-white text-gray-900 transition duration-200"
+                  placeholder="Enter product name"
+                />
+              </div>
+
+              <div>
+                <label htmlFor="category" className="block text-sm font-semibold text-gray-700 mb-2">
+                  Category
+                </label>
+                <select
+                  id="category"
+                  name="category"
+                  value={formData.category}
+                  onChange={handleChange}
+                  required
+                  className="w-full border border-gray-300 rounded-lg shadow-sm py-3 px-4 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 bg-white text-gray-900 transition duration-200"
                 >
-                  Add
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setShowAddCategory(false)}
-                  className="px-3 py-1 bg-gray-600 hover:bg-gray-700 text-white rounded text-sm"
-                >
-                  Cancel
-                </button>
+                  <option value="">Select a category</option>
+                  {categories.map((category) => (
+                    <option key={category.id} value={category.name}>
+                      {category.name}
+                    </option>
+                  ))}
+                </select>
               </div>
             </div>
-          )}
-        </div>
 
-        {selectedCategory && selectedCategory.subcategories && (
-          <div>
-            <label htmlFor="subcategory" className="block text-sm font-medium text-gray-700">
-              Subcategory
-            </label>
-            <select
-              id="subcategory"
-              name="subcategory"
-              value={formData.subcategory}
-              onChange={handleChange}
-              className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 bg-white text-black"
-            >
-              <option value="">Select subcategory</option>
-              {selectedCategory.subcategories.map((subcategory) => (
-                <option key={subcategory.id} value={subcategory.name}>
-                  {subcategory.name}
-                </option>
-              ))}
-            </select>
-          </div>
-        )}
-
-        {selectedCategory && selectedCategory.subcategories && formData.subcategory && (
-          <>
             <div>
-              <label htmlFor="stock" className="block text-sm font-medium text-gray-700">
-                Stock
+              <label htmlFor="description" className="block text-sm font-semibold text-gray-700 mb-2">
+                Description
               </label>
-              <input
-                type="number"
-                id="stock"
-                name="stock"
-                value={formData.stock}
+              <textarea
+                id="description"
+                name="description"
+                value={formData.description}
                 onChange={handleChange}
                 required
-                className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 bg-white text-black"
+                rows={4}
+                className="w-full border border-gray-300 rounded-lg shadow-sm py-3 px-4 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 bg-white text-gray-900 transition duration-200"
+                placeholder="Describe the product"
               />
             </div>
 
-            <div>
-              <h3 className="text-lg font-medium text-gray-900 mb-2">Variants</h3>
-              <div className="space-y-2">
-                <div>
-                  <label htmlFor="variants.size" className="block text-sm font-medium text-gray-700">
-                    Size
-                  </label>
-                  <input
-                    type="text"
-                    id="variants.size"
-                    name="variants.size"
-                    value={formData.variants.size}
-                    onChange={handleChange}
-                    className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 bg-white text-black"
-                  />
-                </div>
-                <div>
-                  <label htmlFor="variants.color" className="block text-sm font-medium text-gray-700">
-                    Color
-                  </label>
-                  <input
-                    type="text"
-                    id="variants.color"
-                    name="variants.color"
-                    value={formData.variants.color}
-                    onChange={handleChange}
-                    className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 bg-white text-black"
-                  />
-                </div>
-                <div>
-                  <label htmlFor="variants.fabric" className="block text-sm font-medium text-gray-700">
-                    Fabric
-                  </label>
-                  <input
-                    type="text"
-                    id="variants.fabric"
-                    name="variants.fabric"
-                    value={formData.variants.fabric}
-                    onChange={handleChange}
-                    className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 bg-white text-black"
-                  />
-                </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div>
+                <label htmlFor="price" className="block text-sm font-semibold text-gray-700 mb-2">
+                  Price
+                </label>
+                <input
+                  type="text"
+                  id="price"
+                  name="price"
+                  value={formData.price}
+                  onChange={handleChange}
+                  required
+                  className="w-full border border-gray-300 rounded-lg shadow-sm py-3 px-4 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 bg-white text-gray-900 transition duration-200"
+                  placeholder="e.g., 99.99"
+                />
+              </div>
+
+              <div>
+                <label htmlFor="stock" className="block text-sm font-semibold text-gray-700 mb-2">
+                  Total Stock
+                </label>
+                <input
+                  type="number"
+                  id="stock"
+                  name="stock"
+                  value={formData.stock}
+                  onChange={handleChange}
+                  required
+                  className="w-full border border-gray-300 rounded-lg shadow-sm py-3 px-4 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 bg-white text-gray-900 transition duration-200"
+                  placeholder="0"
+                />
               </div>
             </div>
-          </>
-        )}
 
-        <div>
-          <label htmlFor="price" className="block text-sm font-medium text-gray-700">
-            Price
-          </label>
-          <input
-            type="number"
-            id="price"
-            name="price"
-            value={formData.price}
-            onChange={handleChange}
-            step="0.01"
-            required
-            className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 bg-white text-black"
-          />
-        </div>
+            <div>
+              <label className="block text-sm font-semibold text-gray-700 mb-4">
+                Product Variants
+              </label>
+              <div className="space-y-4">
+                {formData.variants.map((variant, index) => (
+                  <div key={index} className="bg-gray-50 border border-gray-200 rounded-lg p-4 shadow-sm">
+                    <h3 className="text-lg font-medium text-gray-900 mb-3">Variant {index + 1}</h3>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <div>
+                        <label htmlFor={`variants.${index}.size`} className="block text-sm font-medium text-gray-700 mb-1">
+                          Size
+                        </label>
+                        <select
+                          id={`variants.${index}.size`}
+                          name={`variants.${index}.size`}
+                          value={variant.size}
+                          onChange={handleChange}
+                          className="w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 bg-white text-gray-900 transition duration-200"
+                        >
+                          <option value="">Select size</option>
+                          <option value="S">S</option>
+                          <option value="M">M</option>
+                          <option value="L">L</option>
+                          <option value="XL">XL</option>
+                        </select>
+                      </div>
+                      <div>
+                        <label htmlFor={`variants.${index}.colors`} className="block text-sm font-medium text-gray-700 mb-1">
+                          Colors
+                        </label>
+                        <input
+                          type="text"
+                          id={`variants.${index}.colors`}
+                          name={`variants.${index}.colors`}
+                          value={variant.colors.join(", ")}
+                          onChange={handleChange}
+                          placeholder="e.g., Red, Blue, Green"
+                          className="w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 bg-white text-gray-900 transition duration-200"
+                        />
+                      </div>
+                      <div>
+                        <label htmlFor={`variants.${index}.fabric`} className="block text-sm font-medium text-gray-700 mb-1">
+                          Fabric
+                        </label>
+                        <input
+                          type="text"
+                          id={`variants.${index}.fabric`}
+                          name={`variants.${index}.fabric`}
+                          value={variant.fabric}
+                          onChange={handleChange}
+                          className="w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 bg-white text-gray-900 transition duration-200"
+                          placeholder="e.g., Cotton"
+                        />
+                      </div>
+                      <div>
+                        <label htmlFor={`variants.${index}.stock`} className="block text-sm font-medium text-gray-700 mb-1">
+                          Variant Stock
+                        </label>
+                        <input
+                          type="text"
+                          id={`variants.${index}.stock`}
+                          name={`variants.${index}.stock`}
+                          value={variant.stock}
+                          onChange={handleChange}
+                          className="w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 bg-white text-gray-900 transition duration-200"
+                          placeholder="e.g., 10"
+                        />
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+              {formData.variants.length > 0 && formData.variants[formData.variants.length - 1].size && formData.variants[formData.variants.length - 1].colors.length > 0 && formData.variants[formData.variants.length - 1].fabric && formData.variants[formData.variants.length - 1].stock && (
+                <button
+                  type="button"
+                  onClick={addVariant}
+                  className="bg-green-500 hover:bg-green-600 text-white font-semibold py-2 px-6 rounded-lg shadow-md transition duration-200 flex items-center"
+                >
+                  <span className="mr-2">+</span> Add Another Variant
+                </button>
+              )}
+            </div>
 
-        <div>
-          <label htmlFor="image" className="block text-sm font-medium text-gray-700">
-            Image
-          </label>
-          <input
-            type="file"
-            id="image"
-            name="image"
-            accept="image/*"
-            multiple
-            onChange={handleImageChange}
-            className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 bg-white text-black"
-          />
-        </div>
+            <div>
+              <label htmlFor="image" className="block text-sm font-semibold text-gray-700 mb-2">
+                Product Images
+              </label>
+              <input
+                type="file"
+                id="image"
+                name="image"
+                accept="image/*"
+                multiple
+                onChange={handleImageChange}
+                className="w-full border border-gray-300 rounded-lg shadow-sm py-3 px-4 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 bg-white text-gray-900 transition duration-200 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-indigo-50 file:text-indigo-700 hover:file:bg-indigo-100"
+              />
+            </div>
 
-        <div className="flex space-x-4">
-          <button
-            type="submit"
-            disabled={loading}
-            className="bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded disabled:opacity-50"
-          >
-            {loading ? "Adding..." : "Add Product"}
-          </button>
-          <button
-            type="button"
-            onClick={() => router.push("/products")}
-            className="bg-gray-600 hover:bg-gray-700 text-white font-medium py-2 px-4 rounded"
-          >
-            Cancel
-          </button>
+            <div className="flex flex-col sm:flex-row gap-4 pt-6 border-t border-gray-200">
+              <button
+                type="submit"
+                disabled={loading}
+                className="bg-indigo-600 hover:bg-indigo-700 disabled:bg-indigo-400 text-white font-semibold py-3 px-6 rounded-lg shadow-md transition duration-200 flex-1"
+              >
+                {loading ? "Adding Product..." : "Add Product"}
+              </button>
+              <button
+                type="button"
+                onClick={() => router.push("/products")}
+                className="bg-gray-500 hover:bg-gray-600 text-white font-semibold py-3 px-6 rounded-lg shadow-md transition duration-200"
+              >
+                Cancel
+              </button>
+            </div>
+          </form>
         </div>
-      </form>
+      </div>
     </div>
   );
 }

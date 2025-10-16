@@ -1,15 +1,15 @@
 import { NextRequest, NextResponse } from "next/server";
 
 // Mock data for products (shared with route.ts)
-let products = [
+const products = [
   { id: "1", name: "Wireless Headphones", price: 99.99, category: "Electronics", stock: 50 },
   { id: "2", name: "Smart Watch", price: 199.99, category: "Electronics", stock: 30 },
   { id: "3", name: "Running Shoes", price: 79.99, category: "Sports", stock: 100 },
 ];
 
-export async function GET(request: NextRequest, { params }: { params: { id: string } }) {
+export async function GET(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
-    const { id } = params;
+    const { id } = await params;
 
     // In production, fetch from MongoDB
     // const client = await clientPromise;
@@ -28,9 +28,9 @@ export async function GET(request: NextRequest, { params }: { params: { id: stri
   }
 }
 
-export async function PUT(request: NextRequest, { params }: { params: { id: string } }) {
+export async function PUT(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
-    const { id } = params;
+    const { id } = await params;
     const body = await request.json();
     const { name, price, category, stock } = body;
 
@@ -62,9 +62,9 @@ export async function PUT(request: NextRequest, { params }: { params: { id: stri
   }
 }
 
-export async function DELETE(request: NextRequest, { params }: { params: { id: string } }) {
+export async function DELETE(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
-    const { id } = params;
+    const { id } = await params;
 
     // In production, delete from MongoDB
     // const client = await clientPromise;

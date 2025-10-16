@@ -1,6 +1,8 @@
 "use client";
 
 import { useState } from "react";
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
+import { mockOrders } from '../../lib/orders';
 
 export default function Dashboard() {
   const [recentActivities, setRecentActivities] = useState([
@@ -56,6 +58,21 @@ export default function Dashboard() {
     setRecentActivities([newActivity, ...recentActivities.slice(0, 4)]);
   };
 
+  // Prepare chart data from orders
+  const orderStatusData = mockOrders.reduce((acc, order) => {
+    const status = order.status;
+    if (!acc[status]) {
+      acc[status] = 0;
+    }
+    acc[status]++;
+    return acc;
+  }, {} as Record<string, number>);
+
+  const chartData = Object.entries(orderStatusData).map(([status, count]) => ({
+    status,
+    count,
+  }));
+
   return (
     <div className="space-y-8">
       <div className="flex justify-between items-center">
@@ -103,6 +120,20 @@ export default function Dashboard() {
             <div className="text-6xl opacity-20">💰</div>
           </div>
         </div>
+      </div>
+
+      <div className="bg-white p-8 rounded-xl shadow-lg">
+        <h2 className="text-2xl font-semibold text-gray-900 mb-6">Orders by Status</h2>
+        <ResponsiveContainer width="100%" height={300}>
+          <BarChart data={chartData}>
+            <CartesianGrid strokeDasharray="3 3" />
+            <XAxis dataKey="status" />
+            <YAxis />
+            <Tooltip />
+            <Legend />
+            <Bar dataKey="count" fill="#8884d8" />
+          </BarChart>
+        </ResponsiveContainer>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">

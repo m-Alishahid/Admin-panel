@@ -158,7 +158,7 @@ export default function Orders() {
                     {order.date}
                   </td>
                   <td className="px-6 py-4 text-sm text-gray-500">
-                    {order.items.map((item: any) => item.productName).join(", ")}
+                    {order.items.map((item: { productName: string }) => item.productName).join(", ")}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
                     <button

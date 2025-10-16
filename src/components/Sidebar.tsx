@@ -2,7 +2,6 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { signOut } from "next-auth/react";
 
 const Sidebar = () => {
   const pathname = usePathname();
@@ -37,14 +36,6 @@ const Sidebar = () => {
           ))}
         </ul>
       </nav>
-      <div className="absolute bottom-4 left-4 right-4">
-        <button
-          onClick={() => signOut()}
-          className="w-full bg-red-600 hover:bg-red-700 text-white font-medium py-2 px-4 rounded"
-        >
-          Logout
-        </button>
-      </div>
     </div>
   );
 };
