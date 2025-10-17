@@ -1,5 +1,9 @@
-- [ ] Modify src/app/products/add/page.tsx to have stock for each color in variants
-  - [ ] Change variant structure: colors as array of {color, stock}
-  - [ ] Update form inputs for color stocks
-  - [ ] Update total stock calculation to sum all color stocks
-  - [ ] Update handleChange logic
+# TODO: Update Edit Product Page
+
+## Tasks
+- [ ] Update edit product page design to match add page (full layout, sections, preview)
+- [ ] Change form data structure to match add page (variants as array, images as array, thumbnailIndex)
+- [ ] Update fetchProduct to populate form with converted data
+- [ ] Update handleChange and other handlers to support new structure
+- [ ] Update handleSubmit to save data correctly
+- [ ] Test edit functionality and verify products list updates
