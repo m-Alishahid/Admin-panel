@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { mockCategories, Category } from "@/lib/categories";
 
@@ -11,13 +11,24 @@ export default function AddProduct() {
     price: "",
     category: "",
     stock: "",
-    variants: [{ size: "", colors: [] as string[], fabric: "", stock: "" }],
+    variants: [{ size: "", colors: [] as { color: string; stock: string }[], fabric: "" }],
     image: [] as File[],
   });
   const [loading, setLoading] = useState(false);
   const [categories, setCategories] = useState<Category[]>(mockCategories);
 
   const router = useRouter();
+
+  // Calculate total stock from variants
+  useEffect(() => {
+    const totalStock = formData.variants.reduce((sum, variant) => {
+      const variantStock = variant.colors.reduce((colorSum, color) => {
+        return colorSum + (parseInt(color.stock) || 0);
+      }, 0);
+      return sum + variantStock;
+    }, 0);
+    setFormData(prev => ({ ...prev, stock: totalStock.toString() }));
+  }, [formData.variants]);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
@@ -29,12 +40,18 @@ export default function AddProduct() {
       const key = parts[2];
       const newVariants = [...formData.variants];
       if (key === "colors") {
-        newVariants[index][key] = value.split(",").map(c => c.trim());
+        const colorIndex = parseInt(parts[3]);
+        const subKey = parts[4];
+        if (subKey === "color") {
+          newVariants[index].colors[colorIndex].color = value;
+        } else if (subKey === "stock") {
+          newVariants[index].colors[colorIndex].stock = value;
+        }
       } else {
         (newVariants[index] as Record<string, unknown>)[key] = value;
       }
       setFormData({ ...formData, variants: newVariants });
-    } else {
+    } else if (name !== "stock") { // Prevent manual change of stock
       setFormData({ ...formData, [name]: value });
     }
   };
@@ -42,8 +59,20 @@ export default function AddProduct() {
   const addVariant = () => {
     setFormData({
       ...formData,
-      variants: [...formData.variants, { size: "", colors: [], fabric: "", stock: "" }],
+      variants: [...formData.variants, { size: "", colors: [], fabric: "" }],
     });
+  };
+
+  const addColor = (variantIndex: number) => {
+    const newVariants = [...formData.variants];
+    newVariants[variantIndex].colors.push({ color: "", stock: "" });
+    setFormData({ ...formData, variants: newVariants });
+  };
+
+  const removeColor = (variantIndex: number, colorIndex: number) => {
+    const newVariants = [...formData.variants];
+    newVariants[variantIndex].colors.splice(colorIndex, 1);
+    setFormData({ ...formData, variants: newVariants });
   };
 
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -167,9 +196,8 @@ export default function AddProduct() {
                   id="stock"
                   name="stock"
                   value={formData.stock}
-                  onChange={handleChange}
-                  required
-                  className="w-full border border-gray-300 rounded-lg shadow-sm py-3 px-4 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 bg-white text-gray-900 transition duration-200"
+                  readOnly
+                  className="w-full border border-gray-300 rounded-lg shadow-sm py-3 px-4 bg-gray-100 text-gray-900 transition duration-200"
                   placeholder="0"
                 />
               </div>
@@ -202,19 +230,53 @@ export default function AddProduct() {
                           <option value="XL">XL</option>
                         </select>
                       </div>
-                      <div>
-                        <label htmlFor={`variants.${index}.colors`} className="block text-sm font-medium text-gray-700 mb-1">
+                      <div className="col-span-2">
+                        <label className="block text-sm font-medium text-gray-700 mb-2">
                           Colors
                         </label>
-                        <input
-                          type="text"
-                          id={`variants.${index}.colors`}
-                          name={`variants.${index}.colors`}
-                          value={variant.colors.join(", ")}
-                          onChange={handleChange}
-                          placeholder="e.g., Red, Blue, Green"
-                          className="w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 bg-white text-gray-900 transition duration-200"
-                        />
+                        <div className="space-y-2">
+                          {variant.colors.map((color, colorIndex) => (
+                            <div key={colorIndex} className="flex items-center space-x-2">
+                              <input
+                                type="text"
+                                id={`variants.${index}.colors.${colorIndex}.color`}
+                                name={`variants.${index}.colors.${colorIndex}.color`}
+                                value={color.color}
+                                onChange={handleChange}
+                                placeholder="Color name"
+                                className="flex-1 border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 bg-white text-gray-900 transition duration-200"
+                              />
+                              <input
+                                type="number"
+                                id={`variants.${index}.colors.${colorIndex}.stock`}
+                                name={`variants.${index}.colors.${colorIndex}.stock`}
+                                value={color.stock}
+                                onChange={handleChange}
+                                placeholder="Stock"
+                                className="w-20 border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 bg-white text-gray-900 transition duration-200"
+                              />
+                              <button
+                                type="button"
+                                onClick={() => removeColor(index, colorIndex)}
+                                className="text-red-500 hover:text-red-700"
+                              >
+                                Remove
+                              </button>
+                            </div>
+                          ))}
+                          <button
+                            type="button"
+                            onClick={() => addColor(index)}
+                            className="text-indigo-600 hover:text-indigo-800 text-sm font-medium"
+                          >
+                            + Add Color
+                          </button>
+                        </div>
+                        {variant.colors.length > 0 && (
+                          <p className="text-sm text-gray-600 mt-2">
+                            Colors: {variant.colors.map(c => `${c.color} (${c.stock})`).join(", ")}
+                          </p>
+                        )}
                       </div>
                       <div>
                         <label htmlFor={`variants.${index}.fabric`} className="block text-sm font-medium text-gray-700 mb-1">
@@ -230,25 +292,12 @@ export default function AddProduct() {
                           placeholder="e.g., Cotton"
                         />
                       </div>
-                      <div>
-                        <label htmlFor={`variants.${index}.stock`} className="block text-sm font-medium text-gray-700 mb-1">
-                          Variant Stock
-                        </label>
-                        <input
-                          type="text"
-                          id={`variants.${index}.stock`}
-                          name={`variants.${index}.stock`}
-                          value={variant.stock}
-                          onChange={handleChange}
-                          className="w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 bg-white text-gray-900 transition duration-200"
-                          placeholder="e.g., 10"
-                        />
-                      </div>
+
                     </div>
                   </div>
                 ))}
               </div>
-              {formData.variants.length > 0 && formData.variants[formData.variants.length - 1].size && formData.variants[formData.variants.length - 1].colors.length > 0 && formData.variants[formData.variants.length - 1].fabric && formData.variants[formData.variants.length - 1].stock && (
+              {formData.variants.length > 0 && formData.variants[formData.variants.length - 1].size && formData.variants[formData.variants.length - 1].colors.length > 0 && formData.variants[formData.variants.length - 1].fabric && (
                 <button
                   type="button"
                   onClick={addVariant}
