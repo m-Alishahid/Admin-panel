@@ -1,10 +1,11 @@
 "use client";
 
 import { useState } from "react";
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
+import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, AreaChart, Area } from 'recharts';
 import { mockOrders } from '../../lib/orders';
 
 export default function Dashboard() {
+  const [chartView, setChartView] = useState<'daily' | 'weekly' | 'monthly'>('daily');
   const [recentActivities, setRecentActivities] = useState([
     {
       id: 1,
@@ -58,20 +59,52 @@ export default function Dashboard() {
     setRecentActivities([newActivity, ...recentActivities.slice(0, 4)]);
   };
 
-  // Prepare chart data from orders
-  const orderStatusData = mockOrders.reduce((acc, order) => {
-    const status = order.status;
-    if (!acc[status]) {
-      acc[status] = 0;
-    }
-    acc[status]++;
-    return acc;
-  }, {} as Record<string, number>);
+  // Prepare chart data from orders based on selected view
+  const getChartData = () => {
+    const now = new Date();
 
-  const chartData = Object.entries(orderStatusData).map(([status, count]) => ({
-    status,
-    count,
-  }));
+    if (chartView === 'daily') {
+      // Generate dummy daily data for the last 30 days
+      const dataPoints: { period: string; orders: number }[] = [];
+      for (let i = 29; i >= 0; i--) {
+        const date = new Date(now);
+        date.setDate(now.getDate() - i);
+        dataPoints.push({
+          period: date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' }),
+          orders: Math.floor(Math.random() * 10) + 1 // Random orders between 1-10
+        });
+      }
+      return dataPoints;
+    } else if (chartView === 'weekly') {
+      // Generate dummy weekly data for the last 12 weeks
+      const dataPoints: { period: string; orders: number }[] = [];
+      for (let i = 11; i >= 0; i--) {
+        const date = new Date(now);
+        date.setDate(now.getDate() - (i * 7));
+        const weekStart = new Date(date);
+        weekStart.setDate(date.getDate() - date.getDay());
+        dataPoints.push({
+          period: `Week of ${weekStart.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}`,
+          orders: Math.floor(Math.random() * 50) + 10 // Random orders between 10-60
+        });
+      }
+      return dataPoints;
+    } else { // monthly
+      // Generate dummy monthly data for the last 12 months
+      const dataPoints: { period: string; orders: number }[] = [];
+      for (let i = 11; i >= 0; i--) {
+        const date = new Date(now);
+        date.setMonth(now.getMonth() - i);
+        dataPoints.push({
+          period: date.toLocaleDateString('en-US', { month: 'short', year: 'numeric' }),
+          orders: Math.floor(Math.random() * 200) + 50 // Random orders between 50-250
+        });
+      }
+      return dataPoints;
+    }
+  };
+
+  const chartData = getChartData();
 
   return (
     <div className="space-y-8">
@@ -123,16 +156,43 @@ export default function Dashboard() {
       </div>
 
       <div className="bg-white p-8 rounded-xl shadow-lg">
-        <h2 className="text-2xl font-semibold text-gray-900 mb-6">Orders by Status</h2>
+        <div className="flex justify-between items-center mb-6">
+          <h2 className="text-2xl font-semibold text-gray-900">Orders Over Time</h2>
+          <div className="flex space-x-2">
+            <button
+              onClick={() => setChartView('daily')}
+              className={`px-4 py-2 rounded-lg text-sm font-medium ${
+                chartView === 'daily' ? 'bg-blue-600 text-white' : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+              }`}
+            >
+              Daily
+            </button>
+            <button
+              onClick={() => setChartView('weekly')}
+              className={`px-4 py-2 rounded-lg text-sm font-medium ${
+                chartView === 'weekly' ? 'bg-blue-600 text-white' : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+              }`}
+            >
+              Weekly
+            </button>
+            <button
+              onClick={() => setChartView('monthly')}
+              className={`px-4 py-2 rounded-lg text-sm font-medium ${
+                chartView === 'monthly' ? 'bg-blue-600 text-white' : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+              }`}
+            >
+              Monthly
+            </button>
+          </div>
+        </div>
         <ResponsiveContainer width="100%" height={300}>
-          <BarChart data={chartData}>
+          <AreaChart data={chartData}>
             <CartesianGrid strokeDasharray="3 3" />
-            <XAxis dataKey="status" />
+            <XAxis dataKey="period" />
             <YAxis />
             <Tooltip />
-            <Legend />
-            <Bar dataKey="count" fill="#8884d8" />
-          </BarChart>
+            <Area type="monotone" dataKey="orders" stroke="#8884d8" fill="#8884d8" fillOpacity={0.6} />
+          </AreaChart>
         </ResponsiveContainer>
       </div>
 
