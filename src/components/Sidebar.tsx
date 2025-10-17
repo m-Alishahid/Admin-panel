@@ -11,6 +11,7 @@ const Sidebar = () => {
 
   const menuItems = [
     { href: "/dashboard", label: "Dashboard", icon: "📊" },
+        { href: "/category", label: "Categories", icon: "📦" },
     { href: "/products", label: "Products", icon: "📦" },
     { href: "/orders", label: "Orders", icon: "🛒" },
     { href: "/api", label: "API", icon: "🔗" },
