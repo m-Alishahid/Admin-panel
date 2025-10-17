@@ -1,10 +1,26 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 import { mockOrders } from '../../lib/orders';
+import { useRouter } from 'next/navigation';
+import { useAuth } from '../../context/AuthContext';
 
 export default function Dashboard() {
+  const { user, isAuthenticated, loading, logout } = useAuth();
+  const router = useRouter();
+
+  useEffect(() => {
+    if (!loading && !isAuthenticated) {
+      router.push('/login');
+    }
+  }, [isAuthenticated, loading, router]);
+
+  const handleLogout = async () => {
+    await logout();
+    router.push('/login');
+  };
+
   const [recentActivities, setRecentActivities] = useState([
     {
       id: 1,
