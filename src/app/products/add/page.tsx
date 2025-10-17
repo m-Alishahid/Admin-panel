@@ -38,22 +38,52 @@ const mockCategories: Category[] = [
 ];
 // -----------------
 
-// --- Product Preview Component (Updated for Thumbnail) ---
+// --- Product Preview Component (Updated for Thumbnail and Variants) ---
 const ProductPreview = ({ formData }: { formData: FormData }) => {
   const { name, description, price, variants, image, thumbnailIndex } = formData;
-  
+
+  // State for selected size and color in preview
+  const [selectedSize, setSelectedSize] = useState<string>('M');
+  const [selectedColor, setSelectedColor] = useState<string>('');
+
   // Logic to determine the image for the live preview
   let previewImage = 'https://images.unsplash.com/photo-1571402325950-891d06b69460?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w0OTI3MDV8MHwxfHNlYXJjaHw1fHxibGFjayUyMHRzaGlydHxlbnwwfHx8fDE3MTgyNTg5MjF8MA&ixlib=rb-4.0.3&q=80&w=400';
-  
+
   if (image.length > 0) {
       // Use the thumbnail image if set and available, otherwise use the first image
       const imageToShow = thumbnailIndex !== -1 && image[thumbnailIndex] ? image[thumbnailIndex] : image[0];
       previewImage = URL.createObjectURL(imageToShow);
   }
 
-  // Get the first variant/size for the preview buttons
-  const firstVariant = variants.find((v: any) => v.size) || variants[0];
-  const firstSize = firstVariant?.size || 'M';
+  // Get available sizes from variants
+  const availableSizes = variants.filter(v => v.size).map(v => v.size);
+  const defaultSize = availableSizes.length > 0 ? availableSizes[0] : 'M';
+
+  // Get the selected variant based on selectedSize
+  const selectedVariant = variants.find(v => v.size === selectedSize) || variants.find(v => v.size) || variants[0];
+
+  // Get all unique colors from all variants
+  const allColors = variants.flatMap(v => v.colors.filter(c => c.color));
+  const uniqueColors = Array.from(new Set(allColors.map(c => c.color))).map(color => ({ color }));
+
+  // Get colors for the selected variant (for display in details)
+  const availableColors = selectedVariant?.colors.filter(c => c.color) || [];
+
+  // Set default selectedColor if not set or not available
+  useEffect(() => {
+    if (availableColors.length > 0 && !availableColors.some(c => c.color === selectedColor)) {
+      setSelectedColor(availableColors[0].color);
+    } else if (availableColors.length === 0) {
+      setSelectedColor('');
+    }
+  }, [selectedSize, availableColors, selectedColor]);
+
+  // Update selectedSize if defaultSize changes
+  useEffect(() => {
+    if (!availableSizes.includes(selectedSize)) {
+      setSelectedSize(defaultSize);
+    }
+  }, [defaultSize, availableSizes, selectedSize]);
 
   const defaultName = "Product Name Preview";
   const defaultDescription = "Short description will appear here...";
@@ -61,20 +91,20 @@ const ProductPreview = ({ formData }: { formData: FormData }) => {
   return (
     <div className="p-6 border border-gray-200 rounded-xl shadow-lg bg-white sticky top-4">
       <h2 className="text-xl font-bold text-gray-800 mb-4 border-b pb-2">Live Preview</h2>
-      
+
       {/* Product Image */}
       <div className="w-full h-80 bg-gray-100 rounded-lg overflow-hidden mb-4 border border-gray-200 flex items-center justify-center">
         {image.length > 0 ? (
-          <img 
-            src={previewImage} 
-            alt={name || defaultName} 
+          <img
+            src={previewImage}
+            alt={name || defaultName}
             className="w-full h-full object-cover"
           />
         ) : (
            <p className="text-gray-400 text-sm">Upload an image to see the preview</p>
         )}
       </div>
-      
+
       {/* Product Info */}
       <div className="flex justify-between items-start mb-4">
         <h3 className="text-2xl font-bold text-gray-900">{name || defaultName}</h3>
@@ -82,7 +112,7 @@ const ProductPreview = ({ formData }: { formData: FormData }) => {
           {price ? `$${price}` : "$0.00"}
         </p>
       </div>
-      
+
       <p className="text-sm text-gray-500 mb-4">{description.split('\n')[0] || defaultDescription}</p>
 
       {/* Options/Variants Preview */}
@@ -90,32 +120,76 @@ const ProductPreview = ({ formData }: { formData: FormData }) => {
         {/* Size Selector */}
         <div>
           <p className="text-sm font-semibold text-gray-700 mb-2">Size</p>
-          <div className="flex space-x-2">
-            {['S', 'M', 'L', 'XL'].map(size => (
-              <span 
+          <div className="flex space-x-2 flex-wrap">
+            {availableSizes.length > 0 ? availableSizes.map(size => (
+              <button
                 key={size}
+                onClick={() => setSelectedSize(size)}
                 className={`py-1 px-3 border rounded-lg text-sm font-medium transition ${
-                  size === firstSize && variants.length > 0 ? 'bg-blue-600 text-white border-blue-600' : 'bg-white text-gray-700 border-gray-300'
+                  size === selectedSize ? 'bg-blue-600 text-white border-blue-600' : 'bg-white text-gray-700 border-gray-300 hover:bg-gray-50'
                 }`}
               >
                 {size}
+              </button>
+            )) : (
+              <span className="py-1 px-3 border rounded-lg text-sm font-medium bg-gray-100 text-gray-500 border-gray-300">
+                No sizes available
               </span>
-            ))}
+            )}
           </div>
         </div>
+
+        {/* Color Selector */}
+        {uniqueColors.length > 0 && (
+          <div>
+            <p className="text-sm font-semibold text-gray-700 mb-2">Color</p>
+            <div className="flex space-x-2 flex-wrap">
+              {uniqueColors.map(color => (
+                <button
+                  key={color.color}
+                  onClick={() => setSelectedColor(color.color)}
+                  className={`py-1 px-3 border rounded-lg text-sm font-medium transition ${
+                    color.color === selectedColor ? 'bg-blue-600 text-white border-blue-600' : 'bg-white text-gray-700 border-gray-300 hover:bg-gray-50'
+                  }`}
+                >
+                  {color.color}
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* Variants Summary */}
+        {variants.length > 0 && variants.some(v => v.size || v.colors.some(c => c.color)) && (
+          <div>
+            <p className="text-sm font-semibold text-gray-700 mb-2">Variants Added</p>
+            <div className="space-y-2">
+              {variants.filter(v => v.size || v.colors.some(c => c.color)).map((variant, index) => (
+                <div key={index} className="bg-gray-50 p-2 rounded-lg text-xs">
+                  <p className="font-medium">Size: {variant.size || 'N/A'}</p>
+                  {variant.colors.filter(c => c.color).length > 0 && (
+                    <p>Colors: {variant.colors.filter(c => c.color).map(c => c.color).join(', ')}</p>
+                  )}
+                  {variant.fabric && <p>Fabric: {variant.fabric}</p>}
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
       </div>
-      
+
       {/* Action Button (Placeholder) */}
-      <button 
+      <button
         className="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 rounded-lg shadow-md transition duration-200"
       >
         Buy Now
       </button>
-      
+
       {/* Extra Details */}
       <div className="mt-4 pt-4 border-t border-gray-200 text-xs text-gray-500 space-y-1">
         <p>Category: {formData.category || 'N/A'}</p>
-        {firstVariant?.fabric && <p>Fabric: {firstVariant.fabric || 'N/A'}</p>}
+        {selectedVariant?.fabric && <p>Fabric: {selectedVariant.fabric || 'N/A'}</p>}
+        {selectedColor && <p>Selected Color: {selectedColor}</p>}
       </div>
     </div>
   );
@@ -248,12 +322,25 @@ export default function AddProduct() {
     setLoading(true);
 
     try {
-      console.log("Submitting product data:", formData);
-      await new Promise(resolve => setTimeout(resolve, 1500)); 
-      const isSuccess = true; 
+      const formDataToSend = new FormData();
+      formDataToSend.append('name', formData.name);
+      formDataToSend.append('description', formData.description);
+      formDataToSend.append('price', formData.price);
+      formDataToSend.append('category', formData.category);
+      formDataToSend.append('stock', formData.stock);
+      formDataToSend.append('variants', JSON.stringify(formData.variants));
+      formData.image.forEach((file, index) => {
+        formDataToSend.append('image', file);
+      });
 
-      if (isSuccess) {
+      const response = await fetch('/api/products', {
+        method: 'POST',
+        body: formDataToSend,
+      });
+
+      if (response.ok) {
         alert("Product added successfully!");
+        router.push('/products');
       } else {
         alert("Failed to add product.");
       }
@@ -275,9 +362,10 @@ export default function AddProduct() {
           <div className="flex space-x-3">
             <button
               type="button"
+              onClick={() => router.push('/products')}
               className="px-4 py-2 text-sm font-medium text-blue-700 bg-white border border-blue-300 rounded-lg hover:bg-blue-50 transition"
             >
-              Save Draft
+              Cancel
             </button>
             <button
               type="submit"
@@ -286,7 +374,7 @@ export default function AddProduct() {
               // Blue color for the main action button
               className="px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700 disabled:bg-blue-400 transition shadow-md"
             >
-              {loading ? "Publishing..." : "Publish Now"}
+              {loading ? "Saving..." : "Save"}
             </button>
           </div>
         </div>

@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
+import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import { mockOrders } from '../../lib/orders';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '../../context/AuthContext';
@@ -20,6 +20,8 @@ export default function Dashboard() {
     await logout();
     router.push('/login');
   };
+
+  const [chartView, setChartView] = useState('monthly');
 
   const [recentActivities, setRecentActivities] = useState([
     {
