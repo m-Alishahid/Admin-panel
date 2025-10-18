@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import Category from '../../../../Models/Category';
-import connectDB from '../../../lib/mongodb';
+import connectDB from '@/lib/mongodb';
 
 // GET category by ID
 export async function GET(request, { params }) {

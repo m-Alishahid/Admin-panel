@@ -7,15 +7,15 @@ import { usePathname } from "next/navigation";
 const Sidebar = () => {
   const pathname = usePathname();
   // State for controlling sidebar visibility
-  const [isOpen, setIsOpen] = useState(true); 
+  const [isOpen, setIsOpen] = useState(true);
 
   const menuItems = [
     { href: "/dashboard", label: "Dashboard", icon: "📊" },
-        { href: "/category", label: "Categories", icon: "📦" },
+    { href: "/users", label: "Users", icon: "👥" },
+    { href: "/category", label: "Categories", icon: "📦" },
     { href: "/products", label: "Products", icon: "📦" },
     { href: "/orders", label: "Orders", icon: "🛒" },
     { href: "/api", label: "API", icon: "🔗" },
-    { href: "/users", label: "Users", icon: "👥" },
   ];
 
   const toggleSidebar = () => {
@@ -48,7 +48,7 @@ const Sidebar = () => {
           <h1 className={`text-2xl font-bold transition-opacity duration-300 ${isOpen ? 'opacity-100' : 'opacity-0'}`}>
             Admin Panel
           </h1>
-          
+
           {/* Close Button (Visible when sidebar is open) */}
           <button
             onClick={toggleSidebar}
@@ -69,10 +69,9 @@ const Sidebar = () => {
               href={item.href}
               // Conditional styling based on active path and mouse hover
               className={`flex items-center px-6 py-3 text-base font-medium transition-colors duration-200
-                ${
-                  pathname === item.href 
-                    ? "bg-blue-600 border-l-4 border-white shadow-inner" // Active link
-                    : "hover:bg-blue-700 hover:border-l-4 border-blue-400" // Inactive link
+                ${pathname === item.href
+                  ? "bg-blue-600 border-l-4 border-white shadow-inner" // Active link
+                  : "hover:bg-blue-700 hover:border-l-4 border-blue-400" // Inactive link
                 }
               `}
             >
