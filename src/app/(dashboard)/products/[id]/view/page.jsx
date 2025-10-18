@@ -785,3 +785,5 @@ export default function ViewProduct() {
     </div>
   );
 }
+
+
