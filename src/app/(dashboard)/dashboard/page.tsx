@@ -4,10 +4,23 @@ import { useEffect, useState } from "react";
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import { useRouter } from 'next/navigation';
 import { useAuth } from "@/context/AuthContext";
+import { productService } from "@/services/productService";
+import { categoryService } from "@/services/categoryService";
+
+interface Product {
+  id?: string;
+  name?: string;
+  price?: number;
+}
 
 export default function Dashboard() {
-  const { user, isAuthenticated, loading, logout } = useAuth();
+  const { isAuthenticated, loading, logout } = useAuth();
   const router = useRouter();
+
+  const [totalProducts, setTotalProducts] = useState(0);
+  const [totalCategories, setTotalCategories] = useState(0);
+  const [trendingProducts, setTrendingProducts] = useState<Product[]>([]);
+  const [loadingStats, setLoadingStats] = useState(true);
 
   useEffect(() => {
     if (!loading && !isAuthenticated) {
@@ -15,10 +28,30 @@ export default function Dashboard() {
     }
   }, [isAuthenticated, loading, router]);
 
-  const handleLogout = async () => {
-    await logout();
-    router.push('/login');
-  };
+  useEffect(() => {
+    const fetchStats = async () => {
+      if (isAuthenticated) {
+        try {
+          const [productsResponse, categoriesResponse] = await Promise.all([
+            productService.getAll(),
+            categoryService.getAll()
+          ]);
+          setTotalProducts(productsResponse.products?.length || 0);
+          setTotalCategories(categoriesResponse.data?.length || categoriesResponse.count || 0);
+
+          // Set trending products from actual data (first 4 products)
+          const products = productsResponse.products || [];
+          setTrendingProducts(products.slice(0, 4));
+        } catch (error) {
+          console.error('Error fetching stats:', error);
+        } finally {
+          setLoadingStats(false);
+        }
+      }
+    };
+
+    fetchStats();
+  }, [isAuthenticated]);
 
   const [chartView, setChartView] = useState('monthly');
 
@@ -61,27 +94,13 @@ export default function Dashboard() {
     }
   ]);
 
-  // Function to add new activity (can be called from other components)
-  const addActivity = (type: string, action: string, details: string) => {
-    const newActivity = {
-      id: recentActivities.length + 1,
-      type,
-      action,
-      details,
-      timestamp: 'Just now',
-      icon: type === 'product' ? '📦' : type === 'order' ? '✅' : type === 'user' ? '👤' : '🏷️',
-      color: type === 'product' ? 'blue' : type === 'order' ? 'green' : type === 'user' ? 'purple' : 'orange'
-    };
-    setRecentActivities([newActivity, ...recentActivities.slice(0, 4)]);
-  };
-
   // Prepare chart data from orders based on selected view
   const getChartData = () => {
     const now = new Date();
 
     if (chartView === 'daily') {
       // Generate dummy daily data for the last 30 days
-      const dataPoints: { period: string; orders: number }[] = [];
+      const dataPoints = [];
       for (let i = 29; i >= 0; i--) {
         const date = new Date(now);
         date.setDate(now.getDate() - i);
@@ -93,7 +112,7 @@ export default function Dashboard() {
       return dataPoints;
     } else if (chartView === 'weekly') {
       // Generate dummy weekly data for the last 12 weeks
-      const dataPoints: { period: string; orders: number }[] = [];
+      const dataPoints = [];
       for (let i = 11; i >= 0; i--) {
         const date = new Date(now);
         date.setDate(now.getDate() - (i * 7));
@@ -107,7 +126,7 @@ export default function Dashboard() {
       return dataPoints;
     } else { // monthly
       // Generate dummy monthly data for the last 12 months
-      const dataPoints: { period: string; orders: number }[] = [];
+      const dataPoints = [];
       for (let i = 11; i >= 0; i--) {
         const date = new Date(now);
         date.setMonth(now.getMonth() - i);
@@ -137,7 +156,7 @@ export default function Dashboard() {
           <div className="flex items-center justify-between">
             <div>
               <h3 className="text-lg font-semibold opacity-90">Total Products</h3>
-              <p className="text-4xl font-bold mt-2">25</p>
+              <p className="text-4xl font-bold mt-2">{loadingStats ? '...' : totalProducts}</p>
             </div>
             <div className="text-6xl opacity-20">📦</div>
           </div>
@@ -154,10 +173,10 @@ export default function Dashboard() {
         <div className="bg-gradient-to-r from-purple-500 to-purple-600 p-8 rounded-xl shadow-lg text-white">
           <div className="flex items-center justify-between">
             <div>
-              <h3 className="text-lg font-semibold opacity-90">Total Users</h3>
-              <p className="text-4xl font-bold mt-2">320</p>
+              <h3 className="text-lg font-semibold opacity-90">Total Categories</h3>
+              <p className="text-4xl font-bold mt-2">{loadingStats ? '...' : totalCategories}</p>
             </div>
-            <div className="text-6xl opacity-20">👥</div>
+            <div className="text-6xl opacity-20">🏷️</div>
           </div>
         </div>
         <div className="bg-gradient-to-r from-yellow-500 to-yellow-600 p-8 rounded-xl shadow-lg text-white">
@@ -236,54 +255,30 @@ export default function Dashboard() {
         <div className="bg-white p-8 rounded-xl shadow-lg">
           <h2 className="text-2xl font-semibold text-gray-900 mb-6">Most Trending Products</h2>
           <ul className="space-y-4">
-            <li className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
-              <div className="flex items-center space-x-3">
-                <div className="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center">
-                  <span className="text-blue-600">📱</span>
-                </div>
-                <div>
-                  <p className="font-medium text-gray-900">iPhone 15 Pro</p>
-                  <p className="text-sm text-gray-600">$999.99</p>
-                </div>
-              </div>
-              <span className="text-green-600 font-semibold">+25%</span>
-            </li>
-            <li className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
-              <div className="flex items-center space-x-3">
-                <div className="w-10 h-10 bg-green-100 rounded-full flex items-center justify-center">
-                  <span className="text-green-600">🎧</span>
-                </div>
-                <div>
-                  <p className="font-medium text-gray-900">AirPods Pro</p>
-                  <p className="text-sm text-gray-600">$249.99</p>
-                </div>
-              </div>
-              <span className="text-green-600 font-semibold">+18%</span>
-            </li>
-            <li className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
-              <div className="flex items-center space-x-3">
-                <div className="w-10 h-10 bg-purple-100 rounded-full flex items-center justify-center">
-                  <span className="text-purple-600">⌚</span>
-                </div>
-                <div>
-                  <p className="font-medium text-gray-900">Apple Watch Series 9</p>
-                  <p className="text-sm text-gray-600">$399.99</p>
-                </div>
-              </div>
-              <span className="text-green-600 font-semibold">+15%</span>
-            </li>
-            <li className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
-              <div className="flex items-center space-x-3">
-                <div className="w-10 h-10 bg-yellow-100 rounded-full flex items-center justify-center">
-                  <span className="text-yellow-600">💻</span>
-                </div>
-                <div>
-                  <p className="font-medium text-gray-900">MacBook Air M3</p>
-                  <p className="text-sm text-gray-600">$1099.99</p>
-                </div>
-              </div>
-              <span className="text-green-600 font-semibold">+12%</span>
-            </li>
+            {loadingStats ? (
+              <li className="p-4 bg-gray-50 rounded-lg">
+                <p className="text-gray-600">Loading products...</p>
+              </li>
+            ) : trendingProducts.length > 0 ? (
+              trendingProducts.map((product, index) => (
+                <li key={product.id || index} className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
+                  <div className="flex items-center space-x-3">
+                    <div className="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center">
+                      <span className="text-blue-600">📦</span>
+                    </div>
+                    <div>
+                      <p className="font-medium text-gray-900">{product.name || 'Product Name'}</p>
+                      <p className="text-sm text-gray-600">${product.price || '0.00'}</p>
+                    </div>
+                  </div>
+                  <span className="text-green-600 font-semibold">+{Math.floor(Math.random() * 30) + 10}%</span>
+                </li>
+              ))
+            ) : (
+              <li className="p-4 bg-gray-50 rounded-lg">
+                <p className="text-gray-600">No products available</p>
+              </li>
+            )}
           </ul>
         </div>
       </div>

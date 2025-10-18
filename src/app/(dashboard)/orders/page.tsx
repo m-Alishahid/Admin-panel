@@ -1,14 +1,14 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Order } from "../../lib/orders";
+import { Order } from "../../../lib/orders";
 
 export default function Orders() {
   const [orders, setOrders] = useState<Order[]>([]);
   const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [loading, setLoading] = useState(true);
   const [sortBy, setSortBy] = useState<"all" | "pending" | "shipped" | "completed" | "cancelled">("all");
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     fetchOrders();
@@ -23,8 +23,6 @@ export default function Orders() {
       }
     } catch (error) {
       console.error('Failed to fetch orders:', error);
-    } finally {
-      setLoading(false);
     }
   };
 
@@ -105,7 +103,7 @@ export default function Orders() {
               <label className="text-sm font-medium text-gray-700 whitespace-nowrap">Filter by Status:</label>
               <select
                 value={sortBy}
-                onChange={(e) => setSortBy(e.target.value as any)}
+                onChange={(e) => setSortBy(e.target.value as "all" | "pending" | "shipped" | "completed" | "cancelled")}
                 className="px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-black bg-white shadow-sm"
               >
                 <option value="all">All Orders</option>

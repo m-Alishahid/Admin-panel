@@ -35,16 +35,20 @@ export function AuthProvider({ children }) {
     try {
       setLoading(true);
       const response = await authService.login(email, password);
-      
+
       if (response.success) {
         setUser(response.data.user);
         setIsAuthenticated(true);
+        // Store token in localStorage for client-side API calls
+        if (typeof window !== 'undefined') {
+          localStorage.setItem('token', response.data.token);
+        }
         return { success: true, message: response.message };
       }
     } catch (error) {
-      return { 
-        success: false, 
-        message: error.response?.data?.error || 'Login failed' 
+      return {
+        success: false,
+        message: error.response?.data?.error || 'Login failed'
       };
     } finally {
       setLoading(false);
@@ -57,6 +61,10 @@ export function AuthProvider({ children }) {
     } catch (error) {
       console.error('Logout error:', error);
     } finally {
+      // Clear token from localStorage
+      if (typeof window !== 'undefined') {
+        localStorage.removeItem('token');
+      }
       setUser(null);
       setIsAuthenticated(false);
     }
