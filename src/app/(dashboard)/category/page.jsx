@@ -12,9 +12,9 @@ export default function Categories() {
     name: "", 
     description: "", 
     image: "",
-    requiresSize: false,
-    requiresColor: false,
-    hasVariants: false,
+    // requiresSize: false,
+    // requiresColor: false,
+    // hasVariants: false,
     shippingCost: 0,
     taxRate: 0,
     seoTitle: "",
@@ -186,9 +186,9 @@ export default function Categories() {
       name: "", 
       description: "", 
       image: "",
-      requiresSize: false,
-      requiresColor: false,
-      hasVariants: false,
+      // requiresSize: false,
+      // requiresColor: false,
+      // hasVariants: false,
       shippingCost: 0,
       taxRate: 0,
       seoTitle: "",
@@ -340,7 +340,7 @@ export default function Categories() {
             </div>
 
             {/* Product Properties */}
-            <div className="border-t pt-4">
+            {/* <div className="border-t pt-4">
               <h3 className="text-lg font-medium text-gray-900 mb-4">Product Properties</h3>
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <label className="flex items-center">
@@ -387,7 +387,7 @@ export default function Categories() {
                   <span className="ml-2 text-sm text-gray-700">Featured Category</span>
                 </label>
               </div>
-            </div>
+            </div> */}
 
             {/* Financial Settings */}
             <div className="border-t pt-4">
@@ -525,9 +525,9 @@ export default function Categories() {
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                     Name & Details
                   </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  {/* <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                     Properties
-                  </th>
+                  </th> */}
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                     Financial
                   </th>
@@ -547,9 +547,6 @@ export default function Categories() {
                         src={category.image} 
                         alt={category.name}
                         className="h-12 w-12 rounded-md object-cover border border-gray-300"
-                        // onError={(e) => {
-                        //   e.target.src = '/images/placeholder.jpg';
-                        // }}
                       />
                     </td>
                     <td className="px-6 py-4">
@@ -561,7 +558,7 @@ export default function Categories() {
                         </span>
                       )}
                     </td>
-                    <td className="px-6 py-4">
+                    {/* <td className="px-6 py-4">
                       <div className="flex flex-wrap gap-1">
                         {category.requiresSize && (
                           <span className="inline-flex items-center px-2 py-1 text-xs font-medium text-blue-800 bg-blue-100 rounded-full">
@@ -579,7 +576,7 @@ export default function Categories() {
                           </span>
                         )}
                       </div>
-                    </td>
+                    </td> */}
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                       <div>Shipping: ₹{category.shippingCost}</div>
                       <div>Tax: {category.taxRate}%</div>
