@@ -2,9 +2,8 @@
 
 import { useEffect, useState } from "react";
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
-import { mockOrders } from '../../lib/orders';
 import { useRouter } from 'next/navigation';
-import { useAuth } from '../../context/AuthContext';
+import { useAuth } from "@/context/AuthContext";
 
 export default function Dashboard() {
   const { user, isAuthenticated, loading, logout } = useAuth();

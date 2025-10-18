@@ -13,8 +13,6 @@ const colorStockSchema = new mongoose.Schema({
   }
 });
 
-
-
 const variantSchema = new mongoose.Schema({
   size: {
     type: String,

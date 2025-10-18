@@ -1,6 +1,6 @@
-import type { Metadata } from "next";
+import { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
-import "./globals.css";
+import "..//globals.css";
 import Layout from "@/components/Layout";
 import { AuthProvider } from "@/context/AuthContext";
 
@@ -14,16 +14,14 @@ const geistMono = Geist_Mono({
   subsets: ["latin"],
 });
 
-export const metadata: Metadata = {
+export const metadata = {
   title: "Admin Panel",
   description: "Next.js Admin Panel with Authentication",
 };
 
 export default function RootLayout({
   children,
-}: Readonly<{
-  children: React.ReactNode;
-}>) {
+}) {
   return (
     <html lang="en">
       <body
@@ -38,3 +36,4 @@ export default function RootLayout({
     </html>
   );
 }
+
