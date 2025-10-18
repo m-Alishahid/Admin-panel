@@ -1,16 +1,13 @@
-# TODO: Update Edit and View Product Pages UI to Match Add Page
+# UI Improvements for Users Page
 
 ## Tasks
-- [ ] Update src/app/products/[id]/edit/page.tsx to match add page design:
-  - Add top action bar with "Update Product" and "Cancel" buttons
-  - Restructure form into sections: Base Information, Product Images, Pricing & Category, Product Variants
-  - Include live preview component on the side
-  - Handle variants properly (size, color, fabric, stock per variant)
-  - Update handleSubmit to PUT to /api/products/[id]
-  - After update, redirect to /products
-- [ ] Update src/app/products/[id]/view/page.tsx to match add page design:
-  - Add top action bar with "Edit Product" and "Back to Products" buttons
-  - Display product data in read-only sections: Base Information, Product Images, Pricing & Category, Product Variants
-  - Include product preview on the side
-  - Make all fields read-only
-- [ ] Test both pages for functionality and UI consistency
+- [ ] Import shadcn/ui components (Card, Button, Tabs, Alert, Table, Input, Label, etc.)
+- [ ] Replace main container with Card component for better structure
+- [ ] Implement Tabs component for Users/Roles navigation
+- [ ] Use Alert component for success/error messages
+- [ ] Convert users list to Table component for better data display
+- [ ] Enhance user creation form with Input, Label, and Button components
+- [ ] Enhance role creation form with better layout and components
+- [ ] Add icons (e.g., User, Shield) for visual appeal
+- [ ] Improve overall spacing, colors, and responsiveness
+- [ ] Test UI changes for mobile and desktop views
