@@ -1,13 +1,12 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Order } from "../../lib/orders";
+import { Order } from "../../../lib/orders";
 
 export default function Orders() {
   const [orders, setOrders] = useState<Order[]>([]);
   const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [loading, setLoading] = useState(true);
   const [sortBy, setSortBy] = useState<"all" | "pending" | "shipped" | "completed" | "cancelled">("all");
 
   useEffect(() => {
@@ -23,8 +22,6 @@ export default function Orders() {
       }
     } catch (error) {
       console.error('Failed to fetch orders:', error);
-    } finally {
-      setLoading(false);
     }
   };
 

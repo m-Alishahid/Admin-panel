@@ -173,12 +173,12 @@ import mongoose from 'mongoose';
 const colorStockSchema = new mongoose.Schema({
   color: {
     type: String,
-    required: true,
+    required: false,
     trim: true
   },
   stock: {
     type: Number,
-    required: true,
+    required: false,
     min: 0
   }
 });

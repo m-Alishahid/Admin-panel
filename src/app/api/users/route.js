@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import connectDB from '@/lib/mongodb';
-import User from '@/models/User';
+import User from '@/Models/User';
 import { verifyToken } from '@/lib/jwt';
 
 // GET all users (with pagination, filtering, sorting)
@@ -43,7 +43,7 @@ export async function GET(request) {
 
     // Build filter
     let filter = {};
-    
+
     if (search) {
       filter.$or = [
         { firstName: { $regex: search, $options: 'i' } },
@@ -65,7 +65,7 @@ export async function GET(request) {
 
     // Execute query with pagination
     const skip = (page - 1) * limit;
-    
+
     const users = await User.find(filter)
       .populate('role')
       .select('-password')
@@ -93,10 +93,10 @@ export async function GET(request) {
   } catch (error) {
     console.error('GET Users Error:', error);
     return NextResponse.json(
-      { 
-        success: false, 
+      {
+        success: false,
         error: 'Failed to fetch users',
-        details: error.message 
+        details: error.message
       },
       { status: 500 }
     );
@@ -134,7 +134,7 @@ export async function POST(request) {
     }
 
     const body = await request.json();
-    
+
     // Create user
     const user = await User.create({
       ...body,
@@ -152,22 +152,22 @@ export async function POST(request) {
     }, { status: 201 });
   } catch (error) {
     console.error('POST User Error:', error);
-    
+
     if (error.code === 11000) {
       return NextResponse.json(
-        { 
-          success: false, 
-          error: 'User with this email already exists' 
+        {
+          success: false,
+          error: 'User with this email already exists'
         },
         { status: 400 }
       );
     }
-    
+
     return NextResponse.json(
-      { 
-        success: false, 
+      {
+        success: false,
         error: 'Failed to create user',
-        details: error.message 
+        details: error.message
       },
       { status: 500 }
     );

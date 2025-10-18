@@ -1,31 +1,75 @@
+"use client";
+
 import Navbar from '../../../components/Navbar';
 import Footer from '../../../components/Footer';
 import Link from 'next/link';
+import { useEffect, useState } from 'react';
+import { productService } from '@/services/productService';
+import { categoryService } from '@/services/categoryService';
 
 export default function ProductsPage() {
+  const [products, setProducts] = useState([]);
+  const [categories, setCategories] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const [productsResponse, categoriesResponse] = await Promise.all([
+          productService.getAll(),
+          categoryService.getAll()
+        ]);
+       setProducts(productsResponse.data?.products || []);
+        setCategories(categoriesResponse.data || []);
+      } catch (error) {
+        console.error('Error fetching data:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchData();
+  }, []);
+
   const dummyData = {
     hero: {
       title: "Fashion Collection",
       subtitle: "Style your life",
       description: "Discover our curated collection of trendy clothing and accessories for every occasion."
     },
-    categories: [
-      { id: 1, name: "Women", icon: "👩", count: 45, link: "/product?category=women" },
-      { id: 2, name: "Men", icon: "👨", count: 38, link: "/product?category=men" },
-      { id: 3, name: "Kids", icon: "👶", count: 22, link: "/product?category=kids" },
-      { id: 4, name: "Accessories", icon: "👜", count: 31, link: "/product?category=accessories" }
-    ],
-    products: [
-      { id: 1, name: "Floral Summer Dress", price: "$49.99", image: "👗", rating: 4.5, reviews: 128, category: "Women", description: "Beautiful floral print dress perfect for summer outings." },
-      { id: 2, name: "Classic White T-Shirt", price: "$19.99", image: "👕", rating: 4.7, reviews: 89, category: "Men", description: "Essential cotton t-shirt for everyday wear." },
-      { id: 3, name: "Designer Denim Jeans", price: "$79.99", image: "👖", rating: 4.3, reviews: 156, category: "Unisex", description: "Premium quality jeans with perfect fit." },
-      { id: 4, name: "Leather Handbag", price: "$89.99", image: "👜", rating: 4.6, reviews: 203, category: "Accessories", description: "Elegant leather handbag for all occasions." },
-      { id: 5, name: "Kids Party Dress", price: "$39.99", image: "👗", rating: 4.4, reviews: 67, category: "Kids", description: "Adorable dress for special occasions." },
-      { id: 6, name: "Stylish Sneakers", price: "$69.99", image: "👟", rating: 4.2, reviews: 94, category: "Footwear", description: "Comfortable sneakers with modern design." },
-      { id: 7, name: "Silk Scarf", price: "$29.99", image: "🧣", rating: 4.8, reviews: 45, category: "Accessories", description: "Luxurious silk scarf for elegant styling." },
-      { id: 8, name: "Casual Hoodie", price: "$44.99", image: "🧥", rating: 4.1, reviews: 112, category: "Men", description: "Cozy hoodie perfect for casual wear." }
-    ]
+    categories: categories.map((category, index) => ({
+      id: category._id || index + 1,
+      name: category.name || 'Category',
+      icon: "👕",
+      count: products.filter(p => p.category === category._id).length,
+      link: `/product?category=${category.name?.toLowerCase()}`
+    })),
+    products: products.map(product => ({
+      id: product._id,
+      name: product.name || 'Product Name',
+      price: `$${product.salePrice || product.price || '0.00'}`,
+      image: product.thumbnail || product.images?.[0] || "👕",
+      rating: 4.5,
+      reviews: 128,
+      category: categories.find(c => c._id === product.category)?.name || 'General',
+      description: product.description || 'Product description'
+    }))
   };
+
+  if (loading) {
+    return (
+      <div className="min-h-screen flex flex-col">
+        <Navbar />
+        <main className="flex-grow flex items-center justify-center">
+          <div className="text-center">
+            <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-pink-600 mx-auto"></div>
+            <p className="mt-4 text-lg text-gray-600">Loading products...</p>
+          </div>
+        </main>
+        <Footer />
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen flex flex-col">
@@ -56,6 +100,49 @@ export default function ProductsPage() {
           </div>
         </section>
 
+        {/* Trending Products Section */}
+        <section className="py-16 bg-white">
+          <div className="container mx-auto px-4">
+            <h2 className="text-3xl font-bold text-center mb-12">Trending Products</h2>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+              {dummyData.products.slice(0, 4).map(product => (
+                <div key={`trending-${product.id}`} className="bg-gray-50 p-6 rounded-lg shadow-md hover:shadow-lg transition duration-300 h-full flex flex-col">
+                  <div className="h-24 flex items-center justify-center mb-4">
+                    {product.image.startsWith('http') ? (
+                      <img src={product.image} alt={product.name} className="w-20 h-20 object-cover rounded" />
+                    ) : (
+                      <div className="text-8xl">{product.image}</div>
+                    )}
+                  </div>
+                  <div className="mb-2">
+                    <span className="inline-block bg-red-100 text-red-800 text-xs px-2 py-1 rounded-full font-medium">
+                      🔥 Trending
+                    </span>
+                  </div>
+                  <h3 className="text-xl font-semibold mb-2 line-clamp-2">{product.name}</h3>
+                  <p className="text-gray-600 mb-4 flex-grow line-clamp-3">{product.description}</p>
+                  <div className="flex items-center mb-4">
+                    <div className="flex items-center">
+                      {[...Array(5)].map((_, i) => (
+                        <span key={i} className={`text-lg ${i < Math.floor(product.rating) ? 'text-yellow-400' : 'text-gray-300'}`}>
+                          ★
+                        </span>
+                      ))}
+                    </div>
+                    <span className="ml-2 text-sm text-gray-600">({product.reviews})</span>
+                  </div>
+                  <div className="flex justify-between items-center mt-auto">
+                    <span className="text-2xl font-bold text-green-600">{product.price}</span>
+                    <Link href={`/product/${product.id}`} className="bg-pink-600 text-white px-4 py-2 rounded hover:bg-pink-700 transition duration-300">
+                      View Details
+                    </Link>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </section>
+
         {/* Products Section */}
         <section className="py-16 bg-gray-50">
           <div className="container mx-auto px-4">
@@ -74,15 +161,21 @@ export default function ProductsPage() {
 
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
               {dummyData.products.map(product => (
-                <div key={product.id} className="bg-white p-6 rounded-lg shadow-md hover:shadow-lg transition duration-300">
-                  <div className="text-8xl mb-4 text-center">{product.image}</div>
+                <div key={product.id} className="bg-white p-6 rounded-lg shadow-md hover:shadow-lg transition duration-300 h-full flex flex-col">
+                  <div className="h-24 flex items-center justify-center mb-4">
+                    {product.image.startsWith('http') ? (
+                      <img src={product.image} alt={product.name} className="w-20 h-20 object-cover rounded" />
+                    ) : (
+                      <div className="text-8xl">{product.image}</div>
+                    )}
+                  </div>
                   <div className="mb-2">
                     <span className="inline-block bg-pink-100 text-pink-800 text-xs px-2 py-1 rounded-full font-medium">
                       {product.category}
                     </span>
                   </div>
-                  <h3 className="text-xl font-semibold mb-2">{product.name}</h3>
-                  <p className="text-gray-600 mb-4">{product.description}</p>
+                  <h3 className="text-xl font-semibold mb-2 line-clamp-2">{product.name}</h3>
+                  <p className="text-gray-600 mb-4 flex-grow line-clamp-3">{product.description}</p>
                   <div className="flex items-center mb-4">
                     <div className="flex items-center">
                       {[...Array(5)].map((_, i) => (
@@ -93,7 +186,7 @@ export default function ProductsPage() {
                     </div>
                     <span className="ml-2 text-sm text-gray-600">({product.reviews})</span>
                   </div>
-                  <div className="flex justify-between items-center">
+                  <div className="flex justify-between items-center mt-auto">
                     <span className="text-2xl font-bold text-green-600">{product.price}</span>
                     <Link href={`/product/${product.id}`} className="bg-pink-600 text-white px-4 py-2 rounded hover:bg-pink-700 transition duration-300">
                       View Details
