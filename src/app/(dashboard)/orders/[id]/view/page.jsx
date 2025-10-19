@@ -3,16 +3,6 @@
 import { useState, useEffect } from "react";
 import { useRouter, useParams } from "next/navigation";
 
-interface Order {
-  id: string;
-  customer: string;
-  email: string;
-  total: number;
-  status: string;
-  date: string;
-  items: string[];
-}
-
 const mockOrders = [
   {
     id: "1",
@@ -53,19 +43,18 @@ const mockOrders = [
 ];
 
 export default function ViewOrder() {
-  const [order, setOrder] = useState<Order | null>(null);
+  const [order, setOrder] = useState(null);
   const [loading, setLoading] = useState(true);
   const router = useRouter();
   const params = useParams();
-  const id = params.id as string;
+  const id = params.id;
 
   useEffect(() => {
     fetchOrder();
   }, [id]);
 
   const fetchOrder = () => {
-    // Simulate API call
-    const foundOrder = mockOrders.find(o => o.id === id);
+    const foundOrder = mockOrders.find((o) => o.id === id);
     if (foundOrder) {
       setOrder(foundOrder);
     }
@@ -88,27 +77,43 @@ export default function ViewOrder() {
         <div className="p-8 space-y-6">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div>
-              <label className="block text-sm font-semibold text-gray-700 uppercase tracking-wide">Order ID</label>
-              <p className="mt-2 text-lg text-gray-900 font-medium">#{order.id}</p>
+              <label className="block text-sm font-semibold text-gray-700 uppercase tracking-wide">
+                Order ID
+              </label>
+              <p className="mt-2 text-lg text-gray-900 font-medium">
+                #{order.id}
+              </p>
             </div>
 
             <div>
-              <label className="block text-sm font-semibold text-gray-700 uppercase tracking-wide">Customer</label>
-              <p className="mt-2 text-lg text-gray-900 font-medium">{order.customer}</p>
+              <label className="block text-sm font-semibold text-gray-700 uppercase tracking-wide">
+                Customer
+              </label>
+              <p className="mt-2 text-lg text-gray-900 font-medium">
+                {order.customer}
+              </p>
             </div>
 
             <div>
-              <label className="block text-sm font-semibold text-gray-700 uppercase tracking-wide">Email</label>
+              <label className="block text-sm font-semibold text-gray-700 uppercase tracking-wide">
+                Email
+              </label>
               <p className="mt-2 text-lg text-gray-900">{order.email}</p>
             </div>
 
             <div>
-              <label className="block text-sm font-semibold text-gray-700 uppercase tracking-wide">Total</label>
-              <p className="mt-2 text-lg text-gray-900 font-semibold">${order.total.toFixed(2)}</p>
+              <label className="block text-sm font-semibold text-gray-700 uppercase tracking-wide">
+                Total
+              </label>
+              <p className="mt-2 text-lg text-gray-900 font-semibold">
+                ${order.total.toFixed(2)}
+              </p>
             </div>
 
             <div>
-              <label className="block text-sm font-semibold text-gray-700 uppercase tracking-wide">Status</label>
+              <label className="block text-sm font-semibold text-gray-700 uppercase tracking-wide">
+                Status
+              </label>
               <p className="mt-2">
                 <span
                   className={`inline-flex px-3 py-1 text-sm font-semibold rounded-full ${
@@ -125,7 +130,9 @@ export default function ViewOrder() {
             </div>
 
             <div>
-              <label className="block text-sm font-semibold text-gray-700 uppercase tracking-wide">Date</label>
+              <label className="block text-sm font-semibold text-gray-700 uppercase tracking-wide">
+                Date
+              </label>
               <p className="mt-2 text-lg text-gray-900">{order.date}</p>
             </div>
           </div>
@@ -135,7 +142,9 @@ export default function ViewOrder() {
             <div className="bg-gray-50 rounded-lg p-4">
               <ul className="list-disc list-inside space-y-2">
                 {order.items.map((item, index) => (
-                  <li key={index} className="text-lg text-gray-900">{item}</li>
+                  <li key={index} className="text-lg text-gray-900">
+                    {item}
+                  </li>
                 ))}
               </ul>
             </div>

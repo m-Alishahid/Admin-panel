@@ -9,8 +9,8 @@ export default function Categories() {
   const [showForm, setShowForm] = useState(false);
   const [formMode, setFormMode] = useState('add'); // 'add' or 'edit'
   const [currentCategory, setCurrentCategory] = useState({
-    name: "", 
-    description: "", 
+    name: "",
+    description: "",
     image: "",
     shippingCost: 0,
     taxRate: 0,
@@ -66,9 +66,9 @@ export default function Categories() {
 
       // In real application, you would upload the file to your server here
       // For now, we'll simulate by setting a mock URL
-      setCurrentCategory(prev => ({ 
-        ...prev, 
-        image: `/uploads/categories/${Date.now()}-${file.name}` 
+      setCurrentCategory(prev => ({
+        ...prev,
+        image: `/uploads/categories/${Date.now()}-${file.name}`
       }));
 
       // Clear any previous image errors

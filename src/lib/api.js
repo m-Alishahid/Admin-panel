@@ -38,7 +38,12 @@ api.interceptors.response.use(
   (error) => {
     if (error.response) {
       // Server responded with error status
-      console.error('API Error:', error.response.data || error.message);
+      const errorData = error.response.data;
+      if (errorData && Object.keys(errorData).length > 0) {
+        console.error('API Error:', errorData);
+      } else {
+        console.error('API Error:', `Status: ${error.response.status} ${error.response.statusText}, Message: ${error.message}`);
+      }
       return Promise.reject(error);
     } else if (error.request) {
       // Request was made but no response received
