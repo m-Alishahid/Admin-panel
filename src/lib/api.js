@@ -12,7 +12,19 @@ const api = axios.create({
 // Request interceptor
 api.interceptors.request.use(
   (config) => {
-    // You can add auth tokens here
+    // Add auth token from localStorage or cookies if available
+    if (typeof window !== 'undefined') {
+      let token = localStorage.getItem('token');
+      if (!token) {
+        token = document.cookie
+          .split('; ')
+          .find(row => row.startsWith('token='))
+          ?.split('=')[1];
+      }
+      if (token) {
+        config.headers.Authorization = `Bearer ${token}`;
+      }
+    }
     return config;
   },
   (error) => {
@@ -24,8 +36,19 @@ api.interceptors.request.use(
 api.interceptors.response.use(
   (response) => response,
   (error) => {
-    console.error('API Error:', error.response?.data || error.message);
-    return Promise.reject(error);
+    if (error.response) {
+      // Server responded with error status
+      console.error('API Error:', error.response.data || error.message);
+      return Promise.reject(error);
+    } else if (error.request) {
+      // Request was made but no response received
+      console.error('Network Error:', error.message);
+      return Promise.reject(new Error('Network error - please check your connection'));
+    } else {
+      // Something else happened
+      console.error('Request Error:', error.message);
+      return Promise.reject(error);
+    }
   }
 );
 

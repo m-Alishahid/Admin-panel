@@ -1,17 +1,17 @@
-import { NextRequest, NextResponse } from 'next/server';
-import { Order, mockOrders } from '../../../lib/orders';
+import { NextResponse } from 'next/server';
+import { mockOrders } from '../../../lib/orders';
 
-const orders: Order[] = [...mockOrders];
+const orders = [...mockOrders];
 
 export async function GET() {
   return NextResponse.json(orders);
 }
 
-export async function POST(request: NextRequest) {
+export async function POST(request) {
   try {
-    const body: Omit<Order, 'id' | 'date'> = await request.json();
+    const body = await request.json();
 
-    const newOrder: Order = {
+    const newOrder = {
       id: (orders.length + 1).toString(),
       ...body,
       date: new Date().toISOString().split('T')[0], // YYYY-MM-DD format
@@ -24,9 +24,9 @@ export async function POST(request: NextRequest) {
   }
 }
 
-export async function PUT(request: NextRequest) {
+export async function PUT(request) {
   try {
-    const { id, status }: { id: string; status: string } = await request.json();
+    const { id, status } = await request.json();
 
     const orderIndex = orders.findIndex(order => order.id === id);
     if (orderIndex === -1) {

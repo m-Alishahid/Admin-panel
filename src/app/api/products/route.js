@@ -80,6 +80,8 @@ export async function GET(request) {
 
 // POST create new product
 export async function POST(request) {
+  let uploadedImages = []; // Declare outside try block for catch block access
+
   try {
     await connectDB();
 
@@ -98,7 +100,7 @@ export async function POST(request) {
     const hasVariants = formData.get('hasVariants') === 'true';
     const variants = JSON.parse(formData.get('variants') || '[]');
     const status = formData.get('status') || 'Active';
-    
+
     // Handle images
     const imageFiles = [];
     for (let [key, value] of formData.entries()) {
@@ -108,18 +110,35 @@ export async function POST(request) {
     }
 
     // Upload images to Cloudinary
-    let uploadedImages = [];
-    if (imageFiles.length > 0) {
-      uploadedImages = await cloudinaryService.uploadImages(imageFiles);
+    try {
+      if (imageFiles.length > 0) {
+        uploadedImages = await cloudinaryService.uploadImages(imageFiles);
+      }
+    } catch (uploadError) {
+      console.error('Image upload error:', uploadError);
+      return NextResponse.json(
+        {
+          success: false,
+          error: 'Failed to upload images',
+          details: uploadError.message
+        },
+        { status: 500 }
+      );
     }
 
     // Calculate total stock from variants
-    const totalStock = variants.reduce((sum, variant) => {
-      const variantStock = variant.colors.reduce((colorSum, color) => {
-        return colorSum + (parseInt(color.stock) || 0);
+    let totalStock = 0;
+    if (variants && variants.length > 0) {
+      totalStock = variants.reduce((sum, variant) => {
+        if (variant.colors && variant.colors.length > 0) {
+          const variantStock = variant.colors.reduce((colorSum, color) => {
+            return colorSum + (parseInt(color.stock) || 0);
+          }, 0);
+          return sum + variantStock;
+        }
+        return sum;
       }, 0);
-      return sum + variantStock;
-    }, 0);
+    }
 
     // Set thumbnail (first image or specified thumbnail)
     const thumbnailIndex = parseInt(formData.get('thumbnailIndex')) || 0;
@@ -153,7 +172,7 @@ export async function POST(request) {
     }, { status: 201 });
   } catch (error) {
     console.error('POST Product Error:', error);
-    
+
     // Delete uploaded images if product creation fails
     if (uploadedImages && uploadedImages.length > 0) {
       await cloudinaryService.deleteImages(uploadedImages).catch(console.error);

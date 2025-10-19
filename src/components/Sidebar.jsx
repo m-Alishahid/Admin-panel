@@ -3,12 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 
-interface SidebarProps {
-  isOpen: boolean;
-  toggleSidebar: () => void;
-}
-
-const Sidebar = ({ isOpen, toggleSidebar }: SidebarProps) => {
+const Sidebar = ({ isOpen, toggleSidebar }) => {
   const pathname = usePathname();
 
   const menuItems = [
@@ -130,7 +125,6 @@ const Sidebar = ({ isOpen, toggleSidebar }: SidebarProps) => {
           </div>
         </div>
       </div>
-
     </>
   );
 };

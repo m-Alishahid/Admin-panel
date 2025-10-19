@@ -8,9 +8,17 @@ export async function GET(request) {
   try {
     await connectDB();
 
-    // Get token from cookie
-    const token = request.cookies.get('token')?.value;
-    
+    // Get token from cookie or Authorization header
+    let token = request.cookies.get('token')?.value;
+
+    // Check Authorization header if no cookie token
+    if (!token) {
+      const authHeader = request.headers.get('authorization');
+      if (authHeader && authHeader.startsWith('Bearer ')) {
+        token = authHeader.substring(7);
+      }
+    }
+
     if (!token) {
       return NextResponse.json(
         { success: false, error: 'Not authenticated' },
@@ -20,7 +28,7 @@ export async function GET(request) {
 
     // Verify token
     const decoded = verifyToken(token);
-    
+
     if (!decoded) {
       return NextResponse.json(
         { success: false, error: 'Invalid token' },

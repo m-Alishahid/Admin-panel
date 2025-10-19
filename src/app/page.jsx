@@ -1,16 +1,12 @@
 "use client";
 
-import Navbar from '../../../components/Navbar';
-import Footer from '../../../components/Footer';
-import Link from 'next/link';
-import { useEffect, useState } from 'react';
-import { productService } from '@/services/productService';
-import { categoryService } from '@/services/categoryService';
-
-export const dynamic = 'force-dynamic';
+import Link from "next/link";
+import { useEffect, useState } from "react";
+import { productService } from "@/services/productService";
+import { categoryService } from "@/services/categoryService";
 
 export default function HomePage() {
-  const [trendingProducts, setTrendingProducts] = useState([]);
+  const [featuredProducts, setFeaturedProducts] = useState([]);
   const [categories, setCategories] = useState([]);
   const [loading, setLoading] = useState(true);
 
@@ -19,12 +15,12 @@ export default function HomePage() {
       try {
         const [productsResponse, categoriesResponse] = await Promise.all([
           productService.getAll({ limit: 4 }),
-          categoryService.getAll()
+          categoryService.getAll(),
         ]);
-        setTrendingProducts(productsResponse.data?.products || []);
+        setFeaturedProducts(productsResponse.data?.products || []);
         setCategories(categoriesResponse.data || []);
       } catch (error) {
-        console.error('Error fetching data:', error);
+        console.error("Error fetching data:", error);
       } finally {
         setLoading(false);
       }
@@ -36,7 +32,7 @@ export default function HomePage() {
   return (
     <div className="min-h-screen flex flex-col">
       {/* Header */}
-      <header className="bg-white shadow-md">
+      <header className="fashion-header">
         <div className="container mx-auto px-4 py-4">
           <div className="flex justify-between items-center">
             <div className="text-2xl font-bold text-gray-800">FashionHub</div>
@@ -60,7 +56,7 @@ export default function HomePage() {
 
       <main className="flex-grow">
         {/* Hero Section */}
-        <section className="bg-gradient-to-r from-pink-500 to-purple-600 text-white py-20">
+        <section className="fashion-hero">
           <div className="container mx-auto text-center px-4">
             <h1 className="text-5xl md:text-7xl font-bold mb-6">
               Fashion Forward
@@ -68,49 +64,60 @@ export default function HomePage() {
             <p className="text-xl mb-8 max-w-2xl mx-auto">
               Discover the latest trends in clothing and accessories. Style your life with our curated collection.
             </p>
-            <Link href="/product" className="bg-white text-purple-600 px-8 py-4 rounded-lg font-semibold text-lg hover:bg-gray-100 transition duration-300">
+            <Link href="/product" className="fashion-button-secondary">
               Shop Collection
             </Link>
           </div>
         </section>
 
         {/* Our Story Section */}
-        <section className="py-16 bg-gray-50">
+        <section className="fashion-our-story">
           <div className="container mx-auto px-4 text-center">
             <h2 className="text-4xl font-bold text-gray-800 mb-8">Our Story</h2>
             <p className="text-lg text-gray-600 max-w-3xl mx-auto">
-              At FashionHub, we believe fashion is more than just clothing—it's a way to express yourself and feel confident in your own skin. Our carefully curated collection brings together the latest trends with timeless pieces that you'll love wearing season after season.
+              At FashionHub, we believe fashion is more than just clothing—it&apos;s a way to express yourself and feel confident in your own skin. Our carefully curated collection brings together the latest trends with timeless pieces that you&apos;ll love wearing season after season.
             </p>
           </div>
         </section>
 
         {/* Shop by Category */}
-        <section className="py-16 bg-white">
+        <section className="fashion-categories">
           <div className="container mx-auto px-4">
             <h2 className="text-4xl font-bold text-center text-gray-800 mb-12">Shop by Category</h2>
             <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
-              <div className="text-center">
-                <div className="text-6xl mb-4">👩</div>
-                <h3 className="text-xl font-semibold text-gray-800">Women</h3>
-              </div>
-              <div className="text-center">
-                <div className="text-6xl mb-4">👨</div>
-                <h3 className="text-xl font-semibold text-gray-800">Men</h3>
-              </div>
-              <div className="text-center">
-                <div className="text-6xl mb-4">👶</div>
-                <h3 className="text-xl font-semibold text-gray-800">Kids</h3>
-              </div>
-              <div className="text-center">
-                <div className="text-6xl mb-4">👜</div>
-                <h3 className="text-xl font-semibold text-gray-800">Accessories</h3>
-              </div>
+              {categories.length > 0 ? (
+                categories.map((category, index) => {
+                  const categoryIcons = ["👩", "👨", "👶", "👜"];
+                  const categoryLinks = [
+                    "/product?category=women",
+                    "/product?category=men",
+                    "/product?category=kids",
+                    "/product?category=accessories",
+                  ];
+                  return (
+                    <Link
+                      key={category._id || index}
+                      href={categoryLinks[index] || "/product"}
+                      className="fashion-category-card"
+                    >
+                      <div className="text-6xl mb-4">{categoryIcons[index] || "🏷️"}</div>
+                      <h3 className="text-xl font-semibold">
+                        {category.name || category.category}
+                      </h3>
+                    </Link>
+                  );
+                })
+              ) : (
+                <div className="col-span-full text-center">
+                  <p className="text-gray-600">No categories available</p>
+                </div>
+              )}
             </div>
           </div>
         </section>
 
         {/* Featured Products */}
-        <section className="py-16 bg-gray-50">
+        <section className="fashion-featured">
           <div className="container mx-auto px-4">
             <h2 className="text-4xl font-bold text-center text-gray-800 mb-12">Featured Products</h2>
             {loading ? (
@@ -118,33 +125,39 @@ export default function HomePage() {
                 <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-purple-600 mx-auto"></div>
                 <p className="mt-4 text-lg text-gray-600">Loading featured products...</p>
               </div>
-            ) : trendingProducts.length > 0 ? (
+            ) : featuredProducts.length > 0 ? (
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
-                {trendingProducts.slice(0, 4).map((product, index) => {
-                  const featuredProducts = [
-                    { emoji: "👗", category: "Women", name: "Summer Dress", price: "$49.99" },
-                    { emoji: "👕", category: "Men", name: "Casual T-Shirt", price: "$19.99" },
-                    { emoji: "👖", category: "Unisex", name: "Denim Jeans", price: "$79.99" },
-                    { emoji: "👟", category: "Footwear", name: "Sneakers", price: "$89.99" }
-                  ];
-                  const featured = featuredProducts[index] || {};
-
+                {featuredProducts.map((product, index) => {
+                  const productEmojis = ["👗", "👕", "👖", "👟"];
+                  const productCategories = ["Women", "Men", "Unisex", "Footwear"];
                   return (
-                    <div key={product._id} className="bg-white p-6 rounded-lg shadow-md hover:shadow-lg transition duration-300">
-                      <div className="text-6xl mb-4 text-center">{featured.emoji}</div>
+                    <div key={product._id || index} className="fashion-product-card">
+                      <div className="mb-4 text-center">
+                        {product.thumbnail ? (
+                          <img
+                            src={product.thumbnail}
+                            alt={product.name}
+                            className="w-24 h-24 object-cover rounded-lg mx-auto"
+                          />
+                        ) : (
+                          <div className="text-6xl">{productEmojis[index] || "👕"}</div>
+                        )}
+                      </div>
                       <div className="mb-2">
                         <span className="inline-block bg-purple-100 text-purple-800 text-xs px-2 py-1 rounded-full font-medium">
-                          {featured.category}
+                          {productCategories[index] || "Fashion"}
                         </span>
                       </div>
-                      <h3 className="text-xl font-semibold mb-2">{featured.name}</h3>
-                      <p className="text-gray-600 mb-4">{product.description}</p>
-                      <div className="flex justify-between items-center">
-                        <span className="text-2xl font-bold text-green-600">{featured.price}</span>
-                        <Link href={`/product/${product._id}`} className="bg-purple-600 text-white px-4 py-2 rounded hover:bg-purple-700 transition duration-300">
-                          View Details
-                        </Link>
-                      </div>
+                      <h3 className="text-lg font-semibold mb-2">{product.name}</h3>
+                      <p className="text-2xl font-bold text-green-600 mb-4">
+                        ${product.salePrice || product.price || "0.00"}
+                      </p>
+                      <Link
+                        href={`/product/${product._id}`}
+                        className="fashion-button-primary w-full text-center block"
+                      >
+                        View Details
+                      </Link>
                     </div>
                   );
                 })}
@@ -158,7 +171,7 @@ export default function HomePage() {
         </section>
 
         {/* Newsletter Section */}
-        <section className="py-16 bg-purple-600 text-white">
+        <section className="fashion-newsletter">
           <div className="container mx-auto px-4 text-center">
             <h2 className="text-4xl font-bold mb-4">Stay in Style</h2>
             <p className="text-xl mb-8 max-w-2xl mx-auto">
@@ -179,7 +192,7 @@ export default function HomePage() {
       </main>
 
       {/* Footer */}
-      <footer className="bg-gray-800 text-white py-12">
+      <footer className="fashion-footer">
         <div className="container mx-auto px-4">
           <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
             <div>
