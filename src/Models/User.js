@@ -105,10 +105,8 @@ userSchema.virtual('fullName').get(function() {
 });
 
 // Index for better performance
-userSchema.index({ email: 1 });
 userSchema.index({ role: 1 });
 userSchema.index({ isActive: 1 });
-userSchema.index({ employeeId: 1 });
 
 // Password hashing middleware
 userSchema.pre('save', async function(next) {

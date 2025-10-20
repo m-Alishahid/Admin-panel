@@ -1,13 +1,13 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Order } from "../../lib/orders";
+import { Order, OrderItem } from "../../../lib/orders";
 
 export default function Orders() {
   const [orders, setOrders] = useState<Order[]>([]);
   const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [loading, setLoading] = useState(true);
+
   const [sortBy, setSortBy] = useState<"all" | "pending" | "shipped" | "completed" | "cancelled">("all");
 
   useEffect(() => {
@@ -23,8 +23,6 @@ export default function Orders() {
       }
     } catch (error) {
       console.error('Failed to fetch orders:', error);
-    } finally {
-      setLoading(false);
     }
   };
 
@@ -244,7 +242,7 @@ export default function Orders() {
                         </tr>
                       </thead>
                       <tbody className="bg-white divide-y divide-gray-200">
-                        {selectedOrder.items.map((item, index) => (
+                        {selectedOrder.items.map((item: OrderItem, index: number) => (
                           <tr key={index}>
                             <td className="px-4 py-2 text-sm text-gray-900">{item.productId}</td>
                             <td className="px-4 py-2 text-sm text-gray-900">{item.productName}</td>

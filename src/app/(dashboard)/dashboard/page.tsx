@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useEffect, useState } from "react";
@@ -6,7 +7,7 @@ import { useRouter } from 'next/navigation';
 import { useAuth } from "@/context/AuthContext";
 
 export default function Dashboard() {
-  const { user, isAuthenticated, loading, logout } = useAuth();
+  const { isAuthenticated, loading, logout } = useAuth();
   const router = useRouter();
 
   useEffect(() => {
@@ -15,10 +16,7 @@ export default function Dashboard() {
     }
   }, [isAuthenticated, loading, router]);
 
-  const handleLogout = async () => {
-    await logout();
-    router.push('/login');
-  };
+
 
   const [chartView, setChartView] = useState('monthly');
 
@@ -61,19 +59,7 @@ export default function Dashboard() {
     }
   ]);
 
-  // Function to add new activity (can be called from other components)
-  const addActivity = (type: string, action: string, details: string) => {
-    const newActivity = {
-      id: recentActivities.length + 1,
-      type,
-      action,
-      details,
-      timestamp: 'Just now',
-      icon: type === 'product' ? '📦' : type === 'order' ? '✅' : type === 'user' ? '👤' : '🏷️',
-      color: type === 'product' ? 'blue' : type === 'order' ? 'green' : type === 'user' ? 'purple' : 'orange'
-    };
-    setRecentActivities([newActivity, ...recentActivities.slice(0, 4)]);
-  };
+
 
   // Prepare chart data from orders based on selected view
   const getChartData = () => {

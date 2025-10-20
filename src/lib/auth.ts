@@ -2,7 +2,6 @@ import { NextAuthOptions } from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
 // import { MongoDBAdapter } from "@auth/mongodb-adapter";
 // import clientPromise from "./mongodb";
-import bcrypt from "bcryptjs";
 
 export const authOptions: NextAuthOptions = {
   // adapter: MongoDBAdapter(clientPromise), // Temporarily disabled
