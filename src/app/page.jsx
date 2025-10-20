@@ -56,7 +56,7 @@ export default function HomePage() {
           <div className="container mx-auto px-4 py-12 md:py-16 text-center">
             <h2 className="text-3xl md:text-4xl font-bold text-gray-800 mb-6 md:mb-8">Our Story</h2>
             <p className="text-base md:text-lg text-gray-600 max-w-3xl mx-auto leading-relaxed px-4">
-              At FashionHub, we believe fashion is more than just clothing—it&apos;s a way to express yourself and feel confident in your own skin. Our carefully curated collection brings together the latest trends with timeless pieces that you&apos;ll love wearing season after season.
+              At FashionHub ,  we believe fashion is more than just clothing—it&apos;s a way to express yourself and feel confident in your own skin. Our carefully curated collection brings together the latest trends with timeless pieces that you&apos;ll love wearing season after season.
             </p>
           </div>
         </section>
