@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 "use client";
 import { useState, useEffect } from "react";
 import { useParams } from "next/navigation";
@@ -60,11 +61,41 @@ export default function ProductDetailPage() {
         <div className="flex justify-center items-center h-64">
           <p className="text-gray-600">Product not found.</p>
         </div>
+=======
+import Navbar from '../../../components/Navbar';
+import Footer from '../../../components/Footer';
+import Link from 'next/link';
+
+export default function ProductDetailPage({ params }) {
+  const { id } = params;
+
+  const dummyData = {
+    1: { name: "Product A", price: "$10.00", description: "A great product.", details: "More details about Product A." },
+    2: { name: "Product B", price: "$20.00", description: "Another great product.", details: "More details about Product B." },
+    3: { name: "Product C", price: "$30.00", description: "Yet another great product.", details: "More details about Product C." }
+  };
+
+  const product = dummyData[id];
+
+  if (!product) {
+    return (
+      <div className="min-h-screen flex flex-col">
+        <Navbar />
+        <main className="flex-grow container mx-auto p-4">
+          <h1 className="text-3xl font-bold mb-4">Product Not Found</h1>
+          <p>The product with ID {id} does not exist.</p>
+          <Link href="/product" className="text-blue-500 hover:underline">
+            Back to Products
+          </Link>
+        </main>
+        <Footer />
+>>>>>>> 2d5d6d74d4d6eb7aa0e934030d2cc2e8d008a5e9
       </div>
     );
   }
 
   return (
+<<<<<<< HEAD
     <div className="min-h-screen bg-gray-50">
       <Navbar />
 
@@ -200,6 +231,20 @@ export default function ProductDetailPage() {
           </div>
         </div>
       </div>
+=======
+    <div className="min-h-screen flex flex-col">
+      <Navbar />
+      <main className="flex-grow container mx-auto p-4">
+        <h1 className="text-3xl font-bold mb-4">{product.name}</h1>
+        <p className="text-gray-600 mb-2">{product.price}</p>
+        <p className="mb-4">{product.description}</p>
+        <p>{product.details}</p>
+        <Link href="/product" className="text-blue-500 hover:underline">
+          Back to Products
+        </Link>
+      </main>
+      <Footer />
+>>>>>>> 2d5d6d74d4d6eb7aa0e934030d2cc2e8d008a5e9
     </div>
   );
 }
