@@ -1,12 +1,13 @@
 "use client";
-
-import Link from 'next/link';
-import { useEffect, useState } from 'react';
-import { categoryService } from '@/services/categoryService';
+import Image from "next/image";
+import Link from "next/link";
+import { useState, useEffect } from "react";
+import { Globe, Heart, ShoppingBag, User, Search, Menu, X } from "lucide-react";
+import categoryService from "@/services/categoryService";
 
 export default function Navbar() {
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [categories, setCategories] = useState([]);
-  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   useEffect(() => {
     const fetchCategories = async () => {
@@ -21,157 +22,111 @@ export default function Navbar() {
     fetchCategories();
   }, []);
 
-  const toggleMobileMenu = () => {
-    setIsMobileMenuOpen(!isMobileMenuOpen);
-  };
-
-  const closeMobileMenu = () => {
-    setIsMobileMenuOpen(false);
-  };
-
   return (
-    <nav className="bg-white shadow-lg sticky top-0 z-50">
-      <div className="container mx-auto px-4">
-        <div className="flex justify-between items-center py-4">
-          {/* Logo */}
-          <div className="flex items-center">
-            <Link href="/" className="text-xl md:text-2xl font-bold text-pink-600">
-              FashionHub
-            </Link>
-          </div>
+    <header className="w-full bg-white border-b shadow-sm sticky top-0 z-50">
+      {/* --- Top Reward Bar --- */}
+      <div className="bg-gradient-to-b from-[#f8f4eb] to-[#fffdf9] text-xs text-center text-gray-600 py-2 border-b font-serif">
+        Join Childrensalon Rewards and unlock exclusive treats as you shop.
+        <span className="font-semibold text-[#cda434]"> NEW REWARD </span> — Convert your
+        points into vouchers.
+      </div>
 
-          {/* Desktop Navigation */}
-          <div className="hidden md:flex space-x-6 lg:space-x-8">
-            <Link href="/" className="text-gray-700 hover:text-pink-600 transition duration-300 text-sm lg:text-base">
-              Home
-            </Link>
-            <Link href="/product" className="text-gray-700 hover:text-pink-600 transition duration-300 text-sm lg:text-base">
-              Shop
-            </Link>
-            {categories.slice(0, 4).map((category) => (
-              <Link
-                key={category._id}
-                href={`/product?category=${category.name || category.category}`}
-                className="text-gray-700 hover:text-pink-600 transition duration-300 text-sm lg:text-base whitespace-nowrap"
-              >
-                {category.name || category.category}
-              </Link>
-            ))}
-            <Link href="/about" className="text-gray-700 hover:text-pink-600 transition duration-300 text-sm lg:text-base">
-              About
-            </Link>
-            <Link href="/contact" className="text-gray-700 hover:text-pink-600 transition duration-300 text-sm lg:text-base">
-              Contact
-            </Link>
-          </div>
+      {/* --- Main Navbar --- */}
+      <div className="relative flex items-center justify-center px-4 md:px-6 py-3 max-w-7xl mx-auto">
+        {/* Right Options - Absolute positioned */}
+       
 
-          {/* Desktop Action Buttons */}
-          <div className="hidden md:flex items-center space-x-3 lg:space-x-4">
-            <button className="text-gray-700 hover:text-pink-600 transition duration-300 p-2">
-              <span className="text-lg">🔍</span>
-            </button>
-            <button className="text-gray-700 hover:text-pink-600 transition duration-300 p-2">
-              <span className="text-lg">🛒</span>
-            </button>
-            <button className="text-gray-700 hover:text-pink-600 transition duration-300 p-2">
-              <span className="text-lg">👤</span>
-            </button>
-          </div>
-
-          {/* Mobile Menu Button */}
-          <button
-            onClick={toggleMobileMenu}
-            className="md:hidden text-gray-700 hover:text-pink-600 transition duration-300 p-2"
-            aria-label="Toggle mobile menu"
-          >
-            <svg
-              className="w-6 h-6"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
-              {isMobileMenuOpen ? (
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M6 18L18 6M6 6l12 12"
-                />
-              ) : (
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M4 6h16M4 12h16M4 18h16"
-                />
-              )}
-            </svg>
+        {/* Left Side Buttons - Absolute positioned */}
+        <div className="absolute left-4 md:left-6 flex items-center gap-2 md:gap-3 text-sm text-gray-700">
+          <button className="border border-[#d4b26e] rounded-full px-3 py-1 flex items-center gap-1 hover:bg-[#f8f4eb] transition-colors font-serif">
+            👑 Rewards
+          </button>
+          <button className="border border-[#d4b26e] rounded-full px-3 py-1 flex items-center gap-1 hover:bg-[#f8f4eb] transition-colors font-serif">
+            <User size={14} /> Sign In
           </button>
         </div>
 
-        {/* Mobile Menu */}
-        {isMobileMenuOpen && (
-          <div className="md:hidden border-t border-gray-200 py-4">
-            <div className="flex flex-col space-y-3">
-              {/* Mobile Action Buttons */}
-              <div className="flex justify-center space-x-6 py-2 border-b border-gray-200">
-                <button className="text-gray-700 hover:text-pink-600 transition duration-300 p-2">
-                  <span className="text-lg">🔍</span>
-                </button>
-                <button className="text-gray-700 hover:text-pink-600 transition duration-300 p-2">
-                  <span className="text-lg">🛒</span>
-                </button>
-                <button className="text-gray-700 hover:text-pink-600 transition duration-300 p-2">
-                  <span className="text-lg">👤</span>
-                </button>
-              </div>
+        {/* Center Logo */}
+        <div className="flex flex-col items-center">
+          <Link href="/" className="flex flex-col items-center">
+            <Image
+              src="/next.svg"
+              alt="Childrensalon Logo"
+              width={80}
+              height={60}
+              className="object-contain"
+            />
+            <h1 className="font-bold text-[18px] md:text-[22px] tracking-[2px] md:tracking-[3px] font-serif">
+              <span className="text-[#cda434]">C</span>
+              <span className="text-[#f07b7b]">H</span>
+              <span className="text-[#8cc5c0]">I</span>
+              <span className="text-[#dca8b6]">L</span>
+              <span className="text-[#b7b3d0]">D</span>
+              <span className="text-[#f1b74a]">R</span>
+              <span className="text-[#f07b7b]">E</span>
+              <span className="text-[#8cc5c0]">N</span>
+              <span className="text-[#dca8b6]">S</span>
+              <span className="text-[#b7b3d0]">A</span>
+              <span className="text-[#f1b74a]">L</span>
+              <span className="text-[#cda434]">O</span>
+              <span className="text-[#f07b7b]">N</span>
+            </h1>
+          </Link>
+        </div>
+      </div>
 
-              {/* Mobile Navigation Links */}
-              <Link
-                href="/"
-                onClick={closeMobileMenu}
-                className="text-gray-700 hover:text-pink-600 transition duration-300 py-2 px-4 rounded-lg hover:bg-pink-50"
-              >
-                Home
-              </Link>
-              <Link
-                href="/product"
-                onClick={closeMobileMenu}
-                className="text-gray-700 hover:text-pink-600 transition duration-300 py-2 px-4 rounded-lg hover:bg-pink-50"
-              >
-                Shop
-              </Link>
+      {/* --- Navigation Menu --- */}
+      <nav className="hidden md:flex justify-center gap-6 text-[15px] font-medium tracking-wide text-gray-800 border-t py-3 uppercase font-serif">
+        {categories.map((category) => (
+          <Link key={category.id} href={`/product?category=${category.name.toLowerCase().replace(" ", "-")}`}
+            className="hover:text-[#cda434] transition-colors">
+            {category.name}
+          </Link>
+        ))}
+      </nav>
 
-              {/* Mobile Categories */}
+      {/* --- Mobile Navigation Menu --- */}
+      <div className="md:hidden border-t">
+        <button
+          onClick={() => setIsMenuOpen(!isMenuOpen)}
+          className="w-full flex items-center justify-center py-3 text-gray-800 font-serif"
+        >
+          <Menu size={20} className="mr-2" />
+          Menu
+        </button>
+        {isMenuOpen && (
+          <div className="bg-white border-t shadow-lg">
+            <div className="flex flex-col py-2">
               {categories.map((category) => (
-                <Link
-                  key={category._id}
-                  href={`/product?category=${category.name || category.category}`}
-                  onClick={closeMobileMenu}
-                  className="text-gray-700 hover:text-pink-600 transition duration-300 py-2 px-4 rounded-lg hover:bg-pink-50 ml-4"
-                >
-                  {category.name || category.category}
+                <Link key={category.id} href={`/product?category=${category.name.toLowerCase().replace(" ", "-")}`}
+                  className="px-6 py-3 text-gray-800 hover:bg-gray-50 hover:text-[#cda434] transition-colors font-serif uppercase text-sm"
+                  onClick={() => setIsMenuOpen(false)}>
+                  {category.name}
                 </Link>
               ))}
-
-              <Link
-                href="/about"
-                onClick={closeMobileMenu}
-                className="text-gray-700 hover:text-pink-600 transition duration-300 py-2 px-4 rounded-lg hover:bg-pink-50"
-              >
-                About
-              </Link>
-              <Link
-                href="/contact"
-                onClick={closeMobileMenu}
-                className="text-gray-700 hover:text-pink-600 transition duration-300 py-2 px-4 rounded-lg hover:bg-pink-50"
-              >
-                Contact
-              </Link>
             </div>
           </div>
         )}
       </div>
-    </nav>
+
+      {/* --- Utility Icons --- */}
+      <div className="absolute right-4 md:right-6 top-[72px] flex items-center gap-3 md:gap-4 text-gray-600">
+        <button className="hidden md:flex items-center gap-1 border border-gray-300 rounded-full px-3 py-1 hover:bg-gray-50 transition-colors font-serif">
+          <Search size={16} /> Search
+        </button>
+        <Link href="/account" className="flex items-center gap-1 hover:text-[#cda434] transition-colors">
+          <User size={18} />
+          <span className="hidden md:inline font-serif">Account</span>
+        </Link>
+        <Link href="/wishlist" className="flex items-center gap-1 hover:text-[#cda434] transition-colors">
+          <Heart size={18} />
+          <span className="hidden md:inline font-serif">Wishlist</span>
+        </Link>
+        <Link href="/cart" className="flex items-center gap-1 hover:text-[#cda434] transition-colors">
+          <ShoppingBag size={18} />
+          <span className="hidden md:inline font-serif">Bag</span>
+        </Link>
+      </div>
+    </header>
   );
 }

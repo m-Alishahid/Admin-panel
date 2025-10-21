@@ -164,7 +164,6 @@ productSchema.pre('save', function(next) {
 });
 
 // Index for better performance
-productSchema.index({ name: 'text', description: 'text' });
 productSchema.index({ category: 1 });
 productSchema.index({ status: 1 });
 productSchema.index({ createdAt: -1 });
