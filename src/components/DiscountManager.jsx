@@ -20,7 +20,12 @@ import {
   Calendar,
   Package,
   Tag,
-  AlertTriangle
+  AlertTriangle,
+  Percent,
+  DollarSign,
+  Clock,
+  CheckCircle,
+  Eye
 } from "lucide-react";
 
 export default function DiscountManager() {
@@ -242,24 +247,31 @@ export default function DiscountManager() {
             onClick={() => setShowForm(false)}
             variant="outline"
             size="icon"
+            className="border-blue-200 hover:bg-blue-50"
           >
-            <ArrowLeft className="h-4 w-4" />
+            <ArrowLeft className="h-4 w-4 text-blue-600" />
           </Button>
           <div>
-            <h2 className="text-2xl font-bold">Create New Discount</h2>
-            <p className="text-muted-foreground">Set up a new discount for your products</p>
+            <h2 className="text-2xl font-bold text-blue-900">Create New Discount</h2>
+            <p className="text-blue-700">Set up a new discount for your products</p>
           </div>
         </div>
 
         <div className="grid gap-6 md:grid-cols-2">
-          <Card>
-            <CardHeader>
-              <CardTitle>Discount Details</CardTitle>
-              <CardDescription>Basic information about the discount</CardDescription>
+          {/* Discount Details Card */}
+          <Card className="border-blue-100 bg-blue-50/30">
+            <CardHeader className="bg-blue-100/50 rounded-t-lg">
+              <CardTitle className="text-blue-900 flex items-center gap-2">
+                <Percent className="h-5 w-5" />
+                Discount Details
+              </CardTitle>
+              <CardDescription className="text-blue-700">
+                Basic information about the discount
+              </CardDescription>
             </CardHeader>
-            <CardContent className="space-y-4">
+            <CardContent className="space-y-4 pt-6">
               <div className="space-y-2">
-                <Label htmlFor="name">Discount Name</Label>
+                <Label htmlFor="name" className="text-blue-900 font-medium">Discount Name</Label>
                 <Input
                   id="name"
                   name="name"
@@ -267,40 +279,48 @@ export default function DiscountManager() {
                   onChange={handleInputChange}
                   placeholder="Summer Sale 2024"
                   required
+                  className="border-blue-200 focus:border-blue-500 focus:ring-blue-500"
                 />
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="description">Description</Label>
+                <Label htmlFor="description" className="text-blue-900 font-medium">Description</Label>
                 <Textarea
                   id="description"
                   name="description"
                   value={formData.description}
                   onChange={handleInputChange}
                   placeholder="Describe the discount..."
+                  className="border-blue-200 focus:border-blue-500 focus:ring-blue-500"
                 />
               </div>
 
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <Label htmlFor="discountType">Discount Type</Label>
+                  <Label htmlFor="discountType" className="text-blue-900 font-medium">Discount Type</Label>
                   <Select
                     name="discountType"
                     value={formData.discountType}
                     onValueChange={(value) => setFormData(prev => ({ ...prev, discountType: value }))}
                   >
-                    <SelectTrigger>
+                    <SelectTrigger className="border-blue-200 focus:border-blue-500 focus:ring-blue-500">
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="percentage">Percentage</SelectItem>
-                      <SelectItem value="fixed">Fixed Amount</SelectItem>
+                      <SelectItem value="percentage" className="flex items-center gap-2">
+                        <Percent className="h-4 w-4" />
+                        Percentage
+                      </SelectItem>
+                      <SelectItem value="fixed" className="flex items-center gap-2">
+                        <DollarSign className="h-4 w-4" />
+                        Fixed Amount
+                      </SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="discountValue">
+                  <Label htmlFor="discountValue" className="text-blue-900 font-medium">
                     {formData.discountType === 'percentage' ? 'Percentage (%)' : 'Amount ($)'}
                   </Label>
                   <Input
@@ -311,37 +331,47 @@ export default function DiscountManager() {
                     onChange={handleInputChange}
                     placeholder={formData.discountType === 'percentage' ? '20' : '50'}
                     required
+                    className="border-blue-200 focus:border-blue-500 focus:ring-blue-500"
                   />
                 </div>
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="scope">Apply To</Label>
+                <Label htmlFor="scope" className="text-blue-900 font-medium">Apply To</Label>
                 <Select
                   name="scope"
                   value={formData.scope}
                   onValueChange={(value) => setFormData(prev => ({ ...prev, scope: value }))}
                 >
-                  <SelectTrigger>
+                  <SelectTrigger className="border-blue-200 focus:border-blue-500 focus:ring-blue-500">
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="all">All Products</SelectItem>
-                    <SelectItem value="category">Specific Category</SelectItem>
-                    <SelectItem value="selected">Selected Products</SelectItem>
+                    <SelectItem value="all" className="flex items-center gap-2">
+                      <Package className="h-4 w-4" />
+                      All Products
+                    </SelectItem>
+                    <SelectItem value="category" className="flex items-center gap-2">
+                      <Tag className="h-4 w-4" />
+                      Specific Category
+                    </SelectItem>
+                    <SelectItem value="selected" className="flex items-center gap-2">
+                      <CheckCircle className="h-4 w-4" />
+                      Selected Products
+                    </SelectItem>
                   </SelectContent>
                 </Select>
               </div>
 
               {formData.scope === 'category' && (
                 <div className="space-y-2">
-                  <Label htmlFor="category">Category</Label>
+                  <Label htmlFor="category" className="text-blue-900 font-medium">Category</Label>
                   <Select
                     name="category"
                     value={formData.category}
                     onValueChange={(value) => setFormData(prev => ({ ...prev, category: value }))}
                   >
-                    <SelectTrigger>
+                    <SelectTrigger className="border-blue-200 focus:border-blue-500 focus:ring-blue-500">
                       <SelectValue placeholder="Select a category" />
                     </SelectTrigger>
                     <SelectContent>
@@ -357,7 +387,7 @@ export default function DiscountManager() {
 
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <Label htmlFor="startDate">Start Date</Label>
+                  <Label htmlFor="startDate" className="text-blue-900 font-medium">Start Date</Label>
                   <Input
                     id="startDate"
                     name="startDate"
@@ -365,11 +395,12 @@ export default function DiscountManager() {
                     value={formData.startDate}
                     onChange={handleInputChange}
                     required
+                    className="border-blue-200 focus:border-blue-500 focus:ring-blue-500"
                   />
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="endDate">End Date</Label>
+                  <Label htmlFor="endDate" className="text-blue-900 font-medium">End Date</Label>
                   <Input
                     id="endDate"
                     name="endDate"
@@ -377,50 +408,75 @@ export default function DiscountManager() {
                     value={formData.endDate}
                     onChange={handleInputChange}
                     required
+                    className="border-blue-200 focus:border-blue-500 focus:ring-blue-500"
                   />
                 </div>
               </div>
 
-              <div className="flex items-center space-x-2">
+              <div className="flex items-center space-x-2 p-3 bg-blue-100 rounded-lg">
                 <Checkbox
                   id="autoRemove"
                   name="autoRemove"
                   checked={formData.autoRemove}
                   onCheckedChange={(checked) => setFormData(prev => ({ ...prev, autoRemove: checked }))}
+                  className="border-blue-300 data-[state=checked]:bg-blue-600"
                 />
-                <Label htmlFor="autoRemove">Auto-remove when expired</Label>
+                <Label htmlFor="autoRemove" className="text-blue-900 font-medium cursor-pointer">
+                  Auto-remove when expired
+                </Label>
               </div>
             </CardContent>
           </Card>
 
-          <Card>
-            <CardHeader>
-              <CardTitle>Preview</CardTitle>
-              <CardDescription>See how the discount will apply</CardDescription>
+          {/* Preview Card */}
+          <Card className="border-green-100 bg-green-50/30">
+            <CardHeader className="bg-green-100/50 rounded-t-lg">
+              <CardTitle className="text-green-900 flex items-center gap-2">
+                <Eye className="h-5 w-5" />
+                Discount Preview
+              </CardTitle>
+              <CardDescription className="text-green-700">
+                See how the discount will apply to your products
+              </CardDescription>
             </CardHeader>
-            <CardContent>
+            <CardContent className="pt-6">
               {formData.scope === 'selected' && (
                 <div className="space-y-4 mb-6">
                   <div className="flex items-center justify-between">
-                    <Label>Select Products</Label>
+                    <Label className="text-green-900 font-medium">Select Products</Label>
                     <div className="flex gap-2">
-                      <Button type="button" variant="outline" size="sm" onClick={handleSelectAllProducts}>
+                      <Button 
+                        type="button" 
+                        variant="default" 
+                        size="sm" 
+                        onClick={handleSelectAllProducts}
+                        className="bg-blue-600 hover:bg-blue-700"
+                      >
                         Select All
                       </Button>
-                      <Button type="button" variant="outline" size="sm" onClick={handleClearSelection}>
+                      <Button 
+                        type="button" 
+                        variant="default" 
+                        size="sm" 
+                        onClick={handleClearSelection}
+                        className="bg-gray-600 hover:bg-gray-700"
+                      >
                         Clear
                       </Button>
                     </div>
                   </div>
-                  <div className="max-h-60 overflow-y-auto space-y-2">
+                  <div className="max-h-60 overflow-y-auto space-y-2 border border-green-200 rounded-lg p-3 bg-white">
                     {products.map((product) => (
-                      <div key={product._id} className="flex items-center space-x-2">
+                      <div key={product._id} className="flex items-center space-x-2 p-2 hover:bg-green-50 rounded">
                         <Checkbox
                           checked={selectedProducts.includes(product._id)}
                           onCheckedChange={(checked) => handleProductSelection(product._id, checked)}
+                          className="border-green-300 data-[state=checked]:bg-green-600"
                         />
-                        <Label className="flex-1">{product.name}</Label>
-                        <Badge variant="secondary">${product.salePrice}</Badge>
+                        <Label className="flex-1 text-green-900 cursor-pointer">{product.name}</Label>
+                        <Badge variant="secondary" className="bg-green-100 text-green-700">
+                          ${product.salePrice}
+                        </Badge>
                       </div>
                     ))}
                   </div>
@@ -428,48 +484,72 @@ export default function DiscountManager() {
               )}
 
               <div className="space-y-3">
-                <h4 className="font-semibold">Affected Products ({affectedProducts.length})</h4>
+                <div className="flex items-center justify-between">
+                  <h4 className="font-semibold text-green-900">Affected Products</h4>
+                  <Badge className="bg-green-600 text-white">
+                    {affectedProducts.length} products
+                  </Badge>
+                </div>
                 {affectedProducts.slice(0, 5).map((product) => (
-                  <div key={product._id} className="flex items-center justify-between p-3 border rounded-lg">
+                  <div key={product._id} className="flex items-center justify-between p-3 border border-green-200 rounded-lg bg-white">
                     <div>
-                      <p className="font-medium">{product.name}</p>
-                      <p className="text-sm text-muted-foreground">
+                      <p className="font-medium text-green-900">{product.name}</p>
+                      <p className="text-sm text-green-700">
                         Original: ${product.salePrice}
                       </p>
                     </div>
                     <div className="text-right">
-                      <p className="font-medium text-green-600">
+                      <p className="font-medium text-green-600 text-lg">
                         ${calculateNewPrice(product).toFixed(2)}
                       </p>
-                      <p className="text-xs text-muted-foreground">
+                      <p className="text-xs text-green-600 font-medium">
                         Save {formData.discountType === 'percentage' ? `${formData.discountValue}%` : `$${formData.discountValue}`}
                       </p>
                     </div>
                   </div>
                 ))}
                 {affectedProducts.length > 5 && (
-                  <p className="text-sm text-muted-foreground text-center">
-                    +{affectedProducts.length - 5} more products
+                  <p className="text-sm text-green-700 text-center font-medium">
+                    +{affectedProducts.length - 5} more products will be affected
                   </p>
+                )}
+                {affectedProducts.length === 0 && (
+                  <div className="text-center py-8 border-2 border-dashed border-green-200 rounded-lg bg-green-50/50">
+                    <Package className="h-8 w-8 mx-auto mb-2 text-green-600" />
+                    <p className="text-green-700 font-medium">No products will be affected</p>
+                    <p className="text-sm text-green-600">Adjust your discount scope to see affected products</p>
+                  </div>
                 )}
               </div>
             </CardContent>
           </Card>
         </div>
 
-        <div className="flex gap-4 justify-end">
+        <div className="flex gap-4 justify-end pt-4">
           <Button
             type="button"
             variant="outline"
             onClick={() => setShowForm(false)}
+            className="border-blue-200 text-blue-700 hover:bg-blue-50"
           >
             Cancel
           </Button>
           <Button
             onClick={handleSubmit}
-            disabled={loading}
+            disabled={loading || affectedProducts.length === 0}
+            className="bg-blue-600 hover:bg-blue-700 disabled:bg-gray-400 disabled:cursor-not-allowed"
           >
-            {loading ? "Creating..." : "Create Discount"}
+            {loading ? (
+              <>
+                <Clock className="h-4 w-4 mr-2 animate-spin" />
+                Creating...
+              </>
+            ) : (
+              <>
+                <Plus className="h-4 w-4 mr-2" />
+                Create Discount
+              </>
+            )}
           </Button>
         </div>
       </div>
@@ -478,24 +558,25 @@ export default function DiscountManager() {
 
   return (
     <div className="space-y-6">
+      {/* Header */}
       <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4">
         <div>
-          <h1 className="text-3xl font-bold">Discount Management</h1>
-          <p className="text-muted-foreground mt-1">Create and manage product discounts</p>
+          <h1 className="text-3xl font-bold text-blue-900">Discount Management</h1>
+          <p className="text-blue-700 mt-1">Create and manage product discounts and promotions</p>
         </div>
         <div className="flex gap-3">
           <Button
             onClick={checkExpiredDiscounts}
             disabled={loading}
-            variant="outline"
-            className="flex items-center gap-2"
+            variant="default"
+            className="flex items-center gap-2 bg-orange-600 hover:bg-orange-700"
           >
             <AlertTriangle className="h-4 w-4" />
             {loading ? 'Checking...' : 'Check Expiry'}
           </Button>
           <Button
             onClick={() => setShowForm(true)}
-            className="flex items-center gap-2"
+            className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700"
           >
             <Plus className="h-4 w-4" />
             Create Discount
@@ -503,91 +584,193 @@ export default function DiscountManager() {
         </div>
       </div>
 
-      <Card>
-        <CardHeader>
-          <CardTitle>Active Discounts</CardTitle>
-          <CardDescription>Manage all your current discounts and promotions</CardDescription>
+      {/* Discounts Table */}
+      <Card className="border-blue-100 bg-blue-50/30">
+        <CardHeader className="bg-blue-100/50 rounded-t-lg">
+          <CardTitle className="text-blue-900 flex items-center gap-2">
+            <Tag className="h-5 w-5" />
+            Active Discounts
+          </CardTitle>
+          <CardDescription className="text-blue-700">
+            Manage all your current discounts and promotions
+          </CardDescription>
         </CardHeader>
-        <CardContent>
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Name</TableHead>
-                <TableHead>Type</TableHead>
-                <TableHead>Value</TableHead>
-                <TableHead>Scope</TableHead>
-                <TableHead>Status</TableHead>
-                <TableHead>Expires</TableHead>
-                <TableHead>Actions</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {discounts.map((discount) => (
-                <TableRow key={discount._id}>
-                  <TableCell className="font-medium">{discount.name}</TableCell>
-                  <TableCell>
-                    <Badge variant="outline">
-                      {discount.discountType === 'percentage' ? 'Percentage' : 'Fixed'}
-                    </Badge>
-                  </TableCell>
-                  <TableCell>
-                    {discount.discountType === 'percentage' 
-                      ? `${discount.discountValue}%`
-                      : `$${discount.discountValue}`
-                    }
-                  </TableCell>
-                  <TableCell>
-                    <Badge variant="secondary">
-                      {discount.scope}
-                    </Badge>
-                  </TableCell>
-                  <TableCell>
-                    <Badge 
-                      variant={
-                        isExpired(discount.endDate) ? "destructive" :
-                        isExpiringSoon(discount.endDate) ? "secondary" :
-                        "default"
-                      }
-                    >
-                      {isExpired(discount.endDate) ? 'Expired' :
-                       isExpiringSoon(discount.endDate) ? 'Expiring Soon' :
-                       'Active'}
-                    </Badge>
-                  </TableCell>
-                  <TableCell>
-                    <div className="flex items-center gap-2">
-                      <Calendar className="h-4 w-4 text-muted-foreground" />
-                      {new Date(discount.endDate).toLocaleDateString()}
-                    </div>
-                  </TableCell>
-                  <TableCell>
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => handleRemoveDiscount(discount._id)}
-                    >
-                      <Trash2 className="h-4 w-4" />
-                    </Button>
-                  </TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
-
-          {discounts.length === 0 && (
+        <CardContent className="pt-6">
+          {loading ? (
             <div className="text-center py-12">
-              <Tag className="h-12 w-12 mx-auto mb-4 text-muted-foreground" />
-              <h3 className="font-semibold text-lg mb-2">No Discounts Found</h3>
-              <p className="text-muted-foreground mb-4">
-                Get started by creating your first discount
-              </p>
-              <Button onClick={() => setShowForm(true)}>
-                Create Discount
-              </Button>
+              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
+              <p className="text-blue-700 mt-4">Loading discounts...</p>
             </div>
+          ) : (
+            <>
+              <Table>
+                <TableHeader>
+                  <TableRow className="bg-blue-100/50 hover:bg-blue-100/50">
+                    <TableHead className="text-blue-900 font-bold">Name</TableHead>
+                    <TableHead className="text-blue-900 font-bold">Type</TableHead>
+                    <TableHead className="text-blue-900 font-bold">Value</TableHead>
+                    <TableHead className="text-blue-900 font-bold">Scope</TableHead>
+                    <TableHead className="text-blue-900 font-bold">Status</TableHead>
+                    <TableHead className="text-blue-900 font-bold">Expires</TableHead>
+                    <TableHead className="text-blue-900 font-bold">Actions</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {discounts.map((discount) => (
+                    <TableRow key={discount._id} className="border-blue-100 hover:bg-blue-50/50">
+                      <TableCell className="font-medium text-blue-900">
+                        <div>
+                          <p className="font-semibold">{discount.name}</p>
+                          {discount.description && (
+                            <p className="text-sm text-blue-700">{discount.description}</p>
+                          )}
+                        </div>
+                      </TableCell>
+                      <TableCell>
+                        <Badge className={
+                          discount.discountType === 'percentage' 
+                            ? "bg-blue-100 text-blue-800 border-blue-200"
+                            : "bg-green-100 text-green-800 border-green-200"
+                        }>
+                          {discount.discountType === 'percentage' ? (
+                            <Percent className="h-3 w-3 mr-1" />
+                          ) : (
+                            <DollarSign className="h-3 w-3 mr-1" />
+                          )}
+                          {discount.discountType === 'percentage' ? 'Percentage' : 'Fixed'}
+                        </Badge>
+                      </TableCell>
+                      <TableCell>
+                        <span className="font-semibold text-blue-900">
+                          {discount.discountType === 'percentage' 
+                            ? `${discount.discountValue}%`
+                            : `$${discount.discountValue}`
+                          }
+                        </span>
+                      </TableCell>
+                      <TableCell>
+                        <Badge variant="secondary" className="bg-purple-100 text-purple-800 border-purple-200">
+                          {discount.scope}
+                        </Badge>
+                      </TableCell>
+                      <TableCell>
+                        <Badge 
+                          className={
+                            isExpired(discount.endDate) 
+                              ? "bg-red-100 text-red-800 border-red-200" 
+                              : isExpiringSoon(discount.endDate)
+                              ? "bg-orange-100 text-orange-800 border-orange-200"
+                              : "bg-green-100 text-green-800 border-green-200"
+                          }
+                        >
+                          {isExpired(discount.endDate) ? 'Expired' :
+                          isExpiringSoon(discount.endDate) ? 'Expiring Soon' :
+                          'Active'}
+                        </Badge>
+                      </TableCell>
+                      <TableCell>
+                        <div className="flex items-center gap-2">
+                          <Calendar className="h-4 w-4 text-blue-600" />
+                          <span className="text-blue-900 font-medium">
+                            {new Date(discount.endDate).toLocaleDateString()}
+                          </span>
+                          <span className="text-xs text-blue-600">
+                            {new Date(discount.endDate).toLocaleTimeString()}
+                          </span>
+                        </div>
+                      </TableCell>
+                      <TableCell>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => handleRemoveDiscount(discount._id)}
+                          className="text-red-600 hover:text-red-800 hover:bg-red-50"
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+
+              {discounts.length === 0 && (
+                <div className="text-center py-12 border-2 border-dashed border-blue-200 rounded-lg bg-blue-50/50">
+                  <Tag className="h-12 w-12 mx-auto mb-4 text-blue-600" />
+                  <h3 className="font-semibold text-lg mb-2 text-blue-900">No Discounts Found</h3>
+                  <p className="text-blue-700 mb-4">
+                    Get started by creating your first discount to boost sales
+                  </p>
+                  <Button 
+                    onClick={() => setShowForm(true)}
+                    className="bg-blue-600 hover:bg-blue-700"
+                  >
+                    <Plus className="h-4 w-4 mr-2" />
+                    Create Your First Discount
+                  </Button>
+                </div>
+              )}
+            </>
           )}
         </CardContent>
       </Card>
+
+      {/* Statistics Summary */}
+      <div className="grid gap-4 md:grid-cols-4">
+        <Card className="border-blue-100 bg-blue-50/30">
+          <CardContent className="pt-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm font-medium text-blue-900">Total Discounts</p>
+                <p className="text-2xl font-bold text-blue-600">{discounts.length}</p>
+              </div>
+              <Tag className="h-8 w-8 text-blue-600" />
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card className="border-green-100 bg-green-50/30">
+          <CardContent className="pt-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm font-medium text-green-900">Active</p>
+                <p className="text-2xl font-bold text-green-600">
+                  {discounts.filter(d => !isExpired(d.endDate)).length}
+                </p>
+              </div>
+              <CheckCircle className="h-8 w-8 text-green-600" />
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card className="border-orange-100 bg-orange-50/30">
+          <CardContent className="pt-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm font-medium text-orange-900">Expiring Soon</p>
+                <p className="text-2xl font-bold text-orange-600">
+                  {discounts.filter(d => isExpiringSoon(d.endDate)).length}
+                </p>
+              </div>
+              <AlertTriangle className="h-8 w-8 text-orange-600" />
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card className="border-red-100 bg-red-50/30">
+          <CardContent className="pt-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm font-medium text-red-900">Expired</p>
+                <p className="text-2xl font-bold text-red-600">
+                  {discounts.filter(d => isExpired(d.endDate)).length}
+                </p>
+              </div>
+              <Clock className="h-8 w-8 text-red-600" />
+            </div>
+          </CardContent>
+        </Card>
+      </div>
     </div>
   );
 }

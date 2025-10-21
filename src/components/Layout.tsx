@@ -33,7 +33,7 @@ const Layout = ({ children }: LayoutProps) => {
     <div className="flex">
       <Sidebar isOpen={isOpen} toggleSidebar={toggleSidebar} />
       <div className={`flex-1 bg-gray-100 min-h-screen transition-all duration-300 ${
-        isOpen ? "lg:ml-80" : "lg:ml-0"
+        isOpen ? "ml-56" : "ml-16"
       }`}>
         {/* Main content with responsive padding */}
         <div className="p-4 sm:p-6 lg:p-8">
