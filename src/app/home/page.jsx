@@ -212,7 +212,7 @@ export default function HomePage() {
           </h2>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 md:gap-8">
             {featuredProducts.map((product) => (
-              <Link key={product.id} href={`/product/${product._id}`}>
+              <Link key={product._id} href={`/product/${product._id}`}>
                 <div className="bg-white p-6 rounded-lg shadow-sm hover:shadow-md transition duration-300 cursor-pointer">
                   <div className="mb-4 text-center">
                     <img
