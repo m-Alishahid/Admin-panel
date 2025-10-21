@@ -3,7 +3,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { useState, useEffect } from "react";
 import { Globe, Heart, ShoppingBag, User, Search, Menu, X } from "lucide-react";
-import categoryService from "@/services/categoryService";
+import { categoryService } from "@/services/categoryService";
 
 export default function Navbar() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
