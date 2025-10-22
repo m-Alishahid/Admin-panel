@@ -6,6 +6,8 @@ import { useState, useEffect, useRef } from 'react';
 import { Heart, ShoppingBag, User, Search, Menu, X, ChevronDown } from 'lucide-react';
 import { categoryService } from '@/services/categoryService';
 import { useAuth } from '@/context/AuthContext';
+import { useCart } from '@/context/CartContext';
+import { useWishlist } from '@/context/WishlistContext';
 
 export default function Navbar() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -13,6 +15,8 @@ export default function Navbar() {
   const [profileOpen, setProfileOpen] = useState(false);
   const profileRef = useRef(null);
   const { isAuthenticated, user, logout } = useAuth();
+  const { getCartItemCount } = useCart();
+  const { getWishlistCount } = useWishlist();
 
   useEffect(() => {
     const fetchCategories = async () => {
@@ -55,7 +59,7 @@ export default function Navbar() {
     <header className="w-full bg-white border-b shadow-sm sticky top-0 z-50">
       {/* Rewards Banner */}
       <div className="bg-gradient-to-b from-[#f8f4eb] to-[#fffdf9] text-[11px] sm:text-xs text-center text-gray-600 py-2 border-b font-serif px-2">
-        Join <span className="font-semibold text-[#cda434]">Childrensalon Rewards</span> and unlock exclusive treats as you shop. 
+        Join <span className="font-semibold text-[#cda434]">Childrensalon Rewards</span> and unlock exclusive treats as you shop.
         <span className="font-semibold text-[#cda434]"> NEW REWARD </span> — Convert your points into vouchers.
       </div>
 
@@ -150,11 +154,25 @@ export default function Navbar() {
           <button className="hidden md:flex items-center gap-1 border border-gray-300 rounded-full px-3 py-1 hover:bg-gray-50 transition-colors font-serif text-sm">
             <Search size={15} /> Search
           </button>
-          <Link href="/wishlist" className="flex items-center hover:text-[#cda434]">
+
+          {/* Wishlist Button */}
+          <Link href="/wishlist" className="relative flex items-center hover:text-[#cda434] transition-colors">
             <Heart size={18} />
+            {getWishlistCount() > 0 && (
+              <span className="absolute -top-2 -right-2 bg-[#d4b26e] text-white text-xs rounded-full h-5 w-5 flex items-center justify-center font-bold">
+                {getWishlistCount()}
+              </span>
+            )}
           </Link>
-          <Link href="/cart" className="flex items-center hover:text-[#cda434]">
+
+          {/* Cart Button */}
+          <Link href="/cart" className="relative flex items-center hover:text-[#cda434] transition-colors">
             <ShoppingBag size={18} />
+            {getCartItemCount() > 0 && (
+              <span className="absolute -top-2 -right-2 bg-[#d4b26e] text-white text-xs rounded-full h-5 w-5 flex items-center justify-center font-bold">
+                {getCartItemCount()}
+              </span>
+            )}
           </Link>
 
           {/* Mobile Menu Toggle */}
