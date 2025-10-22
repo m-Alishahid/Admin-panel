@@ -417,7 +417,7 @@ export default function Navbar() {
             {categories.map((category) => (
               <Link
                 key={category._id || category.id}
-                href={`/category/${category._id || category.id}`}
+                href={`/category/${category._id}`}
                 className="px-6 py-3 text-gray-800 hover:bg-gray-50 hover:text-[#cda434] transition-colors font-serif uppercase text-[13px]"
                 onClick={() => setIsMenuOpen(false)}
               >
