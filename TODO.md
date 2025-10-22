@@ -1,8 +1,7 @@
-# TODO: Improve UI of Discount Management Page
-
-## Tasks
-- [ ] Change all Button variants to "default" in DiscountManager.jsx to make them blue
-  - [ ] Update Cancel button variant from "outline" to "default"
-  - [ ] Update Trash2 button variant from "ghost" to "default"
-  - [ ] Ensure all other buttons are explicitly set to "default" if not already
-- [ ] Verify changes by reading the updated file
+- [x] Update login page UI to match dashboard theme
+  - [x] Add "Child Salon" title at the top
+  - [x] Change page background to blue gradient (from-blue-100 to-blue-200)
+  - [x] Ensure form has white background
+  - [x] Adjust styling to match blue theme
+- [x] Remove the blue "S" logo button
+- [x] Improve form UI design
