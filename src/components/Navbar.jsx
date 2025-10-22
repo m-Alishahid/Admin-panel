@@ -13,7 +13,10 @@ export default function Navbar() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [categories, setCategories] = useState([]);
   const [profileOpen, setProfileOpen] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [isSearchOpen, setIsSearchOpen] = useState(false);
   const profileRef = useRef(null);
+  const searchRef = useRef(null);
   const { isAuthenticated, user, logout } = useAuth();
   const { getCartItemCount } = useCart();
   const { getWishlistCount } = useWishlist();
@@ -36,6 +39,9 @@ export default function Navbar() {
       if (profileRef.current && !profileRef.current.contains(e.target)) {
         setProfileOpen(false);
       }
+      if (searchRef.current && !searchRef.current.contains(e.target)) {
+        setIsSearchOpen(false);
+      }
     };
     document.addEventListener('click', handler);
     return () => document.removeEventListener('click', handler);
@@ -46,6 +52,16 @@ export default function Navbar() {
       await logout();
     } catch (err) {
       console.error('Logout failed', err);
+    }
+  };
+
+  const handleSearch = (e) => {
+    e.preventDefault();
+    if (searchQuery.trim()) {
+      // Navigate to search results page with query
+      window.location.href = `/search?q=${encodeURIComponent(searchQuery.trim())}`;
+      setIsSearchOpen(false);
+      setSearchQuery('');
     }
   };
 
@@ -64,9 +80,9 @@ export default function Navbar() {
       </div>
 
       {/* Navbar Container */}
-      <div className="flex items-center justify-between px-3 sm:px-4 md:px-8 py-2 md:py-3 max-w-7xl mx-auto">
+      <div className="flex items-center justify-between px-3 sm:px-4 md:px-8 py-2 md:py-3 max-w-9x1 mx-auto">
         {/* Left Section (Rewards + User) */}
-        <div className="flex items-center gap-2 sm:gap-3">
+        <div className="flex items-center gap-1 sm:gap-3">
           <button className="hidden sm:flex border border-[#d4b26e] rounded-full px-3 py-1 text-[12px] sm:text-sm hover:bg-[#f8f4eb] transition-colors font-serif">
             👑 Rewards
           </button>
@@ -151,9 +167,43 @@ export default function Navbar() {
 
         {/* Right Icons */}
         <div className="flex items-center gap-2 sm:gap-3">
-          <button className="hidden md:flex items-center gap-1 border border-gray-300 rounded-full px-3 py-1 hover:bg-gray-50 transition-colors font-serif text-sm">
-            <Search size={15} /> Search
-          </button>
+          {/* Search Button */}
+          <div className="relative" ref={searchRef}>
+            <button
+              onClick={() => setIsSearchOpen(!isSearchOpen)}
+              className="hidden md:flex items-center gap-1 border border-gray-300 rounded-full px-3 py-1 hover:bg-gray-50 transition-colors font-serif text-sm"
+            >
+              <Search size={15} /> Search
+            </button>
+
+            {/* Search Dropdown */}
+            {isSearchOpen && (
+              <div className="absolute right-0 mt-2 w-80 bg-white border rounded-md shadow-lg p-4 z-50">
+                <form onSubmit={handleSearch} className="space-y-3">
+                  <div className="relative">
+                    <Search size={16} className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
+                    <input
+                      type="text"
+                      placeholder="Search for products..."
+                      value={searchQuery}
+                      onChange={(e) => setSearchQuery(e.target.value)}
+                      className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#d4b26e] focus:border-transparent"
+                      autoFocus
+                    />
+                  </div>
+                  <button
+                    type="submit"
+                    className="w-full bg-[#d4b26e] text-white py-2 rounded-md hover:bg-[#b8932a] transition-colors font-serif font-semibold"
+                  >
+                    Search
+                  </button>
+                </form>
+                <div className="mt-3 text-xs text-gray-500">
+                  <p>Popular searches: dresses, shoes, accessories</p>
+                </div>
+              </div>
+            )}
+          </div>
 
           {/* Wishlist Button */}
           <Link href="/wishlist" className="relative flex items-center hover:text-[#cda434] transition-colors">
