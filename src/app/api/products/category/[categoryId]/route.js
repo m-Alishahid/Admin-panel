@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
 import connectDB from '@/lib/mongodb';
 import Product from '@/Models/Product';
-import Category from '@/Models/category';
+import Category from '@/Models/Category';
 
 // GET products by category ID
 export async function GET(request, { params }) {
