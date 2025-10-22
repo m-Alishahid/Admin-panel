@@ -1,7 +1,0 @@
-- [x] Update login page UI to match dashboard theme
-  - [x] Add "Child Salon" title at the top
-  - [x] Change page background to blue gradient (from-blue-100 to-blue-200)
-  - [x] Ensure form has white background
-  - [x] Adjust styling to match blue theme
-- [x] Remove the blue "S" logo button
-- [x] Improve form UI design

@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import { discountService } from '@/services/discountService';
 import { productService } from '@/services/productService';
 import { categoryService } from '@/services/categoryService';
+import { toast } from "sonner";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -90,14 +91,14 @@ export default function DiscountManager() {
       const result = await response.json();
       
       if (result.success) {
-        alert(`Auto-expiry check completed: ${result.message}`);
+        toast.success(`Auto-expiry check completed: ${result.message}`);
         loadData();
       } else {
-        alert(result.error || 'Failed to check expiry');
+        toast.error(result.error || 'Failed to check expiry');
       }
     } catch (error) {
       console.error('Failed to check expired discounts:', error);
-      alert('Failed to check expired discounts');
+      toast.error('Failed to check expired discounts');
     } finally {
       setLoading(false);
     }
@@ -176,16 +177,16 @@ export default function DiscountManager() {
 
       const result = await discountService.create(submitData);
       if (result.success) {
-        alert('Discount created successfully!');
+        toast.success('Discount created successfully!');
         setShowForm(false);
         resetForm();
         loadData();
       } else {
-        alert(result.error || 'Failed to create discount');
+        toast.error(result.error || 'Failed to create discount');
       }
     } catch (error) {
       console.error('Create discount error:', error);
-      alert('Failed to create discount. Please check console for details.');
+      toast.error('Failed to create discount. Please check console for details.');
     } finally {
       setLoading(false);
     }
@@ -197,14 +198,14 @@ export default function DiscountManager() {
     try {
       const result = await discountService.delete(discountId);
       if (result.success) {
-        alert('Discount removed successfully!');
+        toast.success('Discount removed successfully!');
         loadData();
       } else {
-        alert(result.error || 'Failed to remove discount');
+        toast.error(result.error || 'Failed to remove discount');
       }
     } catch (error) {
       console.error('Remove discount error:', error);
-      alert('Failed to remove discount');
+      toast.error('Failed to remove discount');
     }
   };
 
