@@ -402,7 +402,7 @@ export default function Navbar() {
         {categories.map((category) => (
           <Link
             key={category._id || category.id}
-            href={`/category/${category._id || category.id}`}
+            href={`/categories/${category._id || category.id}`}
             className="hover:text-[#cda434] transition-colors"
           >
             {category.name}
