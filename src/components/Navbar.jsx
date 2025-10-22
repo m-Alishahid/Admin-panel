@@ -1,233 +1,3 @@
-// 'use client';
-
-// import Image from 'next/image';
-// import Link from 'next/link';
-// import { useState, useEffect, useRef } from 'react';
-// import { Globe, Heart, ShoppingBag, User, Search, Menu, X, ChevronDown } from 'lucide-react';
-// import { categoryService } from '@/services/categoryService';
-// import { useAuth } from '@/context/AuthContext';
-
-// export default function Navbar() {
-//   const [isMenuOpen, setIsMenuOpen] = useState(false);
-//   const [categories, setCategories] = useState([]);
-//   const [profileOpen, setProfileOpen] = useState(false);
-//   const profileRef = useRef(null);
-//   const { isAuthenticated, user, logout } = useAuth();
-
-//   console.log('Login User', user);
-
-//   useEffect(() => {
-//     const fetchCategories = async () => {
-//       try {
-//         const response = await categoryService.getAll();
-//         setCategories(response.data || response || []);
-//       } catch (error) {
-//         console.error('Error fetching categories:', error);
-//       }
-//     };
-//     fetchCategories();
-//   }, []);
-
-//   useEffect(() => {
-//     const handler = (e) => {
-//       if (profileRef.current && !profileRef.current.contains(e.target)) {
-//         setProfileOpen(false);
-//       }
-//     };
-//     document.addEventListener('click', handler);
-//     return () => document.removeEventListener('click', handler);
-//   }, []);
-
-//   const handleLogout = async () => {
-//     try {
-//       await logout();
-//     } catch (err) {
-//       console.error('Logout failed', err);
-//     }
-//   };
-
-//   const accountHref = isAuthenticated
-//     ? user?.roleType === 'customer'
-//       ? '/account'
-//       : '/dashboard'
-//     : '/login';
-
-//   return (
-//     <header className="w-full bg-white border-b shadow-sm sticky top-0 z-50">
-//       {/* Top Reward Bar */}
-//       <div className="bg-gradient-to-b from-[#f8f4eb] to-[#fffdf9] text-xs text-center text-gray-600 py-2 border-b font-serif px-2">
-//         Join <span className="font-semibold text-[#cda434]">Childrensalon Rewards</span> and unlock exclusive treats as you shop. 
-//         <span className="font-semibold text-[#cda434]"> NEW REWARD </span> — Convert your points into vouchers.
-//       </div>
-
-//       {/* Main Navbar */}
-//       <div className="relative flex items-center justify-between px-4 md:px-8 py-3 max-w-7xl mx-auto">
-//         {/* Left: Rewards + User */}
-//         <div className="flex items-center gap-3 text-sm text-gray-700">
-//           <button className="border border-[#d4b26e] rounded-full px-3 py-1 flex items-center gap-1 hover:bg-[#f8f4eb] transition-colors font-serif">
-//             👑 Rewards
-//           </button>
-
-//           {/* User Section */}
-//           {isAuthenticated ? (
-//             <div className="relative" ref={profileRef}>
-//               <button
-//                 onClick={() => setProfileOpen((s) => !s)}
-//                 className="border border-gray-300 rounded-full px-3 py-1 flex items-center gap-1 hover:bg-gray-50 transition-colors font-serif"
-//               >
-//                 <User size={16} />
-//                 <span className="hidden sm:inline">{user?.firstName || 'Account'}</span>
-//                 <ChevronDown size={14} className="ml-1" />
-//               </button>
-
-//               {profileOpen && (
-//                 <div className="absolute left-0 mt-2 w-44 bg-white border rounded-md shadow-lg py-2 z-50">
-//                   <Link
-//                     href={accountHref}
-//                     className="block px-4 py-2 text-sm hover:bg-gray-50"
-//                     onClick={() => setProfileOpen(false)}
-//                   >
-//                     My Account
-//                   </Link>
-
-//                   {user?.roleType === 'customer' && (
-//                     <Link
-//                       href="/orders"
-//                       className="block px-4 py-2 text-sm hover:bg-gray-50"
-//                       onClick={() => setProfileOpen(false)}
-//                     >
-//                       Orders
-//                     </Link>
-//                   )}
-
-//                   <button
-//                     onClick={() => {
-//                       setProfileOpen(false);
-//                       handleLogout();
-//                     }}
-//                     className="w-full text-left px-4 py-2 text-sm hover:bg-gray-50 text-red-500"
-//                   >
-//                     Logout
-//                   </button>
-//                 </div>
-//               )}
-//             </div>
-//           ) : (
-//             <Link
-//               href="/login"
-//               className="border border-[#d4b26e] rounded-full px-3 py-1 flex items-center gap-1 hover:bg-[#f8f4eb] transition-colors font-serif"
-//             >
-//               <User size={14} /> Sign In
-//             </Link>
-//           )}
-//         </div>
-
-//         {/* Center Logo */}
-//         <Link href="/" className="flex flex-col items-center">
-//           <Image
-//             src="/next.svg"
-//             alt="Childrensalon Logo"
-//             width={70}
-//             height={50}
-//             className="object-contain"
-//           />
-//           <h1 className="font-bold text-[17px] sm:text-[20px] tracking-[2px] font-serif text-center">
-//             <span className="text-[#cda434]">C</span>
-//             <span className="text-[#f07b7b]">H</span>
-//             <span className="text-[#8cc5c0]">I</span>
-//             <span className="text-[#dca8b6]">L</span>
-//             <span className="text-[#b7b3d0]">D</span>
-//             <span className="text-[#f1b74a]">R</span>
-//             <span className="text-[#f07b7b]">E</span>
-//             <span className="text-[#8cc5c0]">N</span>
-//             <span className="text-[#dca8b6]">S</span>
-//             <span className="text-[#b7b3d0]">A</span>
-//             <span className="text-[#f1b74a]">L</span>
-//             <span className="text-[#cda434]">O</span>
-//             <span className="text-[#f07b7b]">N</span>
-//           </h1>
-//         </Link>
-
-//         {/* Right Icons */}
-//         <div className="flex items-center gap-3 text-gray-600">
-//           <button className="hidden md:flex items-center gap-1 border border-gray-300 rounded-full px-3 py-1 hover:bg-gray-50 transition-colors font-serif">
-//             <Search size={16} /> Search
-//           </button>
-//           <Link href="/wishlist" className="flex items-center gap-1 hover:text-[#cda434] transition-colors">
-//             <Heart size={18} />
-//           </Link>
-//           <Link href="/cart" className="flex items-center gap-1 hover:text-[#cda434] transition-colors">
-//             <ShoppingBag size={18} />
-//           </Link>
-
-//           {/* Mobile Menu Toggle */}
-//           <button
-//             className="md:hidden border rounded-full p-1 hover:bg-gray-50"
-//             onClick={() => setIsMenuOpen(!isMenuOpen)}
-//           >
-//             {isMenuOpen ? <X size={20} /> : <Menu size={20} />}
-//           </button>
-//         </div>
-//       </div>
-
-//       {/* Desktop Categories */}
-//       <nav className="hidden md:flex justify-center gap-6 text-[14px] font-medium tracking-wide text-gray-800 border-t py-3 uppercase font-serif">
-//         {categories.map((category) => (
-//           <Link
-//             key={category._id || category.id}
-//             href={`/category/${category._id || category.id}`}
-//             className="hover:text-[#cda434] transition-colors"
-//           >
-//             {category.name}
-//           </Link>
-//         ))}
-//       </nav>
-
-//       {/* Mobile Menu */}
-//       {isMenuOpen && (
-//         <div className="md:hidden bg-white border-t shadow-md">
-//           <div className="flex flex-col py-2">
-//             {categories.map((category) => (
-//               <Link
-//                 key={category.id || category._id}
-//                 href={`/category/${category._id || category.id}`}
-//                 className="px-6 py-3 text-gray-800 hover:bg-gray-50 hover:text-[#cda434] transition-colors font-serif uppercase text-sm"
-//                 onClick={() => setIsMenuOpen(false)}
-//               >
-//                 {category.name}
-//               </Link>
-//             ))}
-
-//             <div className="border-t mt-2">
-//               {isAuthenticated ? (
-//                 <button
-//                   onClick={handleLogout}
-//                   className="w-full text-left px-6 py-3 hover:bg-gray-50 text-sm font-serif text-red-500"
-//                 >
-//                   Logout
-//                 </button>
-//               ) : (
-//                 <Link
-//                   href="/login"
-//                   className="block text-center py-3 hover:bg-gray-50 font-serif"
-//                   onClick={() => setIsMenuOpen(false)}
-//                 >
-//                   Sign In
-//                 </Link>
-//               )}
-//             </div>
-//           </div>
-//         </div>
-//       )}
-//     </header>
-//   );
-// }
-
-
-
-
-
-
 'use client';
 
 import Image from 'next/image';
@@ -236,6 +6,8 @@ import { useState, useEffect, useRef } from 'react';
 import { Heart, ShoppingBag, User, Search, Menu, X, ChevronDown } from 'lucide-react';
 import { categoryService } from '@/services/categoryService';
 import { useAuth } from '@/context/AuthContext';
+import { useCart } from '@/context/CartContext';
+import { useWishlist } from '@/context/WishlistContext';
 
 export default function Navbar() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -243,6 +15,8 @@ export default function Navbar() {
   const [profileOpen, setProfileOpen] = useState(false);
   const profileRef = useRef(null);
   const { isAuthenticated, user, logout } = useAuth();
+  const { getCartItemCount } = useCart();
+  const { getWishlistCount } = useWishlist();
 
   useEffect(() => {
     const fetchCategories = async () => {
@@ -285,7 +59,7 @@ export default function Navbar() {
     <header className="w-full bg-white border-b shadow-sm sticky top-0 z-50">
       {/* Rewards Banner */}
       <div className="bg-gradient-to-b from-[#f8f4eb] to-[#fffdf9] text-[11px] sm:text-xs text-center text-gray-600 py-2 border-b font-serif px-2">
-        Join <span className="font-semibold text-[#cda434]">Childrensalon Rewards</span> and unlock exclusive treats as you shop. 
+        Join <span className="font-semibold text-[#cda434]">Childrensalon Rewards</span> and unlock exclusive treats as you shop.
         <span className="font-semibold text-[#cda434]"> NEW REWARD </span> — Convert your points into vouchers.
       </div>
 
@@ -380,11 +154,25 @@ export default function Navbar() {
           <button className="hidden md:flex items-center gap-1 border border-gray-300 rounded-full px-3 py-1 hover:bg-gray-50 transition-colors font-serif text-sm">
             <Search size={15} /> Search
           </button>
-          <Link href="/wishlist" className="flex items-center hover:text-[#cda434]">
+
+          {/* Wishlist Button */}
+          <Link href="/wishlist" className="relative flex items-center hover:text-[#cda434] transition-colors">
             <Heart size={18} />
+            {getWishlistCount() > 0 && (
+              <span className="absolute -top-2 -right-2 bg-[#d4b26e] text-white text-xs rounded-full h-5 w-5 flex items-center justify-center font-bold">
+                {getWishlistCount()}
+              </span>
+            )}
           </Link>
-          <Link href="/cart" className="flex items-center hover:text-[#cda434]">
+
+          {/* Cart Button */}
+          <Link href="/cart" className="relative flex items-center hover:text-[#cda434] transition-colors">
             <ShoppingBag size={18} />
+            {getCartItemCount() > 0 && (
+              <span className="absolute -top-2 -right-2 bg-[#d4b26e] text-white text-xs rounded-full h-5 w-5 flex items-center justify-center font-bold">
+                {getCartItemCount()}
+              </span>
+            )}
           </Link>
 
           {/* Mobile Menu Toggle */}
