@@ -1,13 +1,10 @@
-
-
-
-
 'use client';
 import { useState, useEffect } from "react";
 import Link from "next/link";
-import Navbar from "@/components/Navbar"; // adjust path if needed
-import Footer from "@/components/Footer";
-import Image from 'next/image';
+import Navbar from "@/components/Navbar";
+import ProductCard from "@/components/ProductCard"; // Import ProductCard component
+import { productService } from "@/services/productService";
+import { categoryService } from "@/services/categoryService";
 
 export default function HomePage() {
   const [currentSlide, setCurrentSlide] = useState(0);
@@ -20,17 +17,19 @@ export default function HomePage() {
     const fetchData = async () => {
       try {
         // Fetch categories
-        const categoriesRes = await fetch('/api/categories');
-        const categoriesData = await categoriesRes.json();
-        if (categoriesData.success) {
-          setCategories(categoriesData.data || []);
+        const categoriesRes = await categoryService.getAll();
+        // const categoriesData = await categoriesRes.json();
+        if (categoriesRes.success) {
+          setCategories(categoriesRes.data || []);
         }
 
         // Fetch products
-        const productsRes = await fetch('/api/products?limit=20&sort=createdAt&order=desc');
-        const productsData = await productsRes.json();
-        if (productsData.success) {
-          setProducts(productsData.data?.products || productsData.data || []);
+        const productsRes = await productService.getAll();
+        console.log('Products', productsRes);
+        
+        // const productsData = await productsRes.json();
+        if (productsRes.success) {
+          setProducts(productsRes.data?.products || productsRes.data || []);
         }
       } catch (error) {
         console.error('Error fetching data:', error);
@@ -51,7 +50,7 @@ export default function HomePage() {
   ];
 
   const newInProducts = products.slice(0, 12);
-  const featuredProducts = products.slice(0, 8); // adjustable
+  const featuredProducts = products.slice(0, 8);
 
   const reviews = [
     {
@@ -89,8 +88,8 @@ export default function HomePage() {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-gold-600 mx-auto"></div>
-          <p className="mt-4 text-gray-600">Loading...</p>
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#cda434] mx-auto"></div>
+          <p className="mt-4 text-gray-600 font-serif">Loading...</p>
         </div>
       </div>
     );
@@ -118,24 +117,25 @@ export default function HomePage() {
 
         <div className="relative z-10 container mx-auto px-4 py-16 md:py-28 lg:py-36 min-h-[60vh] flex items-center">
           <div className="max-w-3xl mx-auto text-center">
-            <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-serif font-bold mb-3 text-gold-400">
+            <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-serif font-bold mb-3 text-[#cda434]">
               {slides[0].title}
             </h1>
             <p className="text-base sm:text-lg md:text-xl mb-6 max-w-2xl mx-auto font-serif text-gray-200">
               {slides[0].subtitle}
             </p>
             <div className="flex justify-center">
-              <Link href="/product">
-                <a className="inline-block bg-gold-600 hover:bg-gold-700 text-white px-6 py-3 rounded-full font-serif font-semibold text-base transition transform hover:scale-105 shadow-lg">
-                  Shop Now
-                </a>
+              <Link 
+                href="/product"
+                className="inline-block bg-[#cda434] hover:bg-[#b8932a] text-white px-6 py-3 rounded-full font-serif font-semibold text-base transition transform hover:scale-105 shadow-lg"
+              >
+                Shop Now
               </Link>
             </div>
           </div>
         </div>
       </section>
 
-      {/* Categories Horizontal Scroll (mobile friendly) */}
+      {/* Categories Horizontal Scroll */}
       <section className="bg-white py-8 md:py-12">
         <div className="container mx-auto px-4">
           <h2 className="text-2xl sm:text-3xl font-serif font-bold text-center text-black mb-6">
@@ -147,13 +147,17 @@ export default function HomePage() {
               {/* "All" pill */}
               <button
                 onClick={() => setSelectedCategory('All')}
-                className={`flex-shrink-0 snap-start px-4 py-2 rounded-full border ${selectedCategory === 'All' ? 'bg-black text-white' : 'bg-white text-gray-800'} font-serif`}
+                className={`flex-shrink-0 snap-start px-4 py-2 rounded-full border ${
+                  selectedCategory === 'All' 
+                    ? 'bg-black text-white border-black' 
+                    : 'bg-white text-gray-800 border-gray-300'
+                } font-serif transition-colors duration-300`}
               >
                 All
               </button>
 
               {categories.map((category) => (
-                <div key={category._id || category.id} className="flex-shrink-0 snap-start w-48 md:w-56 bg-gray-50 p-4 rounded-lg shadow-sm">
+                <div key={category._id || category.id} className="flex-shrink-0 snap-start w-48 md:w-56 bg-gray-50 p-4 rounded-lg shadow-sm hover:shadow-md transition-shadow duration-300">
                   <div
                     role="button"
                     onClick={() => setSelectedCategory(category.name)}
@@ -168,7 +172,9 @@ export default function HomePage() {
                     <h3 className="text-sm md:text-base font-serif font-semibold text-center">{category.name}</h3>
                     <p className="text-xs text-gray-600 text-center mt-2">Discover our {category.name.toLowerCase()} collection</p>
                     <div className="mt-3 w-full">
-                      <button className="w-full bg-gold-600 text-white px-3 py-2 rounded-full text-sm hover:bg-gold-700 transition">Shop</button>
+                      <button className="w-full bg-[#cda434] hover:bg-[#b8932a] text-white px-3 py-2 rounded-full text-sm font-serif transition-colors duration-300">
+                        Shop
+                      </button>
                     </div>
                   </div>
                 </div>
@@ -179,7 +185,7 @@ export default function HomePage() {
       </section>
 
       {/* Filtered Products Section */}
-      {selectedCategory !== "All" && (
+      {selectedCategory !== "All" && filteredProducts.length > 0 && (
         <section className="bg-gray-50 py-8 md:py-12">
           <div className="container mx-auto px-4">
             <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-6">
@@ -187,7 +193,7 @@ export default function HomePage() {
                 {selectedCategory} Collection
               </h2>
               <button
-                className="bg-black text-white px-4 py-2 rounded font-serif text-sm"
+                className="bg-black text-white px-4 py-2 rounded font-serif text-sm hover:bg-gray-800 transition-colors duration-300"
                 onClick={() => setSelectedCategory("All")}
               >
                 View All Categories
@@ -195,116 +201,73 @@ export default function HomePage() {
             </div>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6">
-              {filteredProducts.map((product) => {
-                const pid = product._id || product.id;
-                return (
-                  <Link key={pid} href={`/product/${pid}`}>
-                    <a className="block bg-white rounded-lg shadow-sm hover:shadow-md overflow-hidden transition">
-                      <div className="w-full h-56 md:h-64 relative bg-gray-100">
-                        {product.thumbnail ? (
-                          <Image
-                            src={product.thumbnail}
-                            alt={product.name}
-                            fill
-                            sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
-                            style={{ objectFit: 'cover' }}
-                            priority={false}
-                          />
-                        ) : (
-                          <div className="w-full h-full flex items-center justify-center text-gray-400">No image</div>
-                        )}
-                      </div>
-
-                      <div className="p-4">
-                        <h3 className="text-base font-serif font-semibold mb-1">{product.name}</h3>
-                        <p className="text-sm text-gray-600 mb-3 line-clamp-2">{product.description}</p>
-                        <div className="flex items-center justify-between">
-                          <div className="text-lg font-bold text-[#cda434]">£{product.price}</div>
-                          <div>
-                            <button className="bg-gold-600 text-white px-3 py-2 rounded text-sm font-serif hover:bg-gold-700">View</button>
-                          </div>
-                        </div>
-                      </div>
-                    </a>
-                  </Link>
-                );
-              })}
+              {filteredProducts.map((product) => (
+                <ProductCard 
+                  key={product._id || product.id} 
+                  product={product} 
+                />
+              ))}
             </div>
           </div>
         </section>
       )}
 
       {/* Featured Products */}
-      <section className="bg-gray-50 py-8 md:py-12">
-        <div className="container mx-auto px-4">
-          <h2 className="text-2xl sm:text-3xl md:text-4xl font-serif font-bold text-center text-black mb-6">Featured Products</h2>
+      {featuredProducts.length > 0 && (
+        <section className="bg-gray-50 py-8 md:py-12">
+          <div className="container mx-auto px-4">
+            <h2 className="text-2xl sm:text-3xl md:text-4xl font-serif font-bold text-center text-black mb-6">
+              Featured Products
+            </h2>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6">
-            {featuredProducts.map((product) => {
-              const pid = product._id || product.id;
-              return (
-                <Link key={pid} href={`/product/${pid}`}>
-                  <a className="block bg-white rounded-lg shadow-sm hover:shadow-md overflow-hidden transition">
-                    <div className="w-full h-56 md:h-64 relative bg-gray-100">
-                      {product.thumbnail ? (
-                        <Image
-                          src={product.thumbnail}
-                          alt={product.name}
-                          fill
-                          sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
-                          style={{ objectFit: 'cover' }}
-                          priority={false}
-                        />
-                      ) : (
-                        <div className="w-full h-full flex items-center justify-center text-gray-400">No image</div>
-                      )}
-                    </div>
-                    <div className="p-4">
-                      <h3 className="text-lg font-serif font-semibold mb-1">{product.name}</h3>
-                      <p className="text-sm text-gray-600 mb-3 line-clamp-2">{product.description}</p>
-                      <div className="flex items-center justify-between">
-                        <div className="text-xl font-bold text-[#cda434]">£{product.price}</div>
-                        <button className="bg-gold-600 text-white px-3 py-2 rounded text-sm font-serif hover:bg-gold-700">View</button>
-                      </div>
-                    </div>
-                  </a>
-                </Link>
-              );
-            })}
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6">
+              {featuredProducts.map((product) => (
+                <ProductCard 
+                  key={product._id || product.id} 
+                  product={product} 
+                />
+              ))}
+            </div>
           </div>
-        </div>
-      </section>
+        </section>
+      )}
 
-      {/* Seasonal + Reviews + Newsletter + Footer remain similar but responsive */}
       {/* Seasonal Section */}
       <section className="bg-gradient-to-r from-pink-50 to-purple-50 py-8 md:py-12">
         <div className="container mx-auto px-4">
           <div className="text-center mb-6 md:mb-10">
-            <h2 className="text-2xl md:text-4xl font-serif font-bold mb-3 md:mb-4">Winter Wonderland</h2>
-            <p className="text-base md:text-lg text-gray-700 max-w-2xl mx-auto">Discover our exclusive winter collection featuring cozy knits, festive dresses, and holiday-ready outfits for your little ones.</p>
+            <h2 className="text-2xl md:text-4xl font-serif font-bold mb-3 md:mb-4 text-gray-800">
+              Winter Wonderland
+            </h2>
+            <p className="text-base md:text-lg text-gray-700 max-w-2xl mx-auto font-serif">
+              Discover our exclusive winter collection featuring cozy knits, festive dresses, and holiday-ready outfits for your little ones.
+            </p>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            <div className="text-center p-6 bg-white rounded-lg shadow-sm">
+            <div className="text-center p-6 bg-white rounded-lg shadow-sm hover:shadow-md transition-shadow duration-300">
               <div className="text-5xl mb-3">❄️</div>
-              <h3 className="text-xl font-serif font-semibold mb-1">Cozy Winter Wear</h3>
-              <p className="text-gray-600">Warm jackets, sweaters, and boots perfect for chilly days.</p>
+              <h3 className="text-xl font-serif font-semibold mb-1 text-gray-800">Cozy Winter Wear</h3>
+              <p className="text-gray-600 font-serif">Warm jackets, sweaters, and boots perfect for chilly days.</p>
             </div>
-            <div className="text-center p-6 bg-white rounded-lg shadow-sm">
+            <div className="text-center p-6 bg-white rounded-lg shadow-sm hover:shadow-md transition-shadow duration-300">
               <div className="text-5xl mb-3">🎄</div>
-              <h3 className="text-xl font-serif font-semibold mb-1">Holiday Collection</h3>
-              <p className="text-gray-600">Festive outfits and party dresses for special occasions.</p>
+              <h3 className="text-xl font-serif font-semibold mb-1 text-gray-800">Holiday Collection</h3>
+              <p className="text-gray-600 font-serif">Festive outfits and party dresses for special occasions.</p>
             </div>
-            <div className="text-center p-6 bg-white rounded-lg shadow-sm">
+            <div className="text-center p-6 bg-white rounded-lg shadow-sm hover:shadow-md transition-shadow duration-300">
               <div className="text-5xl mb-3">🧣</div>
-              <h3 className="text-xl font-serif font-semibold mb-1">Accessories</h3>
-              <p className="text-gray-600">Scarves, hats, and gloves to complete the winter look.</p>
+              <h3 className="text-xl font-serif font-semibold mb-1 text-gray-800">Accessories</h3>
+              <p className="text-gray-600 font-serif">Scarves, hats, and gloves to complete the winter look.</p>
             </div>
           </div>
 
           <div className="text-center mt-6">
-            <Link href="/product?category=seasonal">
-              <a className="inline-block bg-black text-white px-6 py-3 rounded font-serif">Explore Winter Collection</a>
+            <Link 
+              href="/product?category=seasonal"
+              className="inline-block bg-black text-white px-6 py-3 rounded font-serif hover:bg-gray-800 transition-colors duration-300"
+            >
+              Explore Winter Collection
             </Link>
           </div>
         </div>
@@ -313,15 +276,17 @@ export default function HomePage() {
       {/* Reviews */}
       <section className="bg-white py-8 md:py-12">
         <div className="container mx-auto px-4">
-          <h2 className="text-2xl md:text-4xl font-serif font-bold text-center mb-6">What Parents Say</h2>
+          <h2 className="text-2xl md:text-4xl font-serif font-bold text-center mb-6 text-gray-800">
+            What Parents Say
+          </h2>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             {reviews.map((review, index) => (
-              <div key={index} className="bg-gray-50 p-6 rounded-lg shadow-sm">
+              <div key={index} className="bg-gray-50 p-6 rounded-lg shadow-sm hover:shadow-md transition-shadow duration-300">
                 <div className="flex items-center mb-4">
-                  <div className="text-3xl mr-4">{"⭐".repeat(review.rating)}</div>
+                  <div className="text-3xl mr-4 text-[#cda434]">{"⭐".repeat(review.rating)}</div>
                   <div>
-                    <h4 className="font-serif font-semibold">{review.name}</h4>
-                    <p className="text-sm text-gray-600">{review.role}</p>
+                    <h4 className="font-serif font-semibold text-gray-800">{review.name}</h4>
+                    <p className="text-sm text-gray-600 font-serif">{review.role}</p>
                   </div>
                 </div>
                 <p className="text-gray-700 font-serif italic">"{review.text}"</p>
@@ -334,22 +299,74 @@ export default function HomePage() {
       {/* Newsletter */}
       <section className="bg-black text-white py-8 md:py-12">
         <div className="container mx-auto px-4 text-center">
-          <h2 className="text-2xl md:text-4xl font-serif font-bold mb-3">Stay in Style</h2>
-          <p className="text-base text-white md:text-lg mb-6 max-w-2xl mx-auto">Subscribe to our newsletter for the latest luxury kidswear updates and exclusive offers.</p>
+          <h2 className="text-2xl md:text-4xl font-serif font-bold mb-3">
+            Stay in Style
+          </h2>
+          <p className="text-base md:text-lg mb-6 max-w-2xl mx-auto font-serif text-gray-300">
+            Subscribe to our newsletter for the latest luxury kidswear updates and exclusive offers.
+          </p>
           <div className="max-w-md mx-auto">
             <div className="flex flex-col sm:flex-row gap-3">
               <input
                 type="email"
                 placeholder="Enter your email"
-                className="flex-grow px-4 py-3 rounded-lg sm:rounded-l-lg sm:rounded-r-none text-black bg-white focus:outline-none"
+                className="flex-grow px-4 py-3 rounded-lg sm:rounded-l-lg sm:rounded-r-none text-gray-800 focus:outline-none focus:ring-2 focus:ring-[#cda434] font-serif"
               />
-              <button className="bg-gold-600 text-white px-6 py-3 rounded-lg sm:rounded-r-lg sm:rounded-l-none">Subscribe</button>
+              <button className="bg-[#cda434] hover:bg-[#b8932a] text-white px-6 py-3 rounded-lg sm:rounded-r-lg sm:rounded-l-none font-serif transition-colors duration-300">
+                Subscribe
+              </button>
             </div>
           </div>
         </div>
       </section>
 
-      <Footer />
+      {/* Footer */}
+      <footer className="bg-black text-white py-8">
+        <div className="container mx-auto px-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+            <div>
+              <h3 className="text-lg font-serif font-bold text-[#cda434] mb-2">
+                Childrensalon Clone
+              </h3>
+              <p className="text-gray-300 text-sm font-serif">
+                Luxury kidswear for the discerning child.
+              </p>
+            </div>
+            <div>
+              <h4 className="text-sm font-serif font-semibold mb-2">Shop</h4>
+              <ul className="space-y-1 text-gray-300 text-sm font-serif">
+                <li><Link href="/product?category=girls" className="hover:text-[#cda434] transition-colors duration-300">Girls</Link></li>
+                <li><Link href="/product?category=boys" className="hover:text-[#cda434] transition-colors duration-300">Boys</Link></li>
+                <li><Link href="/product?category=new-in" className="hover:text-[#cda434] transition-colors duration-300">New In</Link></li>
+                <li><Link href="/product?category=designers" className="hover:text-[#cda434] transition-colors duration-300">Designers</Link></li>
+              </ul>
+            </div>
+            <div>
+              <h4 className="text-sm font-serif font-semibold mb-2">Support</h4>
+              <ul className="space-y-1 text-gray-300 text-sm font-serif">
+                <li><Link href="/size-guide" className="hover:text-[#cda434] transition-colors duration-300">Size Guide</Link></li>
+                <li><Link href="/shipping" className="hover:text-[#cda434] transition-colors duration-300">Shipping Info</Link></li>
+                <li><Link href="/returns" className="hover:text-[#cda434] transition-colors duration-300">Returns</Link></li>
+                <li><Link href="/faq" className="hover:text-[#cda434] transition-colors duration-300">FAQ</Link></li>
+              </ul>
+            </div>
+            <div>
+              <h4 className="text-sm font-serif font-semibold mb-2">Contact</h4>
+              <ul className="space-y-1 text-gray-300 text-sm font-serif">
+                <li>📧 hello@childrensalon.com</li>
+                <li>📞 +44 (20) 123-4567</li>
+                <li>📍 123 Luxury St, London</li>
+              </ul>
+            </div>
+          </div>
+
+          <div className="border-t border-gray-700 mt-6 pt-6 text-center text-gray-400">
+            <p className="text-sm font-serif">
+              © 2025 Childrensalon Clone. All rights reserved.
+            </p>
+          </div>
+        </div>
+      </footer>
     </div>
   );
 }

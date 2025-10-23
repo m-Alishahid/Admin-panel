@@ -71,14 +71,16 @@
 //     type: Number,
 //     default: 0
 //   },
-//   // NEW: Track which products have this discount applied
+//   // ✅ IMPROVED: Track original product state before discount
 //   appliedProducts: [{
 //     product: {
 //       type: mongoose.Schema.Types.ObjectId,
 //       ref: 'Product'
 //     },
 //     originalPrice: Number,
-//     discountedPrice: Number,
+//     originalDiscountedPrice: Number, // Previous discounted price if any
+//     originalDiscountPercentage: Number, // Previous discount percentage
+//     newDiscountedPrice: Number,
 //     appliedAt: {
 //       type: Date,
 //       default: Date.now
@@ -119,7 +121,7 @@
 //   next();
 // });
 
-// // Method to apply discount to products
+// // ✅ IMPROVED: Method to apply discount to products
 // discountSchema.methods.applyToProducts = async function() {
 //   const Product = mongoose.model('Product');
   
@@ -143,22 +145,29 @@
 //   let totalDiscountAmount = 0;
 
 //   for (const product of products) {
+//     // ✅ Store original state BEFORE applying new discount
+//     const originalState = {
+//       originalPrice: product.salePrice,
+//       originalDiscountedPrice: product.discountedPrice || 0,
+//       originalDiscountPercentage: product.discountPercentage || 0
+//     };
+
 //     const newDiscountedPrice = this.calculateDiscountedPrice(product.salePrice);
 //     const discountAmount = product.salePrice - newDiscountedPrice;
     
 //     totalDiscountAmount += discountAmount;
 
-//     // Update product
+//     // ✅ Update product with new discount
 //     await Product.findByIdAndUpdate(product._id, {
 //       discountedPrice: Math.max(0, newDiscountedPrice),
 //       discountPercentage: Math.round(((product.salePrice - newDiscountedPrice) / product.salePrice) * 100)
 //     });
 
-//     // Track applied products
+//     // ✅ Track applied products with original state
 //     this.appliedProducts.push({
 //       product: product._id,
-//       originalPrice: product.salePrice,
-//       discountedPrice: newDiscountedPrice,
+//       ...originalState,
+//       newDiscountedPrice: newDiscountedPrice,
 //       appliedAt: new Date()
 //     });
 //   }
@@ -167,23 +176,54 @@
 //   await this.save();
 // };
 
-// // Method to remove discount from products
+// // ✅ IMPROVED: Method to remove discount and restore original state
 // discountSchema.methods.removeFromProducts = async function() {
 //   const Product = mongoose.model('Product');
   
-//   // Reset only the products that have this discount applied
+//   console.log(`Removing discount "${this.name}" from ${this.appliedProducts.length} products`);
+  
+//   // ✅ Restore original state for each product
 //   for (const appliedProduct of this.appliedProducts) {
-//     await Product.findByIdAndUpdate(appliedProduct.product, {
-//       $set: {
-//         discountedPrice: 0,
-//         discountPercentage: 0
-//       }
-//     });
+//     const product = await Product.findById(appliedProduct.product);
+//     if (!product) continue;
+
+//     // ✅ Check if this discount is still active on the product
+//     const currentDiscountedPrice = product.discountedPrice || 0;
+//     const expectedDiscountedPrice = appliedProduct.newDiscountedPrice;
+    
+//     // Only restore if the current discounted price matches what we set
+//     if (Math.abs(currentDiscountedPrice - expectedDiscountedPrice) < 0.01) {
+//       // ✅ Restore to original discounted price if there was one, otherwise to original price
+//       const restorePrice = appliedProduct.originalDiscountedPrice > 0 ? 
+//         appliedProduct.originalDiscountedPrice : 0;
+      
+//       const restoreDiscountPercentage = appliedProduct.originalDiscountedPrice > 0 ? 
+//         appliedProduct.originalDiscountPercentage : 0;
+
+//       await Product.findByIdAndUpdate(appliedProduct.product, {
+//         $set: {
+//           discountedPrice: restorePrice,
+//           discountPercentage: restoreDiscountPercentage
+//         }
+//       });
+
+//       console.log(`Restored product ${product.name} to: ${restorePrice > 0 ? 'discounted' : 'original'} price`);
+//     } else {
+//       console.log(`Product ${product.name} has different discount, skipping restoration`);
+//     }
 //   }
 
-//   this.status = 'Inactive';
+//   this.status = 'Expired';
 //   this.appliedProducts = [];
 //   await this.save();
+// };
+
+// // ✅ NEW: Method to check if this discount is currently applied to a product
+// discountSchema.methods.isAppliedToProduct = function(productId) {
+//   return this.appliedProducts.some(ap => 
+//     ap.product.toString() === productId.toString() && 
+//     ap.newDiscountedPrice > 0
+//   );
 // };
 
 // // Helper method to calculate discounted price
@@ -195,10 +235,12 @@
 //   }
 // };
 
-// // Static method to check and update discount statuses
+// // ✅ IMPROVED: Static method to check and update discount statuses
 // discountSchema.statics.updateDiscountStatuses = async function() {
 //   const now = new Date();
 //   const Discount = this;
+  
+//   console.log('Checking discount statuses...');
   
 //   // Expire discounts that have ended
 //   const expiredDiscounts = await Discount.find({
@@ -207,10 +249,17 @@
 //     autoRemove: true
 //   });
 
+//   console.log(`Found ${expiredDiscounts.length} discounts to expire`);
+
 //   for (const discount of expiredDiscounts) {
-//     await discount.removeFromProducts();
-//     discount.status = 'Expired';
-//     await discount.save();
+//     try {
+//       await discount.removeFromProducts();
+//       discount.status = 'Expired';
+//       await discount.save();
+//       console.log(`Successfully expired discount: ${discount.name}`);
+//     } catch (error) {
+//       console.error(`Error expiring discount ${discount.name}:`, error);
+//     }
 //   }
 
 //   // Activate scheduled discounts
@@ -220,10 +269,110 @@
 //     endDate: { $gte: now }
 //   });
 
+//   console.log(`Found ${scheduledDiscounts.length} discounts to activate`);
+
 //   for (const discount of scheduledDiscounts) {
-//     discount.status = 'Active';
-//     await discount.save();
-//     await discount.applyToProducts();
+//     try {
+//       discount.status = 'Active';
+//       await discount.save();
+//       await discount.applyToProducts();
+//       console.log(`Successfully activated discount: ${discount.name}`);
+//     } catch (error) {
+//       console.error(`Error activating discount ${discount.name}:`, error);
+//     }
+//   }
+
+//   return {
+//     expired: expiredDiscounts.length,
+//     activated: scheduledDiscounts.length
+//   };
+// };
+
+// // // ✅ NEW: Method to manually remove discount (for admin)
+// // discountSchema.methods.manualRemove = async function() {
+// //   await this.removeFromProducts();
+// //   this.status = 'Inactive';
+// //   await this.save();
+// // };
+
+// // Discount model mein yeh methods add karo
+// discountSchema.methods.manualRemove = async function() {
+//   const Product = mongoose.model('Product');
+  
+//   console.log(`Manually removing discount "${this.name}" from ${this.appliedProducts.length} products`);
+  
+//   // Restore original state for each product
+//   for (const appliedProduct of this.appliedProducts) {
+//     const product = await Product.findById(appliedProduct.product);
+//     if (!product) continue;
+
+//     // Restore to original discounted price if there was one, otherwise to original price
+//     const restorePrice = appliedProduct.originalDiscountedPrice > 0 ? 
+//       appliedProduct.originalDiscountedPrice : 0;
+    
+//     const restoreDiscountPercentage = appliedProduct.originalDiscountedPrice > 0 ? 
+//       appliedProduct.originalDiscountPercentage : 0;
+
+//     await Product.findByIdAndUpdate(appliedProduct.product, {
+//       $set: {
+//         discountedPrice: restorePrice,
+//         discountPercentage: restoreDiscountPercentage
+//       }
+//     });
+
+//     console.log(`Restored product ${product.name} to: ${restorePrice > 0 ? 'previous discounted' : 'original'} price`);
+//   }
+
+//   this.status = 'Inactive';
+//   this.appliedProducts = [];
+//   await this.save();
+// };
+
+// // Static method to check and update discount statuses
+// discountSchema.statics.updateDiscountStatuses = async function() {
+//   const now = new Date();
+//   const Discount = this;
+  
+//   console.log('Checking discount statuses...');
+  
+//   // Expire discounts that have ended
+//   const expiredDiscounts = await Discount.find({
+//     status: 'Active',
+//     endDate: { $lt: now },
+//     autoRemove: true
+//   });
+
+//   console.log(`Found ${expiredDiscounts.length} discounts to expire`);
+
+//   for (const discount of expiredDiscounts) {
+//     try {
+//       await discount.removeFromProducts();
+//       discount.status = 'Expired';
+//       await discount.save();
+//       console.log(`Successfully expired discount: ${discount.name}`);
+//     } catch (error) {
+//       console.error(`Error expiring discount ${discount.name}:`, error);
+//     }
+//   }
+
+//   // Activate scheduled discounts
+//   const scheduledDiscounts = await Discount.find({
+//     status: 'Scheduled',
+//     startDate: { $lte: now },
+//     endDate: { $gte: now }
+//   });
+
+//   console.log(`Found ${scheduledDiscounts.length} discounts to activate`);
+
+//   for (const discount of scheduledDiscounts) {
+//     try {
+//       discount.status = 'Active';
+//       await discount.save();
+//       await discount.applyToProducts();
+//       console.log(`Successfully activated discount: ${discount.name}`);
+//     } catch (error) {
+//       console.error(`Error activating discount ${discount.name}:`, error);
+//     }
 //   }
 
 //   return {
@@ -233,6 +382,7 @@
 // };
 
 // export default mongoose.models.Discount || mongoose.model('Discount', discountSchema);
+
 
 
 
@@ -311,15 +461,14 @@ const discountSchema = new mongoose.Schema({
     type: Number,
     default: 0
   },
-  // ✅ IMPROVED: Track original product state before discount
   appliedProducts: [{
     product: {
       type: mongoose.Schema.Types.ObjectId,
       ref: 'Product'
     },
     originalPrice: Number,
-    originalDiscountedPrice: Number, // Previous discounted price if any
-    originalDiscountPercentage: Number, // Previous discount percentage
+    originalDiscountedPrice: Number,
+    originalDiscountPercentage: Number,
     newDiscountedPrice: Number,
     appliedAt: {
       type: Date,
@@ -361,7 +510,7 @@ discountSchema.pre('save', function(next) {
   next();
 });
 
-// ✅ IMPROVED: Method to apply discount to products
+// Method to apply discount to products
 discountSchema.methods.applyToProducts = async function() {
   const Product = mongoose.model('Product');
   
@@ -385,7 +534,7 @@ discountSchema.methods.applyToProducts = async function() {
   let totalDiscountAmount = 0;
 
   for (const product of products) {
-    // ✅ Store original state BEFORE applying new discount
+    // Store original state BEFORE applying new discount
     const originalState = {
       originalPrice: product.salePrice,
       originalDiscountedPrice: product.discountedPrice || 0,
@@ -397,43 +546,49 @@ discountSchema.methods.applyToProducts = async function() {
     
     totalDiscountAmount += discountAmount;
 
-    // ✅ Update product with new discount
+    // Update product with new discount
     await Product.findByIdAndUpdate(product._id, {
       discountedPrice: Math.max(0, newDiscountedPrice),
       discountPercentage: Math.round(((product.salePrice - newDiscountedPrice) / product.salePrice) * 100)
     });
 
-    // ✅ Track applied products with original state
+    // Track applied products with original state
     this.appliedProducts.push({
       product: product._id,
       ...originalState,
       newDiscountedPrice: newDiscountedPrice,
       appliedAt: new Date()
     });
+
+    console.log(`✅ Applied discount to ${product.name}: ${product.salePrice} → ${newDiscountedPrice}`);
   }
 
   this.totalDiscountAmount = totalDiscountAmount;
   await this.save();
+  
+  console.log(`🎯 Discount "${this.name}" applied to ${products.length} products`);
 };
 
-// ✅ IMPROVED: Method to remove discount and restore original state
+// Method to remove discount and restore original state
 discountSchema.methods.removeFromProducts = async function() {
   const Product = mongoose.model('Product');
   
-  console.log(`Removing discount "${this.name}" from ${this.appliedProducts.length} products`);
+  console.log(`🔄 Removing discount "${this.name}" from ${this.appliedProducts.length} products`);
   
-  // ✅ Restore original state for each product
-  for (const appliedProduct of this.appliedProducts) {
-    const product = await Product.findById(appliedProduct.product);
-    if (!product) continue;
+  let restoredCount = 0;
+  let skippedCount = 0;
 
-    // ✅ Check if this discount is still active on the product
-    const currentDiscountedPrice = product.discountedPrice || 0;
-    const expectedDiscountedPrice = appliedProduct.newDiscountedPrice;
-    
-    // Only restore if the current discounted price matches what we set
-    if (Math.abs(currentDiscountedPrice - expectedDiscountedPrice) < 0.01) {
-      // ✅ Restore to original discounted price if there was one, otherwise to original price
+  // ALWAYS restore original state for each product
+  for (const appliedProduct of this.appliedProducts) {
+    try {
+      const product = await Product.findById(appliedProduct.product);
+      if (!product) {
+        console.log(`❌ Product not found: ${appliedProduct.product}`);
+        skippedCount++;
+        continue;
+      }
+
+      // ALWAYS restore to original state
       const restorePrice = appliedProduct.originalDiscountedPrice > 0 ? 
         appliedProduct.originalDiscountedPrice : 0;
       
@@ -447,23 +602,64 @@ discountSchema.methods.removeFromProducts = async function() {
         }
       });
 
-      console.log(`Restored product ${product.name} to: ${restorePrice > 0 ? 'discounted' : 'original'} price`);
-    } else {
-      console.log(`Product ${product.name} has different discount, skipping restoration`);
+      console.log(`✅ Restored ${product.name} to: ${restorePrice > 0 ? `Discounted (${restorePrice})` : 'Original Price'}`);
+      restoredCount++;
+
+    } catch (error) {
+      console.error(`❌ Error restoring product ${appliedProduct.product}:`, error);
+      skippedCount++;
     }
   }
 
+  console.log(`📊 Restoration complete: ${restoredCount} restored, ${skippedCount} skipped`);
+
   this.status = 'Expired';
-  this.appliedProducts = [];
+  this.updatedAt = new Date();
   await this.save();
+  
+  return restoredCount;
 };
 
-// ✅ NEW: Method to check if this discount is currently applied to a product
-discountSchema.methods.isAppliedToProduct = function(productId) {
-  return this.appliedProducts.some(ap => 
-    ap.product.toString() === productId.toString() && 
-    ap.newDiscountedPrice > 0
-  );
+// Manual remove method (for admin)
+discountSchema.methods.manualRemove = async function() {
+  const Product = mongoose.model('Product');
+  
+  console.log(`🔄 Manually removing discount "${this.name}" from ${this.appliedProducts.length} products`);
+  
+  let restoredCount = 0;
+
+  for (const appliedProduct of this.appliedProducts) {
+    try {
+      const product = await Product.findById(appliedProduct.product);
+      if (!product) continue;
+
+      // ALWAYS restore original prices
+      const restorePrice = appliedProduct.originalDiscountedPrice > 0 ? 
+        appliedProduct.originalDiscountedPrice : 0;
+      
+      const restoreDiscountPercentage = appliedProduct.originalDiscountedPrice > 0 ? 
+        appliedProduct.originalDiscountPercentage : 0;
+
+      await Product.findByIdAndUpdate(appliedProduct.product, {
+        $set: {
+          discountedPrice: restorePrice,
+          discountPercentage: restoreDiscountPercentage
+        }
+      });
+
+      console.log(`✅ Manually restored ${product.name} to: ${restorePrice > 0 ? 'previous discounted' : 'original'} price`);
+      restoredCount++;
+
+    } catch (error) {
+      console.error(`❌ Error manually restoring product:`, error);
+    }
+  }
+
+  this.status = 'Inactive';
+  this.updatedAt = new Date();
+  await this.save();
+
+  return restoredCount;
 };
 
 // Helper method to calculate discounted price
@@ -475,12 +671,12 @@ discountSchema.methods.calculateDiscountedPrice = function(originalPrice) {
   }
 };
 
-// ✅ IMPROVED: Static method to check and update discount statuses
+// ✅ FIXED: Static method to check and update discount statuses
 discountSchema.statics.updateDiscountStatuses = async function() {
   const now = new Date();
   const Discount = this;
   
-  console.log('Checking discount statuses...');
+  console.log('🕒 Checking discount statuses...');
   
   // Expire discounts that have ended
   const expiredDiscounts = await Discount.find({
@@ -489,16 +685,20 @@ discountSchema.statics.updateDiscountStatuses = async function() {
     autoRemove: true
   });
 
-  console.log(`Found ${expiredDiscounts.length} discounts to expire`);
+  console.log(`📋 Found ${expiredDiscounts.length} discounts to expire`);
 
+  let totalExpired = 0;
   for (const discount of expiredDiscounts) {
     try {
-      await discount.removeFromProducts();
-      discount.status = 'Expired';
-      await discount.save();
-      console.log(`Successfully expired discount: ${discount.name}`);
+      console.log(`⏰ Expiring discount: ${discount.name}`);
+      
+      // ✅ YEH LINE IMPORTANT HAI - removeFromProducts call karo
+      const restoredCount = await discount.removeFromProducts();
+      
+      console.log(`✅ Successfully expired discount: ${discount.name} (${restoredCount} products restored)`);
+      totalExpired++;
     } catch (error) {
-      console.error(`Error expiring discount ${discount.name}:`, error);
+      console.error(`❌ Error expiring discount ${discount.name}:`, error);
     }
   }
 
@@ -509,30 +709,34 @@ discountSchema.statics.updateDiscountStatuses = async function() {
     endDate: { $gte: now }
   });
 
-  console.log(`Found ${scheduledDiscounts.length} discounts to activate`);
+  console.log(`📋 Found ${scheduledDiscounts.length} discounts to activate`);
 
+  let totalActivated = 0;
   for (const discount of scheduledDiscounts) {
     try {
+      console.log(`🎯 Activating discount: ${discount.name}`);
       discount.status = 'Active';
       await discount.save();
       await discount.applyToProducts();
-      console.log(`Successfully activated discount: ${discount.name}`);
+      totalActivated++;
+      console.log(`✅ Successfully activated discount: ${discount.name}`);
     } catch (error) {
-      console.error(`Error activating discount ${discount.name}:`, error);
+      console.error(`❌ Error activating discount ${discount.name}:`, error);
     }
   }
 
   return {
-    expired: expiredDiscounts.length,
-    activated: scheduledDiscounts.length
+    expired: totalExpired,
+    activated: totalActivated
   };
 };
 
-// ✅ NEW: Method to manually remove discount (for admin)
-discountSchema.methods.manualRemove = async function() {
-  await this.removeFromProducts();
-  this.status = 'Inactive';
-  await this.save();
+// Method to check if this discount is currently applied to a product
+discountSchema.methods.isAppliedToProduct = function(productId) {
+  return this.appliedProducts.some(ap => 
+    ap.product.toString() === productId.toString() && 
+    ap.newDiscountedPrice > 0
+  );
 };
 
 export default mongoose.models.Discount || mongoose.model('Discount', discountSchema);

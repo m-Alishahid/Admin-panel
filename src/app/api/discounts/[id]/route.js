@@ -4,45 +4,66 @@
 // import Product from '@/Models/Product';
 // import mongoose from 'mongoose';
 
-// // GET all discounts
-// export async function GET(request) {
+// export async function GET(request, { params }) {
 //   try {
 //     await connectDB();
     
-//     const { searchParams } = new URL(request.url);
-//     const status = searchParams.get('status');
+//     const { id } = params;
 
-//     let query = {};
-//     if (status && status !== 'all') {
-//       query.status = status;
+//     if (!mongoose.Types.ObjectId.isValid(id)) {
+//       return NextResponse.json(
+//         { success: false, error: 'Invalid discount ID' },
+//         { status: 400 }
+//       );
 //     }
 
-//     const discounts = await Discount.find(query)
+//     const discount = await Discount.findById(id)
 //       .populate('category')
 //       .populate('products')
-//       .populate('appliedProducts.product')
-//       .sort({ createdAt: -1 });
+//       .populate('appliedProducts.product');
+
+//     if (!discount) {
+//       return NextResponse.json(
+//         { success: false, error: 'Discount not found' },
+//         { status: 404 }
+//       );
+//     }
 
 //     return NextResponse.json({
 //       success: true,
-//       data: discounts
+//       data: discount
 //     });
+
 //   } catch (error) {
-//     console.error('GET Discounts Error:', error);
+//     console.error('GET Discount Error:', error);
 //     return NextResponse.json(
-//       { success: false, error: 'Failed to fetch discounts' },
+//       { success: false, error: 'Failed to fetch discount' },
 //       { status: 500 }
 //     );
 //   }
 // }
 
-// // POST create and apply discount
-// export async function POST(request) {
+// export async function PUT(request, { params }) {
 //   try {
 //     await connectDB();
+    
+//     const { id } = params;
 //     const body = await request.json();
 
-//     console.log('Received discount data:', body);
+//     if (!mongoose.Types.ObjectId.isValid(id)) {
+//       return NextResponse.json(
+//         { success: false, error: 'Invalid discount ID' },
+//         { status: 400 }
+//       );
+//     }
+
+//     const discount = await Discount.findById(id);
+//     if (!discount) {
+//       return NextResponse.json(
+//         { success: false, error: 'Discount not found' },
+//         { status: 404 }
+//       );
+//     }
 
 //     // Validate required fields
 //     const requiredFields = ['name', 'discountType', 'discountValue', 'scope', 'startDate', 'endDate'];
@@ -56,14 +77,15 @@
 //     }
 
 //     // Clean and validate data
-//     const cleanData = { 
+//     const updateData = { 
 //       ...body,
-//       discountValue: parseFloat(body.discountValue)
+//       discountValue: parseFloat(body.discountValue),
+//       updatedAt: new Date()
 //     };
 
 //     // Validate dates
-//     const startDate = new Date(cleanData.startDate);
-//     const endDate = new Date(cleanData.endDate);
+//     const startDate = new Date(updateData.startDate);
+//     const endDate = new Date(updateData.endDate);
     
 //     if (startDate >= endDate) {
 //       return NextResponse.json(
@@ -72,34 +94,27 @@
 //       );
 //     }
 
-//     if (endDate <= new Date()) {
-//       return NextResponse.json(
-//         { success: false, error: 'End date must be in the future' },
-//         { status: 400 }
-//       );
-//     }
-
 //     // Validate scope-specific fields
-//     if (cleanData.scope === 'category') {
-//       if (!cleanData.category || !mongoose.Types.ObjectId.isValid(cleanData.category)) {
+//     if (updateData.scope === 'category') {
+//       if (!updateData.category || !mongoose.Types.ObjectId.isValid(updateData.category)) {
 //         return NextResponse.json(
 //           { success: false, error: 'Valid category ID is required for category scope' },
 //           { status: 400 }
 //         );
 //       }
 //     } else {
-//       cleanData.category = undefined;
+//       updateData.category = undefined;
 //     }
 
-//     if (cleanData.scope === 'selected') {
-//       if (!cleanData.products || !Array.isArray(cleanData.products) || cleanData.products.length === 0) {
+//     if (updateData.scope === 'selected') {
+//       if (!updateData.products || !Array.isArray(updateData.products) || updateData.products.length === 0) {
 //         return NextResponse.json(
 //           { success: false, error: 'At least one product must be selected for selected scope' },
 //           { status: 400 }
 //         );
 //       }
 
-//       const invalidProductIds = cleanData.products.filter(
+//       const invalidProductIds = updateData.products.filter(
 //         productId => !mongoose.Types.ObjectId.isValid(productId)
 //       );
       
@@ -110,27 +125,38 @@
 //         );
 //       }
 //     } else {
-//       cleanData.products = [];
+//       updateData.products = [];
 //     }
 
-//     // Set initial status based on start date
+//     // Set status based on dates
 //     const now = new Date();
 //     if (startDate > now) {
-//       cleanData.status = 'Scheduled';
+//       updateData.status = 'Scheduled';
+//     } else if (endDate < now) {
+//       updateData.status = 'Expired';
 //     } else {
-//       cleanData.status = 'Active';
+//       updateData.status = 'Active';
 //     }
 
-//     // Create discount
-//     const discount = await Discount.create(cleanData);
+//     // First remove discount from current products
+//     if (discount.status === 'Active') {
+//       await discount.removeFromProducts();
+//     }
+
+//     // Update discount
+//     const updatedDiscount = await Discount.findByIdAndUpdate(
+//       id,
+//       updateData,
+//       { new: true, runValidators: true }
+//     );
 
 //     // Apply discount to products if it's active
-//     if (discount.status === 'Active') {
-//       await discount.applyToProducts();
+//     if (updatedDiscount.status === 'Active') {
+//       await updatedDiscount.applyToProducts();
 //     }
 
-//     // Populate and return the created discount
-//     const populatedDiscount = await Discount.findById(discount._id)
+//     // Populate and return the updated discount
+//     const populatedDiscount = await Discount.findById(updatedDiscount._id)
 //       .populate('category')
 //       .populate('products')
 //       .populate('appliedProducts.product');
@@ -138,11 +164,11 @@
 //     return NextResponse.json({
 //       success: true,
 //       data: populatedDiscount,
-//       message: `Discount created successfully${discount.status === 'Active' ? ` and applied to ${discount.totalProducts} products` : ''}`
-//     }, { status: 201 });
+//       message: `Discount updated successfully${updatedDiscount.status === 'Active' ? ` and applied to ${updatedDiscount.totalProducts} products` : ''}`
+//     });
 
 //   } catch (error) {
-//     console.error('POST Discount Error:', error);
+//     console.error('PUT Discount Error:', error);
     
 //     if (error.name === 'ValidationError') {
 //       const errors = Object.values(error.errors).map(err => err.message);
@@ -159,7 +185,7 @@
 //     return NextResponse.json(
 //       { 
 //         success: false, 
-//         error: 'Failed to create discount',
+//         error: 'Failed to update discount',
 //         details: error.message 
 //       },
 //       { status: 500 }
@@ -167,21 +193,20 @@
 //   }
 // }
 
-// // DELETE discount
-// export async function DELETE(request) {
+// export async function DELETE(request, { params }) {
 //   try {
 //     await connectDB();
-//     const { searchParams } = new URL(request.url);
-//     const discountId = searchParams.get('id');
+    
+//     const { id } = params;
 
-//     if (!discountId) {
+//     if (!mongoose.Types.ObjectId.isValid(id)) {
 //       return NextResponse.json(
-//         { success: false, error: 'Discount ID is required' },
+//         { success: false, error: 'Invalid discount ID' },
 //         { status: 400 }
 //       );
 //     }
 
-//     const discount = await Discount.findById(discountId);
+//     const discount = await Discount.findById(id);
 //     if (!discount) {
 //       return NextResponse.json(
 //         { success: false, error: 'Discount not found' },
@@ -189,70 +214,98 @@
 //       );
 //     }
 
-//     // ✅ Remove discount from products and restore original prices
+//     // Remove discount from products and restore original prices
 //     await discount.manualRemove();
 
 //     // Delete the discount record
-//     await Discount.findByIdAndDelete(discountId);
+//     await Discount.findByIdAndDelete(id);
 
 //     return NextResponse.json({
 //       success: true,
-//       message: 'Discount removed successfully and product prices restored'
+//       message: 'Discount deleted successfully and product prices restored'
 //     });
 
 //   } catch (error) {
 //     console.error('DELETE Discount Error:', error);
 //     return NextResponse.json(
-//       { success: false, error: 'Failed to remove discount' },
+//       { success: false, error: 'Failed to delete discount' },
 //       { status: 500 }
 //     );
 //   }
 // }
+
+
+
+
+
 import { NextResponse } from 'next/server';
 import connectDB from '@/lib/mongodb';
 import Discount from '@/Models/Discount';
 import Product from '@/Models/Product';
 import mongoose from 'mongoose';
 
-// GET all discounts
-export async function GET(request) {
+export async function GET(request, { params }) {
   try {
     await connectDB();
     
-    const { searchParams } = new URL(request.url);
-    const status = searchParams.get('status');
+    const { id } = params;
 
-    let query = {};
-    if (status && status !== 'all') {
-      query.status = status;
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+      return NextResponse.json(
+        { success: false, error: 'Invalid discount ID' },
+        { status: 400 }
+      );
     }
 
-    const discounts = await Discount.find(query)
+    const discount = await Discount.findById(id)
       .populate('category')
       .populate('products')
-      .populate('appliedProducts.product')
-      .sort({ createdAt: -1 });
+      .populate('appliedProducts.product');
+
+    if (!discount) {
+      return NextResponse.json(
+        { success: false, error: 'Discount not found' },
+        { status: 404 }
+      );
+    }
 
     return NextResponse.json({
       success: true,
-      data: discounts
+      data: discount
     });
+
   } catch (error) {
-    console.error('GET Discounts Error:', error);
+    console.error('❌ GET Discount Error:', error);
     return NextResponse.json(
-      { success: false, error: 'Failed to fetch discounts' },
+      { success: false, error: 'Failed to fetch discount' },
       { status: 500 }
     );
   }
 }
 
-// POST create and apply discount
-export async function POST(request) {
+export async function PUT(request, { params }) {
   try {
     await connectDB();
+    
+    const { id } = params;
     const body = await request.json();
 
-    console.log('📝 Received discount data:', body);
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+      return NextResponse.json(
+        { success: false, error: 'Invalid discount ID' },
+        { status: 400 }
+      );
+    }
+
+    const discount = await Discount.findById(id);
+    if (!discount) {
+      return NextResponse.json(
+        { success: false, error: 'Discount not found' },
+        { status: 404 }
+      );
+    }
+
+    console.log(`✏️ Updating discount: ${discount.name}`);
 
     // Validate required fields
     const requiredFields = ['name', 'discountType', 'discountValue', 'scope', 'startDate', 'endDate'];
@@ -266,14 +319,15 @@ export async function POST(request) {
     }
 
     // Clean and validate data
-    const cleanData = { 
+    const updateData = { 
       ...body,
-      discountValue: parseFloat(body.discountValue)
+      discountValue: parseFloat(body.discountValue),
+      updatedAt: new Date()
     };
 
     // Validate dates
-    const startDate = new Date(cleanData.startDate);
-    const endDate = new Date(cleanData.endDate);
+    const startDate = new Date(updateData.startDate);
+    const endDate = new Date(updateData.endDate);
     
     if (startDate >= endDate) {
       return NextResponse.json(
@@ -282,34 +336,27 @@ export async function POST(request) {
       );
     }
 
-    if (endDate <= new Date()) {
-      return NextResponse.json(
-        { success: false, error: 'End date must be in the future' },
-        { status: 400 }
-      );
-    }
-
     // Validate scope-specific fields
-    if (cleanData.scope === 'category') {
-      if (!cleanData.category || !mongoose.Types.ObjectId.isValid(cleanData.category)) {
+    if (updateData.scope === 'category') {
+      if (!updateData.category || !mongoose.Types.ObjectId.isValid(updateData.category)) {
         return NextResponse.json(
           { success: false, error: 'Valid category ID is required for category scope' },
           { status: 400 }
         );
       }
     } else {
-      cleanData.category = undefined;
+      updateData.category = undefined;
     }
 
-    if (cleanData.scope === 'selected') {
-      if (!cleanData.products || !Array.isArray(cleanData.products) || cleanData.products.length === 0) {
+    if (updateData.scope === 'selected') {
+      if (!updateData.products || !Array.isArray(updateData.products) || updateData.products.length === 0) {
         return NextResponse.json(
           { success: false, error: 'At least one product must be selected for selected scope' },
           { status: 400 }
         );
       }
 
-      const invalidProductIds = cleanData.products.filter(
+      const invalidProductIds = updateData.products.filter(
         productId => !mongoose.Types.ObjectId.isValid(productId)
       );
       
@@ -320,27 +367,40 @@ export async function POST(request) {
         );
       }
     } else {
-      cleanData.products = [];
+      updateData.products = [];
     }
 
-    // Set initial status based on start date
+    // Set status based on dates
     const now = new Date();
     if (startDate > now) {
-      cleanData.status = 'Scheduled';
+      updateData.status = 'Scheduled';
+    } else if (endDate < now) {
+      updateData.status = 'Expired';
     } else {
-      cleanData.status = 'Active';
+      updateData.status = 'Active';
     }
 
-    // Create discount
-    const discount = await Discount.create(cleanData);
+    // First remove discount from current products
+    if (discount.status === 'Active') {
+      console.log(`🔄 Removing current discount from products...`);
+      await discount.removeFromProducts();
+    }
+
+    // Update discount
+    const updatedDiscount = await Discount.findByIdAndUpdate(
+      id,
+      updateData,
+      { new: true, runValidators: true }
+    );
 
     // Apply discount to products if it's active
-    if (discount.status === 'Active') {
-      await discount.applyToProducts();
+    if (updatedDiscount.status === 'Active') {
+      console.log(`🎯 Applying updated discount to products...`);
+      await updatedDiscount.applyToProducts();
     }
 
-    // Populate and return the created discount
-    const populatedDiscount = await Discount.findById(discount._id)
+    // Populate and return the updated discount
+    const populatedDiscount = await Discount.findById(updatedDiscount._id)
       .populate('category')
       .populate('products')
       .populate('appliedProducts.product');
@@ -348,11 +408,11 @@ export async function POST(request) {
     return NextResponse.json({
       success: true,
       data: populatedDiscount,
-      message: `Discount created successfully${discount.status === 'Active' ? ` and applied to ${discount.totalProducts} products` : ''}`
-    }, { status: 201 });
+      message: `Discount updated successfully${updatedDiscount.status === 'Active' ? ` and applied to ${updatedDiscount.totalProducts} products` : ''}`
+    });
 
   } catch (error) {
-    console.error('❌ POST Discount Error:', error);
+    console.error('❌ PUT Discount Error:', error);
     
     if (error.name === 'ValidationError') {
       const errors = Object.values(error.errors).map(err => err.message);
@@ -369,7 +429,7 @@ export async function POST(request) {
     return NextResponse.json(
       { 
         success: false, 
-        error: 'Failed to create discount',
+        error: 'Failed to update discount',
         details: error.message 
       },
       { status: 500 }
@@ -377,21 +437,20 @@ export async function POST(request) {
   }
 }
 
-// DELETE discount
-export async function DELETE(request) {
+export async function DELETE(request, { params }) {
   try {
     await connectDB();
-    const { searchParams } = new URL(request.url);
-    const discountId = searchParams.get('id');
+    
+    const { id } = params;
 
-    if (!discountId) {
+    if (!mongoose.Types.ObjectId.isValid(id)) {
       return NextResponse.json(
-        { success: false, error: 'Discount ID is required' },
+        { success: false, error: 'Invalid discount ID' },
         { status: 400 }
       );
     }
 
-    const discount = await Discount.findById(discountId);
+    const discount = await Discount.findById(id);
     if (!discount) {
       return NextResponse.json(
         { success: false, error: 'Discount not found' },
@@ -400,12 +459,12 @@ export async function DELETE(request) {
     }
 
     console.log(`🗑️ Starting DELETE for discount: ${discount.name}`);
-    
+
     // Remove discount from products and restore original prices
     await discount.manualRemove();
 
     // Delete the discount record
-    await Discount.findByIdAndDelete(discountId);
+    await Discount.findByIdAndDelete(id);
 
     return NextResponse.json({
       success: true,
