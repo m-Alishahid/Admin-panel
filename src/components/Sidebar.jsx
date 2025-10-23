@@ -16,7 +16,7 @@ import {
   FiUser,
 } from "react-icons/fi";
 
-const Sidebar = ({ isOpen, toggleSidebar }) => {
+const Sidebar = ({ isOpen, toggleSidebar, isMobile }) => {
 
   const { user, logout } = useAuth();
   const router = useRouter();
@@ -52,10 +52,21 @@ const Sidebar = ({ isOpen, toggleSidebar }) => {
         />
       )}
 
+      {/* ✅ Toggle Button for Big Screens */}
+      {!isOpen && !isMobile && (
+        <button
+          onClick={toggleSidebar}
+          className="fixed top-4 left-4 z-50 text-blue-700 hover:text-blue-900 transition-colors"
+        >
+          <FiMenu className="text-xl" />
+        </button>
+      )}
+
       {/* ✅ Sidebar */}
       <div
-        className={`fixed top-0 left-0 z-50 h-screen bg-gradient-to-b from-blue-100 to-blue-200 text-blue-900 shadow-lg transition-all duration-300
-        ${isOpen ? "w-56 translate-x-0" : "w-16 translate-x-0"}
+        className={`fixed top-0 left-0 z-50 h-screen bg-white text-blue-900 shadow-lg transition-all duration-300 border-none
+        ${isOpen ? "translate-x-0" : "-translate-x-full"}
+        ${isMobile && isOpen ? "w-full" : "w-56"}
       `}
       >
         {/* Header */}
@@ -77,16 +88,16 @@ const Sidebar = ({ isOpen, toggleSidebar }) => {
           {isOpen ? (
             <button
               onClick={toggleSidebar}
-              className="p-2 text-blue-700 hover:text-blue-900"
+              className="text-blue-700 hover:text-blue-900 transition-colors"
             >
-              <FiX />
+              <FiX className="text-xl" />
             </button>
           ) : (
             <button
               onClick={toggleSidebar}
-              className="p-2 text-blue-700 hover:text-blue-900"
+              className="text-blue-700 hover:text-blue-900 transition-colors"
             >
-              <FiMenu />
+              <FiMenu className="text-xl" />
             </button>
           )}
         </div>
