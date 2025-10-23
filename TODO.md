@@ -1,4 +1,5 @@
 <<<<<<< HEAD
+<<<<<<< HEAD
 - [x] Update login page UI to match dashboard theme
   - [x] Add "Child Salon" title at the top
   - [x] Change page background to blue gradient (from-blue-100 to-blue-200)
@@ -22,3 +23,10 @@
 - [x] Test adding/removing items.
 - [x] Make cart and wishlist pages mobile responsive.
 >>>>>>> 49d1b75bf7f5611094ca9f7d93c480618252bd33
+=======
+- [ ] Create global theme/colors file (src/lib/theme.js)
+- [ ] Update Navbar.jsx to use global theme and change logo name to "TinyFashion"
+- [ ] Update category page to use global theme
+- [ ] Pass categories as props to components if needed
+- [ ] Test consistency across pages
+>>>>>>> e9d6d15623e9299ff95eb88e2db19d6a62e97813
