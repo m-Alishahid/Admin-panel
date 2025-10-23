@@ -88,14 +88,14 @@ export default function DiscountManager() {
       const result = await discountService.updateStatuses();
       
       if (result.success) {
-        alert(result.message);
+        toast.success(`Auto-expiry check completed: ${result.message}`);
         loadData();
       } else {
-        alert(result.error || 'Failed to update statuses');
+        toast.error(result.error || 'Failed to check expiry');
       }
     } catch (error) {
-      console.error('Failed to update discount statuses:', error);
-      alert('Failed to update discount statuses');
+      console.error('Failed to check expired discounts:', error);
+      toast.error('Failed to check expired discounts');
     } finally {
       setLoading(false);
     }
@@ -182,16 +182,16 @@ export default function DiscountManager() {
       }
 
       if (result.success) {
-        alert(`Discount ${editingDiscount ? 'updated' : 'created'} successfully!`);
+        toast.success('Discount created successfully!');
         setShowForm(false);
         resetForm();
         loadData();
       } else {
-        alert(result.error || `Failed to ${editingDiscount ? 'update' : 'create'} discount`);
+        toast.error(result.error || 'Failed to create discount');
       }
     } catch (error) {
-      console.error('Discount submit error:', error);
-      alert(`Failed to ${editingDiscount ? 'update' : 'create'} discount. Please check console for details.`);
+      console.error('Create discount error:', error);
+      toast.error('Failed to create discount. Please check console for details.');
     } finally {
       setLoading(false);
     }
@@ -225,33 +225,31 @@ export default function DiscountManager() {
       const result = await discountService.removeDiscount(discountId);
       
       if (result.success) {
-        alert('Discount removed successfully and product prices restored!');
+        toast.success('Discount removed successfully!');
         loadData();
       } else {
         toast.error(result.error || 'Failed to remove discount');
       }
     } catch (error) {
       console.error('Remove discount error:', error);
-      alert('Failed to remove discount');
-    } finally {
-      setLoading(false);
+      toast.error('Failed to remove discount');
     }
   };
 
-  const handleToggleStatus = async (discountId, currentStatus) => {
+    const handleToggleStatus = async (discountId, currentStatus) => {
     try {
       const newStatus = currentStatus === 'Active' ? 'Inactive' : 'Active';
       const result = await discountService.update(discountId, { status: newStatus });
       
       if (result.success) {
-        alert(`Discount ${newStatus === 'Active' ? 'activated' : 'deactivated'} successfully!`);
+        toast.success(`Discount ${newStatus === 'Active' ? 'activated' : 'deactivated'} successfully!`);
         loadData();
       } else {
-        alert(result.error || 'Failed to update discount status');
+        toast.error(result.error || 'Failed to update discount status');
       }
     } catch (error) {
       console.error('Toggle discount status error:', error);
-      alert('Failed to update discount status');
+      toast.error('Failed to remove discount');
     }
   };
 

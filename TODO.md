@@ -1,0 +1,5 @@
+- [ ] Create global theme/colors file (src/lib/theme.js)
+- [ ] Update Navbar.jsx to use global theme and change logo name to "TinyFashion"
+- [ ] Update category page to use global theme
+- [ ] Pass categories as props to components if needed
+- [ ] Test consistency across pages

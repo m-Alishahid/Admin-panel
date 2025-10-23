@@ -6,7 +6,7 @@ export default function Footer() {
       <div className="container mx-auto px-4">
         <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
           <div>
-            <h3 className="text-xl font-bold mb-4 text-white">FashionHub</h3>
+            <h3 className="text-xl font-bold mb-4 text-white">TinyFashion</h3>
             <p className="text-pink-100 mb-4">Your ultimate destination for trendy fashion and style.</p>
             <div className="flex space-x-4">
               <Link href="#" className="text-pink-200 hover:text-white transition duration-300">📘</Link>
@@ -36,14 +36,14 @@ export default function Footer() {
           <div>
             <h4 className="text-lg font-semibold mb-4">Contact</h4>
             <ul className="space-y-2 text-pink-100">
-              <li>📧 hello@fashionhub.com</li>
+              <li>📧 hello@tinyfashion.com</li>
               <li>📞 +1 (555) 123-4567</li>
               <li>📍 123 Fashion St, Style City</li>
             </ul>
           </div>
         </div>
         <div className="border-t border-pink-500 mt-8 pt-8 text-center">
-          <p className="text-pink-200">&copy; 2024 FashionHub. All rights reserved. Made with ❤️ for fashion lovers.</p>
+          <p className="text-pink-200">&copy; 2024 TinyFashion. All rights reserved. Made with ❤️ for fashion lovers.</p>
         </div>
       </div>
     </footer>

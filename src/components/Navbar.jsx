@@ -8,6 +8,7 @@ import { categoryService } from '@/services/categoryService';
 import { useAuth } from '@/context/AuthContext';
 import { useCart } from '@/context/CartContext';
 import { useWishlist } from '@/context/WishlistContext';
+import { theme, logoColors } from '@/lib/theme';
 
 export default function Navbar() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -59,7 +60,7 @@ export default function Navbar() {
     <header className="w-full bg-white border-b shadow-sm sticky top-0 z-50">
       {/* Rewards Banner */}
       <div className="bg-gradient-to-b from-[#f8f4eb] to-[#fffdf9] text-[11px] sm:text-xs text-center text-gray-600 py-2 border-b font-serif px-2">
-        Join <span className="font-semibold text-[#cda434]">Childrensalon Rewards</span> and unlock exclusive treats as you shop.
+        Join <span className="font-semibold text-[#cda434]">TinyFashion Rewards</span> and unlock exclusive treats as you shop.
         <span className="font-semibold text-[#cda434]"> NEW REWARD </span> — Convert your points into vouchers.
       </div>
 
@@ -127,25 +128,23 @@ export default function Navbar() {
         <Link href="/" className="flex flex-col items-center justify-center flex-1">
           <Image
             src="/next.svg"
-            alt="Childrensalon Logo"
+            alt="TinyFashion Logo"
             width={65}
             height={45}
             className="object-contain"
           />
           <h1 className="font-bold text-[16px] sm:text-[18px] tracking-[1.5px] font-serif text-center">
-            <span className="text-[#cda434]">C</span>
-            <span className="text-[#f07b7b]">H</span>
-            <span className="text-[#8cc5c0]">I</span>
-            <span className="text-[#dca8b6]">L</span>
-            <span className="text-[#b7b3d0]">D</span>
-            <span className="text-[#f1b74a]">R</span>
-            <span className="text-[#f07b7b]">E</span>
-            <span className="text-[#8cc5c0]">N</span>
-            <span className="text-[#dca8b6]">S</span>
-            <span className="text-[#b7b3d0]">A</span>
-            <span className="text-[#f1b74a]">L</span>
-            <span className="text-[#cda434]">O</span>
-            <span className="text-[#f07b7b]">N</span>
+            <span style={{ color: logoColors[0] }}>T</span>
+            <span style={{ color: logoColors[1] }}>I</span>
+            <span style={{ color: logoColors[2] }}>N</span>
+            <span style={{ color: logoColors[3] }}>Y</span>
+            <span style={{ color: logoColors[4] }}>F</span>
+            <span style={{ color: logoColors[5] }}>A</span>
+            <span style={{ color: logoColors[6] }}>S</span>
+            <span style={{ color: logoColors[7] }}>H</span>
+            <span style={{ color: logoColors[8] }}>I</span>
+            <span style={{ color: logoColors[9] }}>O</span>
+            <span style={{ color: logoColors[10] }}>N</span>
           </h1>
         </Link>
 
