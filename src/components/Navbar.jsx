@@ -8,6 +8,7 @@ import { categoryService } from '@/services/categoryService';
 import { useAuth } from '@/context/AuthContext';
 import { useCart } from '@/context/CartContext';
 import { useWishlist } from '@/context/WishlistContext';
+import { theme, logoColors } from '@/lib/theme';
 
 export default function Navbar() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -72,18 +73,18 @@ export default function Navbar() {
     : '/login';
 
   return (
-    <header className="w-full bg-white border-b shadow-sm sticky top-0 z-50">
+    <header className="w-full bg-gradient-to-r from-blue-50 to-blue-100 border-b border-blue-200 shadow-sm sticky top-0 z-50">
       {/* Rewards Banner */}
-      <div className="bg-gradient-to-b from-[#f8f4eb] to-[#fffdf9] text-[11px] sm:text-xs text-center text-gray-600 py-2 border-b font-serif px-2">
-        Join <span className="font-semibold text-[#cda434]">Childrensalon Rewards</span> and unlock exclusive treats as you shop.
-        <span className="font-semibold text-[#cda434]"> NEW REWARD </span> — Convert your points into vouchers.
+      <div className="bg-gradient-to-r from-blue-600 to-blue-700 text-[11px] sm:text-xs text-center text-white py-2 border-b border-blue-500 font-serif px-2">
+        Join <span className="font-semibold text-yellow-300">TinyFashion Rewards</span> and unlock exclusive treats as you shop.
+        <span className="font-semibold text-yellow-300"> NEW REWARD </span> — Convert your points into vouchers.
       </div>
 
       {/* Navbar Container */}
       <div className="flex items-center justify-between px-3 sm:px-4 md:px-8 py-2 md:py-3 max-w-9x1 mx-auto">
         {/* Left Section (Rewards + User) */}
         <div className="flex items-center gap-1 sm:gap-3">
-          <button className="hidden sm:flex border border-[#d4b26e] rounded-full px-3 py-1 text-[12px] sm:text-sm hover:bg-[#f8f4eb] transition-colors font-serif">
+          <button className="hidden sm:flex border border-blue-600 bg-blue-600 text-white rounded-full px-3 py-1 text-[12px] sm:text-sm hover:bg-blue-700 transition-colors font-serif">
             👑 Rewards
           </button>
 
@@ -132,7 +133,7 @@ export default function Navbar() {
           ) : (
             <Link
               href="/login"
-              className="border border-[#d4b26e] rounded-full px-2 sm:px-3 py-1 flex items-center gap-1 hover:bg-[#f8f4eb] transition-colors font-serif text-[12px] sm:text-sm"
+              className="border border-blue-600 bg-blue-600 text-white rounded-full px-2 sm:px-3 py-1 flex items-center gap-1 hover:bg-blue-700 transition-colors font-serif text-[12px] sm:text-sm"
             >
               <User size={14} /> <span className="hidden sm:inline">Sign In</span>
             </Link>
@@ -142,26 +143,24 @@ export default function Navbar() {
         {/* Center Logo */}
         <Link href="/" className="flex flex-col items-center justify-center flex-1">
           <Image
-            src="/next.svg"
-            alt="Childrensalon Logo"
+            src=""
+            alt="TinyFashion Logo"
             width={65}
             height={45}
             className="object-contain"
           />
           <h1 className="font-bold text-[16px] sm:text-[18px] tracking-[1.5px] font-serif text-center">
-            <span className="text-[#cda434]">C</span>
-            <span className="text-[#f07b7b]">H</span>
-            <span className="text-[#8cc5c0]">I</span>
-            <span className="text-[#dca8b6]">L</span>
-            <span className="text-[#b7b3d0]">D</span>
-            <span className="text-[#f1b74a]">R</span>
-            <span className="text-[#f07b7b]">E</span>
-            <span className="text-[#8cc5c0]">N</span>
-            <span className="text-[#dca8b6]">S</span>
-            <span className="text-[#b7b3d0]">A</span>
-            <span className="text-[#f1b74a]">L</span>
-            <span className="text-[#cda434]">O</span>
-            <span className="text-[#f07b7b]">N</span>
+            <span style={{ color: logoColors[0] }}>T</span>
+            <span style={{ color: logoColors[1] }}>I</span>
+            <span style={{ color: logoColors[2] }}>N</span>
+            <span style={{ color: logoColors[3] }}>Y</span>
+            <span style={{ color: logoColors[4] }}>F</span>
+            <span style={{ color: logoColors[5] }}>A</span>
+            <span style={{ color: logoColors[6] }}>S</span>
+            <span style={{ color: logoColors[7] }}>H</span>
+            <span style={{ color: logoColors[8] }}>I</span>
+            <span style={{ color: logoColors[9] }}>O</span>
+            <span style={{ color: logoColors[10] }}>N</span>
           </h1>
         </Link>
 
@@ -187,13 +186,13 @@ export default function Navbar() {
                       placeholder="Search for products..."
                       value={searchQuery}
                       onChange={(e) => setSearchQuery(e.target.value)}
-                      className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#d4b26e] focus:border-transparent"
+                      className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#1e40af] focus:border-transparent"
                       autoFocus
                     />
                   </div>
                   <button
                     type="submit"
-                    className="w-full bg-[#d4b26e] text-white py-2 rounded-md hover:bg-[#b8932a] transition-colors font-serif font-semibold"
+                    className="w-full bg-[#1e40af] text-white py-2 rounded-md hover:bg-[#b8932a] transition-colors font-serif font-semibold"
                   >
                     Search
                   </button>
@@ -209,7 +208,7 @@ export default function Navbar() {
           <Link href="/wishlist" className="relative flex items-center hover:text-[#cda434] transition-colors">
             <Heart size={18} />
             {getWishlistCount() > 0 && (
-              <span className="absolute -top-2 -right-2 bg-[#d4b26e] text-white text-xs rounded-full h-5 w-5 flex items-center justify-center font-bold">
+              <span className="absolute -top-2 -right-2 bg-[#1e40af] text-white text-xs rounded-full h-5 w-5 flex items-center justify-center font-bold">
                 {getWishlistCount()}
               </span>
             )}
@@ -219,7 +218,7 @@ export default function Navbar() {
           <Link href="/cart" className="relative flex items-center hover:text-[#cda434] transition-colors">
             <ShoppingBag size={18} />
             {getCartItemCount() > 0 && (
-              <span className="absolute -top-2 -right-2 bg-[#d4b26e] text-white text-xs rounded-full h-5 w-5 flex items-center justify-center font-bold">
+              <span className="absolute -top-2 -right-2 bg-[#1e40af] text-white text-xs rounded-full h-5 w-5 flex items-center justify-center font-bold">
                 {getCartItemCount()}
               </span>
             )}
@@ -236,12 +235,12 @@ export default function Navbar() {
       </div>
 
       {/* Desktop Categories */}
-      <nav className="hidden md:flex justify-center gap-5 text-[13.5px] font-medium tracking-wide text-gray-800 border-t py-3 uppercase font-serif">
+      <nav className="hidden md:flex justify-center gap-5 text-[13.5px] font-medium tracking-wide text-blue-800 border-t border-blue-200 py-3 uppercase font-serif bg-blue-50">
         {categories.map((category) => (
           <Link
             key={category._id || category.id}
             href={`/categories/${category._id || category.id}`}
-            className="hover:text-[#cda434] transition-colors"
+            className="hover:text-blue-600 transition-colors"
           >
             {category.name}
           </Link>
@@ -255,7 +254,7 @@ export default function Navbar() {
             {categories.map((category) => (
               <Link
                 key={category._id || category.id}
-                href={`/category/${category._id || category.id}`}
+                href={`/category/${category._id}`}
                 className="px-6 py-3 text-gray-800 hover:bg-gray-50 hover:text-[#cda434] transition-colors font-serif uppercase text-[13px]"
                 onClick={() => setIsMenuOpen(false)}
               >

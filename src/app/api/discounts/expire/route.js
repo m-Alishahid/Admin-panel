@@ -2,9 +2,8 @@ import { NextResponse } from 'next/server';
 import connectDB from '@/lib/mongodb';
 import Discount from '@/Models/Discount';
 import Product from '@/Models/Product';
-import mongoose from 'mongoose';
 
-export async function POST(request) {
+export async function POST() {
   try {
     await connectDB();
     

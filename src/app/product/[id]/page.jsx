@@ -389,8 +389,8 @@ export default function ProductDetailPage() {
                   onClick={handleAddToWishlist}
                   className={`flex-1 border rounded-full py-3 font-serif font-semibold transition-all duration-300 flex items-center justify-center gap-2 ${
                     isInWishlist(product._id)
-                      ? 'border-red-500 text-red-500 bg-red-50'
-                      : 'border-[#d4b26e] text-[#d4b26e] hover:bg-[#f8f4eb]'
+                      ? 'border-blue-800 text-white bg-blue-800 hover:bg-blue-900'
+                      : 'border-blue-800 text-blue-800 hover:bg-blue-50'
                   }`}
                 >
                   <span>❤️</span>
@@ -399,7 +399,7 @@ export default function ProductDetailPage() {
                 <button
                   onClick={handleAddToCart}
                   disabled={currentStock === 0 || (product.requiresSize && !selectedSize) || (product.requiresColor && !selectedColor)}
-                  className="flex-1 border border-[#d4b26e] bg-[#d4b26e] text-white rounded-full py-3 font-serif font-semibold hover:bg-[#b8932a] hover:border-[#b8932a] transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                  className="flex-1 border border-blue-800 bg-blue-800 text-white rounded-full py-3 font-serif font-semibold hover:bg-blue-900 hover:border-blue-900 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
                 >
                   <span>🛒</span>
                   Add to Cart

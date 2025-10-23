@@ -3,7 +3,6 @@ import { useState, useEffect } from "react";
 import Link from "next/link";
 import Navbar from "@/components/Navbar";
 
-
 export default function HomePage() {
   const [currentSlide, setCurrentSlide] = useState(0);
   const [selectedCategory, setSelectedCategory] = useState("All");
@@ -83,7 +82,7 @@ export default function HomePage() {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-gold-600 mx-auto"></div>
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
           <p className="mt-4 text-gray-600">Loading...</p>
         </div>
       </div>
@@ -109,14 +108,14 @@ export default function HomePage() {
         </video>
         <div className="relative z-10 container mx-auto text-center px-4 py-8 md:py-20 min-h-[70vh] md:min-h-screen flex items-center justify-center">
           <div className="max-w-4xl mx-auto">
-            <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-serif font-bold mb-4 md:mb-6 text-gold-400 drop-shadow-lg">
+            <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-serif font-bold mb-4 md:mb-6 text-blue-400 drop-shadow-lg">
               {slides[0].title}
             </h1>
             <p className="text-lg sm:text-xl mb-6 md:mb-8 max-w-2xl mx-auto font-serif drop-shadow-md">
               {slides[0].subtitle}
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center items-center mt-8">
-              <button className="bg-gold-600 hover:bg-gold-700 text-white px-8 py-4 rounded-full font-serif font-semibold text-lg transition-all duration-300 transform hover:scale-105 shadow-lg">
+              <button className="bg-blue-600 hover:bg-blue-700 text-white px-8 py-4 rounded-full font-serif font-semibold text-lg transition-all duration-300 transform hover:scale-105 shadow-lg">
                 Shop Now
               </button>
             </div>
@@ -148,7 +147,7 @@ export default function HomePage() {
                   <p className="text-sm text-gray-600 mb-4">
                     Discover our {category.name.toLowerCase()} collection
                   </p>
-                  <button className="bg-gold-600 text-white px-4 py-2 rounded hover:bg-gold-700 transition duration-300 font-serif">
+                  <button className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 transition duration-300 font-serif">
                     Shop Now
                   </button>
                 </div>
@@ -194,7 +193,7 @@ export default function HomePage() {
                     <p className="text-xl md:text-2xl font-bold text-[#cda434] mb-4 text-center">
                       £{product.price}
                     </p>
-                    <button className="bg-gold-600 text-white px-4 py-2 rounded hover:bg-gold-700 transition duration-300 block text-center font-serif w-full">
+                    <button className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 transition duration-300 block text-center font-serif w-full">
                       View Details
                     </button>
                   </div>
@@ -232,9 +231,9 @@ export default function HomePage() {
                   <p className="text-xl md:text-2xl font-bold text-[#cda434] mb-4 text-center">
                     £{product.price}
                   </p>
-                  <button className="bg-gold-600 text-white px-4 py-2 rounded hover:bg-gold-700 transition duration-300 block text-center font-serif w-full">
-                    View Details
-                  </button>
+                    <button className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 transition duration-300 block text-center font-serif w-full">
+                      View Details
+                    </button>
                 </div>
               </Link>
             ))}
@@ -333,7 +332,7 @@ export default function HomePage() {
                 placeholder="Enter your email"
                 className="flex-grow px-4 py-3 rounded-lg sm:rounded-l-lg sm:rounded-r-none text-gray-800 focus:outline-none mb-3 sm:mb-0"
               />
-              <button className="bg-gold-600 text-white px-6 py-3 rounded-lg sm:rounded-r-lg sm:rounded-l-none font-serif hover:bg-gold-700 transition duration-300">
+              <button className="bg-blue-600 text-white px-6 py-3 rounded-lg sm:rounded-r-lg sm:rounded-l-none font-serif hover:bg-blue-700 transition duration-300">
                 Subscribe
               </button>
             </div>

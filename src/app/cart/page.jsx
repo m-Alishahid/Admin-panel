@@ -48,7 +48,7 @@ export default function CartPage() {
   if (!mounted) {
     return (
       <div className="min-h-screen bg-white flex items-center justify-center">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#d4b26e]"></div>
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#1e40af]"></div>
       </div>
     );
   }
@@ -64,7 +64,7 @@ export default function CartPage() {
             <p className="text-gray-600 mb-8 font-serif">Add some products to get started!</p>
             <Link
               href="/"
-              className="inline-block bg-[#d4b26e] text-white px-8 py-3 rounded-full font-serif font-semibold hover:bg-[#b8932a] transition-colors"
+              className="inline-block bg-[#1e40af] text-white px-8 py-3 rounded-full font-serif font-semibold hover:bg-[#1e40af] transition-colors"
             >
               Continue Shopping
             </Link>
@@ -87,7 +87,7 @@ export default function CartPage() {
                   type="checkbox"
                   checked={selectedItems.size === cartItems.length && cartItems.length > 0}
                   onChange={handleSelectAll}
-                  className="w-4 h-4 text-[#d4b26e] border-gray-300 rounded focus:ring-[#d4b26e]"
+                  className="w-4 h-4 text-[#1e40af] border-gray-300 rounded focus:ring-[#1e40af]"
                 />
                 <span className="text-sm font-medium text-gray-700">Select All ({cartItems.length})</span>
               </label>
@@ -120,7 +120,7 @@ export default function CartPage() {
                         type="checkbox"
                         checked={isSelected}
                         onChange={() => handleSelectItem(itemId)}
-                        className="w-4 h-4 text-[#d4b26e] border-gray-300 rounded focus:ring-[#d4b26e]"
+                        className="w-4 h-4 text-[#1e40af] border-gray-300 rounded focus:ring-[#1e40af]"
                       />
                     </label>
 
@@ -138,7 +138,7 @@ export default function CartPage() {
                     {/* Product Content */}
                     <div className="flex-1 min-w-0">
                       <Link href={`/product/${item.productId}`} className="block">
-                        <h3 className="font-medium text-gray-800 hover:text-[#d4b26e] transition-colors text-sm line-clamp-2 mb-1">
+                        <h3 className="font-medium text-gray-800 hover:text-[#1e40af] transition-colors text-sm line-clamp-2 mb-1">
                           {item.name}
                         </h3>
                       </Link>
@@ -157,7 +157,7 @@ export default function CartPage() {
 
                       {/* Operations */}
                       <div className="flex items-center gap-2">
-                        <button className="flex items-center gap-1 text-gray-500 hover:text-red-500 text-xs">
+                        <button className="flex items-center gap-1 text-gray-500 hover:text-red-500 text-xs bg-#1e40af">
                           <Heart size={12} />
                           <span>Wishlist</span>
                         </button>
@@ -233,7 +233,7 @@ export default function CartPage() {
             {selectedItems.size > 0 && (
               <div className="flex justify-between text-sm border-t pt-3">
                 <span className="text-gray-600">Selected Items ({selectedItems.size})</span>
-                <span className="font-semibold text-[#d4b26e]">Rs. {selectedTotal.toFixed(2)}</span>
+                <span className="font-semibold text-[#1e40af]">Rs. {selectedTotal.toFixed(2)}</span>
               </div>
             )}
 
@@ -245,7 +245,7 @@ export default function CartPage() {
             <div className="border-t pt-3">
               <div className="flex justify-between text-lg">
                 <span className="font-bold text-gray-800">Total</span>
-                <span className="font-bold text-[#d4b26e]">Rs. {getCartTotal().toFixed(2)}</span>
+                <span className="font-bold text-[#1e40af]">Rs. {getCartTotal().toFixed(2)}</span>
               </div>
             </div>
           </div>
@@ -253,14 +253,14 @@ export default function CartPage() {
           <div className="flex gap-3">
             <Link
               href="/checkout"
-              className="flex-1 bg-[#d4b26e] text-white py-3 px-6 rounded-lg font-serif font-semibold hover:bg-[#b8932a] transition-colors text-center"
+              className="flex-1 bg-[#1e40af] text-white py-3 px-6 rounded-lg font-serif font-semibold hover:bg-[#1e40af] transition-colors text-center"
             >
               Proceed to Checkout
             </Link>
 
             <Link
               href="/"
-              className="flex-1 border border-[#d4b26e] text-[#d4b26e] py-3 px-6 rounded-lg font-serif font-semibold hover:bg-[#f8f4eb] transition-colors text-center"
+              className="flex-1 border border-[#1e40af] text-[#1e40af] py-3 px-6 rounded-lg font-serif font-semibold hover:bg-[#f8f4eb] transition-colors text-center"
             >
               Continue Shopping
             </Link>

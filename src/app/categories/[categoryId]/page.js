@@ -1,9 +1,11 @@
 "use client";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useParams, useRouter } from "next/navigation";
 import Link from "next/link";
 import Navbar from "@/components/Navbar";
+import Image from 'next/image'
 import { productService } from "@/services/productService";
+import { theme } from "@/lib/theme";
 
 export default function CategoryProductsPage() {
   const params = useParams();
@@ -24,11 +26,7 @@ export default function CategoryProductsPage() {
     limit: 12
   });
 
-  useEffect(() => {
-    fetchCategoryProducts();
-  }, [categoryId, filters]);
-
-  const fetchCategoryProducts = async () => {
+  const fetchCategoryProducts = useCallback(async () => {
     try {
       setLoading(true);
       const response = await productService.getByCategory(categoryId, filters);
@@ -46,7 +44,11 @@ export default function CategoryProductsPage() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [categoryId, filters]);
+
+  useEffect(() => {
+    fetchCategoryProducts();
+  }, [fetchCategoryProducts]);
 
   const handleFilterChange = (key, value) => {
     setFilters(prev => ({
@@ -237,7 +239,7 @@ export default function CategoryProductsPage() {
           No products found
         </h3>
         <p className="text-gray-600 mb-8 font-serif leading-relaxed">
-          We couldn't find any products in this category matching your filters.
+          We couldn&apos;t find any products in this category matching your filters.
           Try adjusting your search criteria or browse other categories.
         </p>
         <div className="flex flex-col sm:flex-row gap-3 justify-center">
@@ -275,12 +277,19 @@ export default function CategoryProductsPage() {
           >
             <div className="bg-white rounded-lg shadow-sm hover:shadow-lg transition-all duration-300 cursor-pointer group overflow-hidden border border-gray-100 hover:border-[#d4b26e]">
               {/* Image Container - FIXED */}
-              <div className="relative overflow-hidden bg-gray-50">
-                <img
-                  alt={product.name}
-                  className="w-full h-64 object-cover group-hover:scale-105 transition-transform duration-300"
-                  src={product.thumbnail}
-                />
+                  <div className="relative overflow-hidden bg-gray-50" style={{height: '16rem'}}>
+                    {product.thumbnail ? (
+                      <Image
+                        alt={product.name}
+                        src={product.thumbnail}
+                        fill
+                        sizes="(max-width: 1024px) 100vw, 25vw"
+                        className="object-cover group-hover:scale-105 transition-transform duration-300"
+                        unoptimized
+                      />
+                    ) : (
+                      <div className="w-full h-64 bg-gray-100" />
+                    )}
                 
                 {/* Discount Badge */}
                 {product.discountedPrice && product.discountedPrice < product.salePrice && (
