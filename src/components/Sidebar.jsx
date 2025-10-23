@@ -1,7 +1,8 @@
 "use client";
 
+import { useAuth } from "@/context/AuthContext";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import {
   FiHome,
   FiUsers,
@@ -17,6 +18,9 @@ import {
 
 const Sidebar = ({ isOpen, toggleSidebar, isMobile }) => {
 
+  const { user, logout } = useAuth();
+  const router = useRouter();
+
   const pathname = usePathname();
 
   const menuItems = [
@@ -28,9 +32,14 @@ const Sidebar = ({ isOpen, toggleSidebar, isMobile }) => {
     { href: "/api", label: "API", icon: <FiLink /> },
   ];
 
-  const handleLogout = () => {
-    // ✅ Logout logic yahan likho (for now console)
-    console.log("Logging out...");
+  // ✅ Proper logout handler
+  const handleLogout = async () => {
+    try {
+      await logout();
+      router.push("/login"); // redirect user
+    } catch (err) {
+      console.error("Logout failed:", err);
+    }
   };
 
   return (
@@ -102,11 +111,10 @@ const Sidebar = ({ isOpen, toggleSidebar, isMobile }) => {
                 key={item.href}
                 href={item.href}
                 className={`flex items-center ${isOpen ? "gap-3 px-3" : "justify-center px-2"} py-2 rounded-md text-sm font-medium transition-all duration-200
-                ${
-                  active
+                ${active
                     ? "bg-blue-500 text-white shadow-sm"
                     : "hover:bg-blue-300/60 text-blue-700"
-                }`}
+                  }`}
               >
                 <span className="text-lg">{item.icon}</span>
                 {isOpen && <span>{item.label}</span>}
