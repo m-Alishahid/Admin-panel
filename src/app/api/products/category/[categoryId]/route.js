@@ -8,7 +8,7 @@ export async function GET(request, { params }) {
   try {
     await connectDB();
 
-    const { categoryId } = params;
+    const { categoryId } = await params;
     const { searchParams } = new URL(request.url);
     
     // Pagination and filtering options

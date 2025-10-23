@@ -262,10 +262,10 @@ export default function ProductDetailPage() {
 
             {/* Price Section */}
             <div className="flex items-center gap-4">
-              <span className="text-3xl font-bold text-[#d4b26e] font-serif">PKR:{displayPrice}</span>
+              <span className="text-3xl font-bold text-[#d4b26e] font-serif">${displayPrice}</span>
               {hasDiscount && (
                 <>
-                  <span className="text-xl text-gray-500 line-through font-serif">PKR:{product.salePrice}</span>
+                  <span className="text-xl text-gray-500 line-through font-serif">${product.salePrice}</span>
                   <span className="bg-red-500 text-white px-3 py-1 rounded-full text-sm font-semibold font-serif">
                     -{product.discountPercentage}% OFF
                   </span>
@@ -348,7 +348,7 @@ export default function ProductDetailPage() {
                   <span className={`font-serif font-semibold ${
                     currentStock > 0 ? 'text-green-600' : 'text-red-600'
                   }`}>
-                    {currentStock > 0 ? `${currentStock} items in stock` : 'Out of Stock'}
+                    {/* {currentStock > 0 ? `${currentStock} items in stock` : 'Out of Stock'} */}
                   </span>
                 </div>
                 {selectedSize && selectedColor && currentStock > 0 && currentStock < 10 && (
