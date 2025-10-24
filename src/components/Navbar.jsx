@@ -14,7 +14,10 @@ export default function Navbar() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [categories, setCategories] = useState([]);
   const [profileOpen, setProfileOpen] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [isSearchOpen, setIsSearchOpen] = useState(false);
   const profileRef = useRef(null);
+  const searchRef = useRef(null);
   const { isAuthenticated, user, logout } = useAuth();
   const { getCartItemCount } = useCart();
   const { getWishlistCount } = useWishlist();
@@ -37,6 +40,9 @@ export default function Navbar() {
       if (profileRef.current && !profileRef.current.contains(e.target)) {
         setProfileOpen(false);
       }
+      if (searchRef.current && !searchRef.current.contains(e.target)) {
+        setIsSearchOpen(false);
+      }
     };
     document.addEventListener('click', handler);
     return () => document.removeEventListener('click', handler);
@@ -50,6 +56,16 @@ export default function Navbar() {
     }
   };
 
+  const handleSearch = (e) => {
+    e.preventDefault();
+    if (searchQuery.trim()) {
+      // Navigate to search results page with query
+      window.location.href = `/search?q=${encodeURIComponent(searchQuery.trim())}`;
+      setIsSearchOpen(false);
+      setSearchQuery('');
+    }
+  };
+
   const accountHref = isAuthenticated
     ? user?.roleType === 'customer'
       ? '/account'
@@ -57,18 +73,18 @@ export default function Navbar() {
     : '/login';
 
   return (
-    <header className="w-full bg-white border-b shadow-sm sticky top-0 z-50">
+    <header className="w-full bg-gradient-to-r from-blue-50 to-blue-100 border-b border-blue-200 shadow-sm sticky top-0 z-50">
       {/* Rewards Banner */}
-      <div className="bg-gradient-to-b from-[#f8f4eb] to-[#fffdf9] text-[11px] sm:text-xs text-center text-gray-600 py-2 border-b font-serif px-2">
-        Join <span className="font-semibold text-[#cda434]">TinyFashion Rewards</span> and unlock exclusive treats as you shop.
-        <span className="font-semibold text-[#cda434]"> NEW REWARD </span> — Convert your points into vouchers.
+      <div className="bg-gradient-to-r from-blue-600 to-blue-700 text-[11px] sm:text-xs text-center text-white py-2 border-b border-blue-500 font-serif px-2">
+        Join <span className="font-semibold text-yellow-300">TinyFashion Rewards</span> and unlock exclusive treats as you shop.
+        <span className="font-semibold text-yellow-300"> NEW REWARD </span> — Convert your points into vouchers.
       </div>
 
       {/* Navbar Container */}
-      <div className="flex items-center justify-between px-3 sm:px-4 md:px-8 py-2 md:py-3 max-w-7xl mx-auto">
+      <div className="flex items-center justify-between px-3 sm:px-4 md:px-8 py-2 md:py-3 max-w-9x1 mx-auto">
         {/* Left Section (Rewards + User) */}
-        <div className="flex items-center gap-2 sm:gap-3">
-          <button className="hidden sm:flex border border-[#d4b26e] rounded-full px-3 py-1 text-[12px] sm:text-sm hover:bg-[#f8f4eb] transition-colors font-serif">
+        <div className="flex items-center gap-1 sm:gap-3">
+          <button className="hidden sm:flex border border-blue-600 bg-blue-600 text-white rounded-full px-3 py-1 text-[12px] sm:text-sm hover:bg-blue-700 transition-colors font-serif">
             👑 Rewards
           </button>
 
@@ -117,7 +133,7 @@ export default function Navbar() {
           ) : (
             <Link
               href="/login"
-              className="border border-[#d4b26e] rounded-full px-2 sm:px-3 py-1 flex items-center gap-1 hover:bg-[#f8f4eb] transition-colors font-serif text-[12px] sm:text-sm"
+              className="border border-blue-600 bg-blue-600 text-white rounded-full px-2 sm:px-3 py-1 flex items-center gap-1 hover:bg-blue-700 transition-colors font-serif text-[12px] sm:text-sm"
             >
               <User size={14} /> <span className="hidden sm:inline">Sign In</span>
             </Link>
@@ -127,7 +143,7 @@ export default function Navbar() {
         {/* Center Logo */}
         <Link href="/" className="flex flex-col items-center justify-center flex-1">
           <Image
-            src="/next.svg"
+            src=""
             alt="TinyFashion Logo"
             width={65}
             height={45}
@@ -150,15 +166,49 @@ export default function Navbar() {
 
         {/* Right Icons */}
         <div className="flex items-center gap-2 sm:gap-3">
-          <button className="hidden md:flex items-center gap-1 border border-gray-300 rounded-full px-3 py-1 hover:bg-gray-50 transition-colors font-serif text-sm">
-            <Search size={15} /> Search
-          </button>
+          {/* Search Button */}
+          <div className="relative" ref={searchRef}>
+            <button
+              onClick={() => setIsSearchOpen(!isSearchOpen)}
+              className="hidden md:flex items-center gap-1 border border-gray-300 rounded-full px-3 py-1 hover:bg-gray-50 transition-colors font-serif text-sm"
+            >
+              <Search size={15} /> Search
+            </button>
+
+            {/* Search Dropdown */}
+            {isSearchOpen && (
+              <div className="absolute right-0 mt-2 w-80 bg-white border rounded-md shadow-lg p-4 z-50">
+                <form onSubmit={handleSearch} className="space-y-3">
+                  <div className="relative">
+                    <Search size={16} className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
+                    <input
+                      type="text"
+                      placeholder="Search for products..."
+                      value={searchQuery}
+                      onChange={(e) => setSearchQuery(e.target.value)}
+                      className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#1e40af] focus:border-transparent"
+                      autoFocus
+                    />
+                  </div>
+                  <button
+                    type="submit"
+                    className="w-full bg-[#1e40af] text-white py-2 rounded-md hover:bg-[#b8932a] transition-colors font-serif font-semibold"
+                  >
+                    Search
+                  </button>
+                </form>
+                <div className="mt-3 text-xs text-gray-500">
+                  <p>Popular searches: dresses, shoes, accessories</p>
+                </div>
+              </div>
+            )}
+          </div>
 
           {/* Wishlist Button */}
           <Link href="/wishlist" className="relative flex items-center hover:text-[#cda434] transition-colors">
             <Heart size={18} />
             {getWishlistCount() > 0 && (
-              <span className="absolute -top-2 -right-2 bg-[#d4b26e] text-white text-xs rounded-full h-5 w-5 flex items-center justify-center font-bold">
+              <span className="absolute -top-2 -right-2 bg-[#1e40af] text-white text-xs rounded-full h-5 w-5 flex items-center justify-center font-bold">
                 {getWishlistCount()}
               </span>
             )}
@@ -168,7 +218,7 @@ export default function Navbar() {
           <Link href="/cart" className="relative flex items-center hover:text-[#cda434] transition-colors">
             <ShoppingBag size={18} />
             {getCartItemCount() > 0 && (
-              <span className="absolute -top-2 -right-2 bg-[#d4b26e] text-white text-xs rounded-full h-5 w-5 flex items-center justify-center font-bold">
+              <span className="absolute -top-2 -right-2 bg-[#1e40af] text-white text-xs rounded-full h-5 w-5 flex items-center justify-center font-bold">
                 {getCartItemCount()}
               </span>
             )}
@@ -185,12 +235,12 @@ export default function Navbar() {
       </div>
 
       {/* Desktop Categories */}
-      <nav className="hidden md:flex justify-center gap-5 text-[13.5px] font-medium tracking-wide text-gray-800 border-t py-3 uppercase font-serif">
+      <nav className="hidden md:flex justify-center gap-5 text-[13.5px] font-medium tracking-wide text-blue-800 border-t border-blue-200 py-3 uppercase font-serif bg-blue-50">
         {categories.map((category) => (
           <Link
             key={category._id || category.id}
             href={`/categories/${category._id || category.id}`}
-            className="hover:text-[#cda434] transition-colors"
+            className="hover:text-blue-600 transition-colors"
           >
             {category.name}
           </Link>

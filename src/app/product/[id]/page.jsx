@@ -262,10 +262,10 @@ export default function ProductDetailPage() {
 
             {/* Price Section */}
             <div className="flex items-center gap-4">
-              <span className="text-3xl font-bold text-[#d4b26e] font-serif">PKR:{displayPrice}</span>
+              <span className="text-3xl font-bold text-[#d4b26e] font-serif">${displayPrice}</span>
               {hasDiscount && (
                 <>
-                  <span className="text-xl text-gray-500 line-through font-serif">PKR:{product.salePrice}</span>
+                  <span className="text-xl text-gray-500 line-through font-serif">${product.salePrice}</span>
                   <span className="bg-red-500 text-white px-3 py-1 rounded-full text-sm font-semibold font-serif">
                     -{product.discountPercentage}% OFF
                   </span>
@@ -348,7 +348,7 @@ export default function ProductDetailPage() {
                   <span className={`font-serif font-semibold ${
                     currentStock > 0 ? 'text-green-600' : 'text-red-600'
                   }`}>
-                    {currentStock > 0 ? `${currentStock} items in stock` : 'Out of Stock'}
+                    {/* {currentStock > 0 ? `${currentStock} items in stock` : 'Out of Stock'} */}
                   </span>
                 </div>
                 {selectedSize && selectedColor && currentStock > 0 && currentStock < 10 && (
@@ -389,8 +389,8 @@ export default function ProductDetailPage() {
                   onClick={handleAddToWishlist}
                   className={`flex-1 border rounded-full py-3 font-serif font-semibold transition-all duration-300 flex items-center justify-center gap-2 ${
                     isInWishlist(product._id)
-                      ? 'border-red-500 text-red-500 bg-red-50'
-                      : 'border-[#d4b26e] text-[#d4b26e] hover:bg-[#f8f4eb]'
+                      ? 'border-blue-800 text-white bg-blue-800 hover:bg-blue-900'
+                      : 'border-blue-800 text-blue-800 hover:bg-blue-50'
                   }`}
                 >
                   <span>❤️</span>
@@ -399,7 +399,7 @@ export default function ProductDetailPage() {
                 <button
                   onClick={handleAddToCart}
                   disabled={currentStock === 0 || (product.requiresSize && !selectedSize) || (product.requiresColor && !selectedColor)}
-                  className="flex-1 border border-[#d4b26e] bg-[#d4b26e] text-white rounded-full py-3 font-serif font-semibold hover:bg-[#b8932a] hover:border-[#b8932a] transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                  className="flex-1 border border-blue-800 bg-blue-800 text-white rounded-full py-3 font-serif font-semibold hover:bg-blue-900 hover:border-blue-900 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
                 >
                   <span>🛒</span>
                   Add to Cart

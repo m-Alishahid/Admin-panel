@@ -18,45 +18,6 @@ const categorySchema = new mongoose.Schema({
     type: String,
     required: [true, 'Category image is required']
   },
-  // YEH PROPERTIES REMOVE KARDI CATEGORY SE
-  // requiresSize: {
-  //   type: Boolean,
-  //   default: false
-  // },
-  // requiresColor: {
-  //   type: Boolean,
-  //   default: false
-  // },
-  // hasVariants: {
-  //   type: Boolean,
-  //   default: false
-  // },
-  shippingCost: {
-    type: Number,
-    default: 0,
-    min: [0, 'Shipping cost cannot be negative']
-  },
-  taxRate: {
-    type: Number,
-    default: 0,
-    min: [0, 'Tax rate cannot be negative'],
-    max: [100, 'Tax rate cannot exceed 100%']
-  },
-  seoTitle: {
-    type: String,
-    trim: true,
-    maxlength: [60, 'SEO title cannot exceed 60 characters']
-  },
-  seoDescription: {
-    type: String,
-    trim: true,
-    maxlength: [160, 'SEO description cannot exceed 160 characters']
-  },
-  metaKeywords: {
-    type: String,
-    trim: true,
-    maxlength: [255, 'Meta keywords cannot exceed 255 characters']
-  },
   isFeatured: {
     type: Boolean,
     default: false
