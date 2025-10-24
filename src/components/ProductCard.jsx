@@ -72,7 +72,7 @@ export default function ProductCard({ product }) {
         <div className="p-4">
           <h3
             className="text-base font-serif font-semibold mb-2 line-clamp-2 text-gray-900 
-            group-hover:text-[#cda434] transition-colors duration-300 leading-tight"
+            group-hover:text-[#3b82f6] transition-colors duration-300 leading-tight"
           >
             {product.name}
           </h3>
@@ -88,7 +88,7 @@ export default function ProductCard({ product }) {
                 <div className="flex flex-col gap-1">
                   <div className="flex items-center gap-2">
                     <span
-                      className="text-lg font-bold text-[#cda434] font-serif"
+                      className="text-lg font-bold text-[#3b82f6] font-serif"
                     >
                       PKR:{product.discountedPrice}
                     </span>
@@ -104,7 +104,7 @@ export default function ProductCard({ product }) {
                 </div>
               ) : (
                 <span
-                  className="text-lg font-bold text-[#cda434] font-serif"
+                  className="text-lg font-bold text-[#3b82f6] font-serif"
                 >
                   PKR:{product.salePrice}
                 </span>
@@ -140,8 +140,8 @@ export default function ProductCard({ product }) {
 
           {/* View Details Button */}
           <button
-            className="w-full border border-[#d4b26e] text-[#d4b26e] rounded-full py-2 font-serif font-semibold 
-              hover:bg-[#f8f4eb] transition-all duration-300 transform group-hover:scale-[1.02] 
+            className="w-full bg-[var(--primary-blue)] hover:bg-[var(--primary-blue-hover)] text-white rounded-full py-2 font-serif font-semibold
+              transition-all duration-300 transform group-hover:scale-[1.02]
               text-sm flex items-center justify-center gap-2"
           >
             <span>View Details</span>
