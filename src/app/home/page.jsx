@@ -88,7 +88,7 @@ export default function HomePage() {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#cda434] mx-auto"></div>
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[var(--primary-blue)] mx-auto"></div>
           <p className="mt-4 text-gray-600 font-serif">Loading...</p>
         </div>
       </div>
@@ -96,7 +96,7 @@ export default function HomePage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-blue-50">
       <Navbar />
 
       {/* Hero Video Section */}
@@ -117,16 +117,16 @@ export default function HomePage() {
 
         <div className="relative z-10 container mx-auto px-4 py-16 md:py-28 lg:py-36 min-h-[60vh] flex items-center">
           <div className="max-w-3xl mx-auto text-center">
-            <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-serif font-bold mb-3 text-[#cda434]">
+            <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-serif font-bold mb-3 text-[var(--primary-blue)]">
               {slides[0].title}
             </h1>
             <p className="text-base sm:text-lg md:text-xl mb-6 max-w-2xl mx-auto font-serif text-gray-200">
               {slides[0].subtitle}
             </p>
             <div className="flex justify-center">
-              <Link 
+              <Link
                 href="/product"
-                className="inline-block bg-[#cda434] hover:bg-[#b8932a] text-white px-6 py-3 rounded-full font-serif font-semibold text-base transition transform hover:scale-105 shadow-lg"
+                className="inline-block bg-[var(--primary-blue)] hover:bg-[var(--primary-blue-hover)] text-white px-6 py-3 rounded-full font-serif font-semibold text-base transition transform hover:scale-105 shadow-lg"
               >
                 Shop Now
               </Link>
@@ -136,7 +136,7 @@ export default function HomePage() {
       </section>
 
       {/* Categories Horizontal Scroll */}
-      <section className="bg-white py-8 md:py-12">
+      <section className="bg-blue-100 py-8 md:py-12">
         <div className="container mx-auto px-4">
           <h2 className="text-2xl sm:text-3xl font-serif font-bold text-center text-black mb-6">
             Shop by Category
@@ -157,7 +157,7 @@ export default function HomePage() {
               </button>
 
               {categories.map((category) => (
-                <div key={category._id || category.id} className="flex-shrink-0 snap-start w-48 md:w-56 bg-gray-50 p-4 rounded-lg shadow-sm hover:shadow-md transition-shadow duration-300">
+                <div key={category._id || category.id} className="flex-shrink-0 snap-start w-48 md:w-56 bg-blue-50 p-4 rounded-lg shadow-sm hover:shadow-md transition-shadow duration-300">
                   <div
                     role="button"
                     onClick={() => setSelectedCategory(category.name)}
@@ -172,7 +172,7 @@ export default function HomePage() {
                     <h3 className="text-sm md:text-base font-serif font-semibold text-center">{category.name}</h3>
                     <p className="text-xs text-gray-600 text-center mt-2">Discover our {category.name.toLowerCase()} collection</p>
                     <div className="mt-3 w-full">
-                      <button className="w-full bg-[#cda434] hover:bg-[#b8932a] text-white px-3 py-2 rounded-full text-sm font-serif transition-colors duration-300">
+                      <button className="w-full bg-[var(--primary-blue)] hover:bg-[var(--primary-blue-hover)] text-white px-3 py-2 rounded-full text-sm font-serif transition-colors duration-300">
                         Shop
                       </button>
                     </div>
@@ -283,7 +283,7 @@ export default function HomePage() {
             {reviews.map((review, index) => (
               <div key={index} className="bg-gray-50 p-6 rounded-lg shadow-sm hover:shadow-md transition-shadow duration-300">
                 <div className="flex items-center mb-4">
-                  <div className="text-3xl mr-4 text-[#cda434]">{"⭐".repeat(review.rating)}</div>
+                  <div className="text-3xl mr-4 text-[var(--primary-blue)]">{"⭐".repeat(review.rating)}</div>
                   <div>
                     <h4 className="font-serif font-semibold text-gray-800">{review.name}</h4>
                     <p className="text-sm text-gray-600 font-serif">{review.role}</p>
@@ -310,9 +310,9 @@ export default function HomePage() {
               <input
                 type="email"
                 placeholder="Enter your email"
-                className="flex-grow px-4 py-3 rounded-lg sm:rounded-l-lg sm:rounded-r-none text-gray-800 focus:outline-none focus:ring-2 focus:ring-[#cda434] font-serif"
+                className="flex-grow px-4 py-3 rounded-lg sm:rounded-l-lg sm:rounded-r-none text-gray-800 focus:outline-none focus:ring-2 focus:ring-[var(--primary-blue)] font-serif"
               />
-              <button className="bg-[#cda434] hover:bg-[#b8932a] text-white px-6 py-3 rounded-lg sm:rounded-r-lg sm:rounded-l-none font-serif transition-colors duration-300">
+              <button className="bg-[var(--primary-blue)] hover:bg-[var(--primary-blue-hover)] text-white px-6 py-3 rounded-lg sm:rounded-r-lg sm:rounded-l-none font-serif transition-colors duration-300">
                 Subscribe
               </button>
             </div>
@@ -325,7 +325,7 @@ export default function HomePage() {
         <div className="container mx-auto px-4">
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
             <div>
-              <h3 className="text-lg font-serif font-bold text-[#cda434] mb-2">
+              <h3 className="text-lg font-serif font-bold text-[var(--primary-blue)] mb-2">
                 Childrensalon Clone
               </h3>
               <p className="text-gray-300 text-sm font-serif">
@@ -335,19 +335,19 @@ export default function HomePage() {
             <div>
               <h4 className="text-sm font-serif font-semibold mb-2">Shop</h4>
               <ul className="space-y-1 text-gray-300 text-sm font-serif">
-                <li><Link href="/product?category=girls" className="hover:text-[#cda434] transition-colors duration-300">Girls</Link></li>
-                <li><Link href="/product?category=boys" className="hover:text-[#cda434] transition-colors duration-300">Boys</Link></li>
-                <li><Link href="/product?category=new-in" className="hover:text-[#cda434] transition-colors duration-300">New In</Link></li>
-                <li><Link href="/product?category=designers" className="hover:text-[#cda434] transition-colors duration-300">Designers</Link></li>
+                <li><Link href="/product?category=girls" className="hover:text-[var(--primary-blue)] transition-colors duration-300">Girls</Link></li>
+                <li><Link href="/product?category=boys" className="hover:text-[var(--primary-blue)] transition-colors duration-300">Boys</Link></li>
+                <li><Link href="/product?category=new-in" className="hover:text-[var(--primary-blue)] transition-colors duration-300">New In</Link></li>
+                <li><Link href="/product?category=designers" className="hover:text-[var(--primary-blue)] transition-colors duration-300">Designers</Link></li>
               </ul>
             </div>
             <div>
               <h4 className="text-sm font-serif font-semibold mb-2">Support</h4>
               <ul className="space-y-1 text-gray-300 text-sm font-serif">
-                <li><Link href="/size-guide" className="hover:text-[#cda434] transition-colors duration-300">Size Guide</Link></li>
-                <li><Link href="/shipping" className="hover:text-[#cda434] transition-colors duration-300">Shipping Info</Link></li>
-                <li><Link href="/returns" className="hover:text-[#cda434] transition-colors duration-300">Returns</Link></li>
-                <li><Link href="/faq" className="hover:text-[#cda434] transition-colors duration-300">FAQ</Link></li>
+                <li><Link href="/size-guide" className="hover:text-[var(--primary-blue)] transition-colors duration-300">Size Guide</Link></li>
+                <li><Link href="/shipping" className="hover:text-[var(--primary-blue)] transition-colors duration-300">Shipping Info</Link></li>
+                <li><Link href="/returns" className="hover:text-[var(--primary-blue)] transition-colors duration-300">Returns</Link></li>
+                <li><Link href="/faq" className="hover:text-[var(--primary-blue)] transition-colors duration-300">FAQ</Link></li>
               </ul>
             </div>
             <div>

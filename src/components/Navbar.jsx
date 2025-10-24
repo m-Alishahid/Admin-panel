@@ -73,18 +73,18 @@ export default function Navbar() {
     : '/login';
 
   return (
-    <header className="w-full bg-gradient-to-r from-blue-50 to-blue-100 border-b border-blue-200 shadow-sm sticky top-0 z-50">
+    <header className="w-full navbar sticky top-0 z-50">
       {/* Rewards Banner */}
-      <div className="bg-gradient-to-r from-blue-600 to-blue-700 text-[11px] sm:text-xs text-center text-white py-2 border-b border-blue-500 font-serif px-2">
-        Join <span className="font-semibold text-yellow-300">TinyFashion Rewards</span> and unlock exclusive treats as you shop.
-        <span className="font-semibold text-yellow-300"> NEW REWARD </span> — Convert your points into vouchers.
+      <div className="navbar-rewards text-[11px] sm:text-xs text-center py-2 font-serif px-2">
+        Join <span className="font-semibold highlight">TinyFashion Rewards</span> and unlock exclusive treats as you shop.
+        <span className="font-semibold highlight"> NEW REWARD </span> — Convert your points into vouchers.
       </div>
 
       {/* Navbar Container */}
       <div className="flex items-center justify-between px-3 sm:px-4 md:px-8 py-2 md:py-3 max-w-9x1 mx-auto">
         {/* Left Section (Rewards + User) */}
         <div className="flex items-center gap-1 sm:gap-3">
-          <button className="hidden sm:flex border border-blue-600 bg-blue-600 text-white rounded-full px-3 py-1 text-[12px] sm:text-sm hover:bg-blue-700 transition-colors font-serif">
+          <button className="hidden sm:flex border border-[var(--primary-blue)] bg-[var(--primary-blue)] text-white rounded-full px-3 py-1 text-[12px] sm:text-sm hover:bg-[var(--primary-blue-hover)] transition-colors font-serif">
             👑 Rewards
           </button>
 
@@ -133,7 +133,7 @@ export default function Navbar() {
           ) : (
             <Link
               href="/login"
-              className="border border-blue-600 bg-blue-600 text-white rounded-full px-2 sm:px-3 py-1 flex items-center gap-1 hover:bg-blue-700 transition-colors font-serif text-[12px] sm:text-sm"
+              className="border border-[var(--primary-blue)] bg-[var(--primary-blue)] text-white rounded-full px-2 sm:px-3 py-1 flex items-center gap-1 hover:bg-[var(--primary-blue-hover)] transition-colors font-serif text-[12px] sm:text-sm"
             >
               <User size={14} /> <span className="hidden sm:inline">Sign In</span>
             </Link>
@@ -235,12 +235,12 @@ export default function Navbar() {
       </div>
 
       {/* Desktop Categories */}
-      <nav className="hidden md:flex justify-center gap-5 text-[13.5px] font-medium tracking-wide text-blue-800 border-t border-blue-200 py-3 uppercase font-serif bg-blue-50">
+      <nav className="navbar-categories hidden md:flex justify-center gap-5 text-[13.5px] font-medium tracking-wide py-3 uppercase font-serif">
         {categories.map((category) => (
           <Link
             key={category._id || category.id}
             href={`/categories/${category._id || category.id}`}
-            className="hover:text-blue-600 transition-colors"
+            className="hover:text-[var(--primary-blue)] transition-colors"
           >
             {category.name}
           </Link>

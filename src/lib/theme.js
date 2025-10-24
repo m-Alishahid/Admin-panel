@@ -3,8 +3,8 @@
 export const theme = {
   colors: {
     // Primary brand colors
-    primary: '#cda434', // Gold brand color (TinyFashion main)
-    primaryDark: '#b8932a', // Darker gold for hover states
+    primary: '#1d4ed8', // Blue brand color
+    primaryDark: '#1e40af', // Darker blue for hover states
 
     // Secondary colors
     secondary: '#1e40af', // Blue secondary

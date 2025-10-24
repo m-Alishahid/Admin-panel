@@ -51,7 +51,7 @@ export default function WishlistPage() {
   if (!mounted) {
     return (
       <div className="min-h-screen bg-white flex items-center justify-center">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#1e40af]"></div>
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[var(--primary-blue)]"></div>
       </div>
     );
   }
@@ -67,7 +67,7 @@ export default function WishlistPage() {
             <p className="text-gray-600 mb-8 font-serif">Save items you love for later!</p>
             <Link
               href="/"
-              className="inline-block bg-[#1e40af] text-white px-8 py-3 rounded-full font-serif font-semibold hover:bg-[#b8932a] transition-colors"
+              className="inline-block bg-[var(--primary-blue)] text-white px-8 py-3 rounded-full font-serif font-semibold hover:bg-[var(--primary-blue-hover)] transition-colors"
             >
               Start Shopping
             </Link>
@@ -113,7 +113,7 @@ export default function WishlistPage() {
                     {/* Product Content */}
                     <div className="flex-1 min-w-0">
                       <Link href={`/product/${item.productId}`} className="block">
-                        <h3 className="font-medium text-gray-800 hover:text-[#1e40af] transition-colors text-sm line-clamp-2 mb-1">
+                        <h3 className="font-medium text-gray-800 hover:text-[var(--primary-blue)] transition-colors text-sm line-clamp-2 mb-1">
                           {item.name}
                         </h3>
                       </Link>
@@ -165,7 +165,7 @@ export default function WishlistPage() {
                       {/* Add to Cart Button */}
                       <button
                         onClick={() => handleAddToCart(item)}
-                        className="flex items-center gap-1 bg-[#1e40af] text-white px-3 py-1 rounded-full font-serif font-semibold hover:bg-[#1e40af] transition-colors text-xs"
+                        className="flex items-center gap-1 bg-[var(--primary-blue)] text-white px-3 py-1 rounded-full font-serif font-semibold hover:bg-[var(--primary-blue-hover)] transition-colors text-xs"
                       >
                         <ShoppingCart size={12} />
                         <span>Add to Cart</span>
@@ -182,7 +182,7 @@ export default function WishlistPage() {
         <div className="text-center mt-12">
           <Link
             href="/"
-            className="inline-block bg-[#1e40af] text-white px-8 py-3 rounded-full font-serif font-semibold hover:bg-[#1e40af] transition-colors"
+            className="inline-block bg-[var(--primary-blue)] text-white px-8 py-3 rounded-full font-serif font-semibold hover:bg-[var(--primary-blue-hover)] transition-colors"
           >
             Continue Shopping
           </Link>
