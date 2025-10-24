@@ -26,7 +26,7 @@ export default function HomePage() {
         // Fetch products
         const productsRes = await productService.getAll();
         console.log('Products', productsRes);
-        
+
         // const productsData = await productsRes.json();
         if (productsRes.success) {
           setProducts(productsRes.data?.products || productsRes.data || []);
@@ -76,13 +76,13 @@ export default function HomePage() {
   const filteredProducts = selectedCategory === "All"
     ? newInProducts
     : newInProducts.filter(product => {
-        const catName = (product.category?.name || '').toLowerCase();
-        if (selectedCategory === "Girls") return catName.includes("girl");
-        if (selectedCategory === "Boys") return catName.includes("boy");
-        if (selectedCategory === "Baby") return catName.includes("baby");
-        if (selectedCategory === "Accessories") return catName.includes("accessories");
-        return true;
-      });
+      const catName = (product.category?.name || '').toLowerCase();
+      if (selectedCategory === "Girls") return catName.includes("girl");
+      if (selectedCategory === "Boys") return catName.includes("boy");
+      if (selectedCategory === "Baby") return catName.includes("baby");
+      if (selectedCategory === "Accessories") return catName.includes("accessories");
+      return true;
+    });
 
   if (loading) {
     return (
@@ -124,7 +124,7 @@ export default function HomePage() {
               {slides[0].subtitle}
             </p>
             <div className="flex justify-center">
-              <Link 
+              <Link
                 href="/product"
                 className="inline-block bg-[#cda434] hover:bg-[#b8932a] text-white px-6 py-3 rounded-full font-serif font-semibold text-base transition transform hover:scale-105 shadow-lg"
               >
@@ -135,7 +135,6 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* Categories Horizontal Scroll */}
       <section className="bg-white py-8 md:py-12">
         <div className="container mx-auto px-4">
           <h2 className="text-2xl sm:text-3xl font-serif font-bold text-center text-black mb-6">
@@ -143,18 +142,8 @@ export default function HomePage() {
           </h2>
 
           <div className="overflow-x-auto no-scrollbar -mx-4 px-4">
-            <div className="flex gap-4 snap-x snap-mandatory">
-              {/* "All" pill */}
-              <button
-                onClick={() => setSelectedCategory('All')}
-                className={`flex-shrink-0 snap-start px-4 py-2 rounded-full border ${
-                  selectedCategory === 'All' 
-                    ? 'bg-black text-white border-black' 
-                    : 'bg-white text-gray-800 border-gray-300'
-                } font-serif transition-colors duration-300`}
-              >
-                All
-              </button>
+            <div className="flex gap-4 snap-x snap-mandatory items-stretch">
+              {/* "All" Category Card - Same size as other categories */}
 
               {categories.map((category) => (
                 <div key={category._id || category.id} className="flex-shrink-0 snap-start w-48 md:w-56 bg-gray-50 p-4 rounded-lg shadow-sm hover:shadow-md transition-shadow duration-300">
@@ -166,14 +155,19 @@ export default function HomePage() {
                     <div className="text-4xl md:text-5xl mb-2">
                       {category.name.toLowerCase().includes('girl') ? '👗' :
                         category.name.toLowerCase().includes('boy') ? '👔' :
-                        category.name.toLowerCase().includes('baby') ? '🍼' :
-                        category.name.toLowerCase().includes('accessories') ? '🧣' : '👕'}
+                          category.name.toLowerCase().includes('baby') ? '🍼' :
+                            category.name.toLowerCase().includes('accessories') ? '🧣' : '👕'}
                     </div>
                     <h3 className="text-sm md:text-base font-serif font-semibold text-center">{category.name}</h3>
                     <p className="text-xs text-gray-600 text-center mt-2">Discover our {category.name.toLowerCase()} collection</p>
                     <div className="mt-3 w-full">
-                      <button className="w-full bg-[#cda434] hover:bg-[#b8932a] text-white px-3 py-2 rounded-full text-sm font-serif transition-colors duration-300">
-                        Shop
+                      <button
+                        className={`w-full px-3 py-2 rounded-full text-sm font-serif transition-colors duration-300 ${selectedCategory === category.name
+                            ? 'bg-black text-white'
+                            : 'bg-[#cda434] hover:bg-[#b8932a] text-white'
+                          }`}
+                      >
+                        {'Shop'}
                       </button>
                     </div>
                   </div>
@@ -183,34 +177,6 @@ export default function HomePage() {
           </div>
         </div>
       </section>
-
-      {/* Filtered Products Section */}
-      {selectedCategory !== "All" && filteredProducts.length > 0 && (
-        <section className="bg-gray-50 py-8 md:py-12">
-          <div className="container mx-auto px-4">
-            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-6">
-              <h2 className="text-2xl sm:text-3xl font-serif font-bold text-black mb-3 sm:mb-0">
-                {selectedCategory} Collection
-              </h2>
-              <button
-                className="bg-black text-white px-4 py-2 rounded font-serif text-sm hover:bg-gray-800 transition-colors duration-300"
-                onClick={() => setSelectedCategory("All")}
-              >
-                View All Categories
-              </button>
-            </div>
-
-            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6">
-              {filteredProducts.map((product) => (
-                <ProductCard 
-                  key={product._id || product.id} 
-                  product={product} 
-                />
-              ))}
-            </div>
-          </div>
-        </section>
-      )}
 
       {/* Featured Products */}
       {featuredProducts.length > 0 && (
@@ -222,9 +188,9 @@ export default function HomePage() {
 
             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6">
               {featuredProducts.map((product) => (
-                <ProductCard 
-                  key={product._id || product.id} 
-                  product={product} 
+                <ProductCard
+                  key={product._id || product.id}
+                  product={product}
                 />
               ))}
             </div>
@@ -263,7 +229,7 @@ export default function HomePage() {
           </div>
 
           <div className="text-center mt-6">
-            <Link 
+            <Link
               href="/product?category=seasonal"
               className="inline-block bg-black text-white px-6 py-3 rounded font-serif hover:bg-gray-800 transition-colors duration-300"
             >
