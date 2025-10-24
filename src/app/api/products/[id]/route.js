@@ -332,6 +332,7 @@ export async function PUT(request, { params }) {
 
     return NextResponse.json({ success: false, error: 'Failed to update product', details: err.message }, { status: 500 });
   }
+  
 }
 
 export async function DELETE(request, { params }) {
