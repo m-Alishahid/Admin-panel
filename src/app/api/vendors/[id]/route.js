@@ -4,6 +4,7 @@ import { getUniversalSession, isAdmin } from '@/lib/auth';
 import Vendor from '@/Models/Vendor';
 import User from '@/Models/User';
 import connectDB from '@/lib/mongodb';
+import Product from '@/Models/Product';
 
 // GET vendor by ID
 export async function GET(request, { params }) {
@@ -18,7 +19,7 @@ export async function GET(request, { params }) {
       }, { status: 401 });
     }
 
-    const { id } = params;
+    const { id } = await params;
     
     // Users can only access their own vendor profile unless they're admin
     if (!isAdmin(session)) {

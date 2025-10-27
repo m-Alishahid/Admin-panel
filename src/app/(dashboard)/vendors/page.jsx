@@ -1,15 +1,15 @@
-// app/dashboard/page.jsx - UPDATED WITH VENDOR RESTRICTIONS
+// app/dashboard/page.jsx - COMPLETE UPDATED VERSION WITH CURRENCY UTILS
 "use client";
 import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { 
-  Users, 
-  Package, 
-  ShoppingCart, 
-  DollarSign, 
+import {
+  Users,
+  Package,
+  ShoppingCart,
+  DollarSign,
   TrendingUp,
   AlertCircle,
   FileText,
@@ -19,7 +19,11 @@ import {
   BarChart3,
   Activity,
   Calendar,
-  IndianRupee
+  Printer,
+  Edit,
+  Clock,
+  ArrowUp,
+  ArrowDown
 } from 'lucide-react';
 import { toast } from 'sonner';
 import { Modal } from '@/components/ui/modal';
@@ -31,6 +35,9 @@ import { dashboardService } from '@/services/dashboardService';
 import { vendorService } from '@/services/vendorService';
 import { invoiceService } from '@/services/invoiceService';
 
+// NEW CURRENCY IMPORTS
+import { formatCurrency, getCurrencySymbol } from '@/lib/cuurencyUtils';
+
 // Vendor Stats Component
 function VendorStats({ vendorData, stats }) {
   const statsConfig = [
@@ -39,42 +46,49 @@ function VendorStats({ vendorData, stats }) {
       value: stats?.totalProducts || 0,
       icon: Package,
       color: 'text-blue-600',
-      bgColor: 'bg-blue-50'
+      bgColor: 'bg-blue-50',
+      change: '+5%'
     },
     {
       title: 'Current Stock',
       value: stats?.currentStock || 0,
       icon: ShoppingCart,
       color: 'text-green-600',
-      bgColor: 'bg-green-50'
+      bgColor: 'bg-green-50',
+      change: '+12%'
     },
     {
       title: 'Sold Stock',
       value: stats?.soldStock || 0,
       icon: TrendingUp,
       color: 'text-purple-600',
-      bgColor: 'bg-purple-50'
+      bgColor: 'bg-purple-50',
+      change: '+8%'
     },
+    // UPDATED - Currency format use karein
     {
       title: 'Total Sales',
-      value: `₹${(stats?.totalSales || 0).toLocaleString()}`,
+      value: formatCurrency(stats?.totalSales || 0),
       icon: DollarSign,
       color: 'text-orange-600',
-      bgColor: 'bg-orange-50'
+      bgColor: 'bg-orange-50',
+      change: '+15%'
     },
     {
       title: 'Total Profit',
-      value: `₹${(stats?.totalProfit || 0).toLocaleString()}`,
+      value: formatCurrency(stats?.totalProfit || 0),
       icon: BarChart3,
       color: 'text-green-600',
-      bgColor: 'bg-green-50'
+      bgColor: 'bg-green-50',
+      change: '+20%'
     },
     {
       title: 'Low Stock Alerts',
       value: stats?.lowStockProducts || 0,
       icon: AlertCircle,
       color: 'text-red-600',
-      bgColor: 'bg-red-50'
+      bgColor: 'bg-red-50',
+      change: '-2%'
     }
   ];
 
@@ -87,6 +101,10 @@ function VendorStats({ vendorData, stats }) {
               <div>
                 <p className="text-sm font-medium text-gray-600">{stat.title}</p>
                 <p className="text-xl font-bold mt-1">{stat.value}</p>
+                <div className={`flex items-center text-xs mt-1 ${stat.change.startsWith('+') ? 'text-green-600' : 'text-red-600'}`}>
+                  {stat.change.startsWith('+') ? <ArrowUp className="w-3 h-3 mr-1" /> : <ArrowDown className="w-3 h-3 mr-1" />}
+                  {stat.change}
+                </div>
               </div>
               <div className={`p-2 rounded-lg ${stat.bgColor}`}>
                 <stat.icon className={`h-5 w-5 ${stat.color}`} />
@@ -107,42 +125,49 @@ function AdminStats({ stats }) {
       value: stats?.totalVendors || 0,
       icon: Users,
       color: 'text-blue-600',
-      bgColor: 'bg-blue-50'
+      bgColor: 'bg-blue-50',
+      change: '+3%'
     },
     {
       title: 'Total Products',
       value: stats?.totalProducts || 0,
       icon: Package,
       color: 'text-green-600',
-      bgColor: 'bg-green-50'
+      bgColor: 'bg-green-50',
+      change: '+8%'
     },
+    // UPDATED - Currency format use karein
     {
       title: 'Total Sales',
-      value: `₹${(stats?.totalSales || 0).toLocaleString()}`,
+      value: formatCurrency(stats?.totalSales || 0),
       icon: DollarSign,
       color: 'text-purple-600',
-      bgColor: 'bg-purple-50'
+      bgColor: 'bg-purple-50',
+      change: '+12%'
     },
     {
       title: 'Total Profit',
-      value: `₹${(stats?.totalProfit || 0).toLocaleString()}`,
+      value: formatCurrency(stats?.totalProfit || 0),
       icon: BarChart3,
       color: 'text-green-600',
-      bgColor: 'bg-green-50'
+      bgColor: 'bg-green-50',
+      change: '+18%'
     },
     {
       title: 'Pending Requests',
       value: stats?.pendingRequests || 0,
       icon: AlertCircle,
       color: 'text-orange-600',
-      bgColor: 'bg-orange-50'
+      bgColor: 'bg-orange-50',
+      change: '+5%'
     },
     {
       title: 'Low Stock Items',
       value: stats?.lowStockProducts || 0,
       icon: Activity,
       color: 'text-red-600',
-      bgColor: 'bg-red-50'
+      bgColor: 'bg-red-50',
+      change: '-3%'
     }
   ];
 
@@ -155,6 +180,10 @@ function AdminStats({ stats }) {
               <div>
                 <p className="text-sm font-medium text-gray-600">{stat.title}</p>
                 <p className="text-xl font-bold mt-1">{stat.value}</p>
+                <div className={`flex items-center text-xs mt-1 ${stat.change.startsWith('+') ? 'text-green-600' : 'text-red-600'}`}>
+                  {stat.change.startsWith('+') ? <ArrowUp className="w-3 h-3 mr-1" /> : <ArrowDown className="w-3 h-3 mr-1" />}
+                  {stat.change}
+                </div>
               </div>
               <div className={`p-2 rounded-lg ${stat.bgColor}`}>
                 <stat.icon className={`h-5 w-5 ${stat.color}`} />
@@ -163,6 +192,400 @@ function AdminStats({ stats }) {
           </CardContent>
         </Card>
       ))}
+    </div>
+  );
+}
+
+// Activity Feed Component
+function ActivityFeed({ activities, onViewInvoice }) {
+  if (!activities || activities.length === 0) {
+    return (
+      <div className="text-center py-8">
+        <Activity className="w-12 h-12 text-gray-400 mx-auto mb-4" />
+        <p className="text-gray-500">No recent activity</p>
+      </div>
+    );
+  }
+
+  const getActivityIcon = (type) => {
+    switch (type) {
+      case 'invoice':
+        return <FileText className="w-4 h-4 text-blue-600" />;
+      case 'product':
+        return <Package className="w-4 h-4 text-green-600" />;
+      default:
+        return <Activity className="w-4 h-4 text-gray-600" />;
+    }
+  };
+
+  const getActivityColor = (type) => {
+    switch (type) {
+      case 'invoice':
+        return 'bg-blue-50 border-blue-200';
+      case 'product':
+        return 'bg-green-50 border-green-200';
+      default:
+        return 'bg-gray-50 border-gray-200';
+    }
+  };
+
+  return (
+    <div className="space-y-3">
+      {activities.map((activity, index) => (
+        <div
+          key={index}
+          className={`p-3 border rounded-lg cursor-pointer hover:shadow-md transition-shadow ${getActivityColor(activity.type)}`}
+          onClick={() => activity.type === 'invoice' && onViewInvoice(activity)}
+        >
+          <div className="flex items-start space-x-3">
+            <div className="p-2 bg-white rounded-lg border">
+              {getActivityIcon(activity.type)}
+            </div>
+            <div className="flex-1">
+              <p className="font-medium text-sm text-gray-900">{activity.title}</p>
+              <p className="text-xs text-gray-600 mt-1">{activity.description}</p>
+              {activity.amount && (
+                <p className="text-xs font-medium text-gray-700 mt-1">
+                  Amount: {formatCurrency(activity.amount)} {/* UPDATED */}
+                </p>
+              )}
+              <div className="flex items-center space-x-2 mt-2">
+                <Clock className="w-3 h-3 text-gray-400" />
+                <span className="text-xs text-gray-500">
+                  {new Date(activity.timestamp).toLocaleDateString()} at{' '}
+                  {new Date(activity.timestamp).toLocaleTimeString()}
+                </span>
+              </div>
+            </div>
+            {activity.status && (
+              <Badge variant={
+                activity.status === 'Paid' ? 'default' :
+                  activity.status === 'Pending' ? 'secondary' : 'outline'
+              }>
+                {activity.status}
+              </Badge>
+            )}
+          </div>
+        </div>
+      ))}
+    </div>
+  );
+}
+
+// Low Stock Alerts Component
+function LowStockAlerts({ lowStockData, user, onViewProduct }) {
+  if (!lowStockData || lowStockData.count === 0) {
+    return (
+      <Card>
+        <CardContent className="p-6">
+          <div className="text-center">
+            <Package className="w-12 h-12 text-gray-400 mx-auto mb-4" />
+            <p className="text-gray-500">No low stock alerts</p>
+            <p className="text-sm text-gray-400 mt-1">All products are well stocked</p>
+          </div>
+        </CardContent>
+      </Card>
+    );
+  }
+
+  const getAlertLevel = (stock) => {
+    if (stock <= 3) return { label: 'Critical', color: 'text-red-600', bgColor: 'bg-red-50' };
+    if (stock <= 10) return { label: 'Warning', color: 'text-orange-600', bgColor: 'bg-orange-50' };
+    return { label: 'Low', color: 'text-yellow-600', bgColor: 'bg-yellow-50' };
+  };
+
+  return (
+    <Card>
+      <CardHeader>
+        <CardTitle className="flex items-center gap-2">
+          <AlertCircle className="w-5 h-5 text-red-600" />
+          Low Stock Alerts
+          <Badge variant="destructive" className="ml-2">
+            {lowStockData.count} items
+          </Badge>
+        </CardTitle>
+      </CardHeader>
+      <CardContent>
+        <div className="space-y-3">
+          {lowStockData.products.slice(0, 10).map((product, index) => {
+            const alertLevel = getAlertLevel(product.currentStock);
+            return (
+              <div
+                key={index}
+                className="flex items-center justify-between p-3 border rounded-lg hover:bg-gray-50 cursor-pointer"
+                onClick={() => onViewProduct(product)}
+              >
+                <div className="flex items-center space-x-3 flex-1">
+                  <img
+                    src={product.image || '/placeholder-product.jpg'}
+                    alt={product.name}
+                    className="w-10 h-10 object-cover rounded border"
+                  />
+                  <div className="flex-1">
+                    <p className="font-medium text-sm text-gray-900">{product.name}</p>
+                    <div className="flex items-center space-x-4 mt-1">
+                      <div className="flex items-center space-x-1">
+                        <span className="text-xs text-gray-500">Stock:</span>
+                        <span className={`text-sm font-medium ${alertLevel.color}`}>
+                          {product.currentStock}
+                        </span>
+                      </div>
+                      {!user.isVendor && product.vendor && (
+                        <div className="flex items-center space-x-1">
+                          <span className="text-xs text-gray-500">Vendor:</span>
+                          <span className="text-sm font-medium">{product.vendor.companyName}</span>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                </div>
+                <div className="flex items-center space-x-2">
+                  <Badge variant={product.currentStock <= 3 ? "destructive" : "secondary"}>
+                    {alertLevel.label}
+                  </Badge>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      onViewProduct(product);
+                    }}
+                  >
+                    <Eye className="w-4 h-4" />
+                  </Button>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+
+        {lowStockData.count > 10 && (
+          <div className="mt-4 text-center">
+            <Button variant="outline" size="sm">
+              View All {lowStockData.count} Alerts
+            </Button>
+          </div>
+        )}
+      </CardContent>
+    </Card>
+  );
+}
+
+// Pending Requests Component
+function PendingRequests({ pendingRequests, user }) {
+  if (!pendingRequests || pendingRequests.count === 0) {
+    return (
+      <Card>
+        <CardContent className="p-6">
+          <div className="text-center">
+            <Clock className="w-12 h-12 text-gray-400 mx-auto mb-4" />
+            <p className="text-gray-500">No pending requests</p>
+            <p className="text-sm text-gray-400 mt-1">All requests have been processed</p>
+          </div>
+        </CardContent>
+      </Card>
+    );
+  }
+
+  const getRequestTypeIcon = (type) => {
+    switch (type) {
+      case 'product_deletion':
+        return <Package className="w-4 h-4 text-red-600" />;
+      case 'vendor_registration':
+        return <Users className="w-4 h-4 text-blue-600" />;
+      default:
+        return <FileText className="w-4 h-4 text-gray-600" />;
+    }
+  };
+
+  const getRequestTypeColor = (type) => {
+    switch (type) {
+      case 'product_deletion':
+        return 'bg-red-50 border-red-200';
+      case 'vendor_registration':
+        return 'bg-blue-50 border-blue-200';
+      default:
+        return 'bg-gray-50 border-gray-200';
+    }
+  };
+
+  return (
+    <Card>
+      <CardHeader>
+        <CardTitle className="flex items-center gap-2">
+          <Clock className="w-5 h-5 text-orange-600" />
+          Pending Requests
+          <Badge variant="secondary" className="ml-2">
+            {pendingRequests.count} pending
+          </Badge>
+        </CardTitle>
+      </CardHeader>
+      <CardContent>
+        <div className="space-y-3">
+          {pendingRequests.requests.slice(0, 10).map((request, index) => (
+            <div
+              key={index}
+              className={`p-3 border rounded-lg ${getRequestTypeColor(request.type)}`}
+            >
+              <div className="flex items-start space-x-3">
+                <div className="p-2 bg-white rounded-lg border">
+                  {getRequestTypeIcon(request.type)}
+                </div>
+                <div className="flex-1">
+                  <p className="font-medium text-sm text-gray-900">
+                    {request.type === 'product_deletion'
+                      ? `Delete ${request.product.name}`
+                      : `New Vendor: ${request.vendor.companyName}`
+                    }
+                  </p>
+                  <p className="text-xs text-gray-600 mt-1">
+                    {request.type === 'product_deletion'
+                      ? `Vendor: ${request.vendor.companyName} • Reason: ${request.reason}`
+                      : `Contact: ${request.vendor.contactPerson} • ${request.vendor.phone}`
+                    }
+                  </p>
+                  <div className="flex items-center space-x-2 mt-2">
+                    <Calendar className="w-3 h-3 text-gray-400" />
+                    <span className="text-xs text-gray-500">
+                      Requested: {new Date(request.requestedAt).toLocaleDateString()}
+                    </span>
+                  </div>
+                </div>
+                <Badge variant="outline">
+                  {request.type.replace('_', ' ')}
+                </Badge>
+              </div>
+            </div>
+          ))}
+        </div>
+
+        {pendingRequests.count > 10 && (
+          <div className="mt-4 text-center">
+            <Button variant="outline" size="sm">
+              Manage All Requests
+            </Button>
+          </div>
+        )}
+      </CardContent>
+    </Card>
+  );
+}
+
+// Analytics Charts Component
+function AnalyticsCharts({ analyticsData }) {
+  if (!analyticsData || !analyticsData.sales || analyticsData.sales.length === 0) {
+    return (
+      <Card>
+        <CardContent className="p-6">
+          <div className="text-center">
+            <BarChart3 className="w-12 h-12 text-gray-400 mx-auto mb-4" />
+            <p className="text-gray-500">No analytics data available</p>
+            <p className="text-sm text-gray-400 mt-1">Data will appear as sales are recorded</p>
+          </div>
+        </CardContent>
+      </Card>
+    );
+  }
+
+  return (
+    <div className="space-y-6">
+      {/* Sales Chart */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <TrendingUp className="w-5 h-5 text-green-600" />
+            Sales Performance ({analyticsData.period})
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="space-y-4">
+            {analyticsData.sales.map((item, index) => (
+              <div key={index} className="flex items-center justify-between p-3 border rounded-lg">
+                <div className="flex-1">
+                  <p className="font-medium text-sm">{item.period}</p>
+                  <div className="grid grid-cols-3 gap-4 mt-2 text-xs">
+                    <div>
+                      <span className="text-gray-500">Sales: </span>
+                      <span className="font-medium">{formatCurrency(item.sales)}</span> {/* UPDATED */}
+                    </div>
+                    <div>
+                      <span className="text-gray-500">Profit: </span>
+                      <span className="font-medium text-green-600">{formatCurrency(item.profit)}</span> {/* UPDATED */}
+                    </div>
+                    <div>
+                      <span className="text-gray-500">Orders: </span>
+                      <span className="font-medium">{item.orders}</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+
+          {/* Summary */}
+          {analyticsData.summary && (
+            <div className="mt-6 p-4 bg-gray-50 rounded-lg">
+              <h4 className="font-semibold text-gray-900 mb-3">Period Summary</h4>
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                <div className="text-center">
+                  <p className="text-2xl font-bold text-blue-600">{formatCurrency(analyticsData.summary.totalSales)}</p> {/* UPDATED */}
+                  <p className="text-xs text-gray-600">Total Sales</p>
+                </div>
+                <div className="text-center">
+                  <p className="text-2xl font-bold text-green-600">{formatCurrency(analyticsData.summary.totalProfit)}</p> {/* UPDATED */}
+                  <p className="text-xs text-gray-600">Total Profit</p>
+                </div>
+                <div className="text-center">
+                  <p className="text-2xl font-bold text-purple-600">{analyticsData.summary.totalOrders}</p>
+                  <p className="text-xs text-gray-600">Total Orders</p>
+                </div>
+                <div className="text-center">
+                  <p className="text-2xl font-bold text-orange-600">{analyticsData.summary.topVendors || '-'}</p>
+                  <p className="text-xs text-gray-600">Top Vendors</p>
+                </div>
+              </div>
+            </div>
+          )}
+        </CardContent>
+      </Card>
+
+      {/* Top Products/Vendors */}
+      {(analyticsData.topProducts || analyticsData.vendorPerformance) && (
+        <Card>
+          <CardHeader>
+            <CardTitle>
+              {analyticsData.topProducts ? 'Top Products' : 'Vendor Performance'}
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-3">
+              {(analyticsData.topProducts || analyticsData.vendorPerformance)?.slice(0, 5).map((item, index) => (
+                <div key={index} className="flex items-center justify-between p-3 border rounded-lg">
+                  <div className="flex items-center space-x-3">
+                    <div className="w-8 h-8 bg-blue-100 rounded-lg flex items-center justify-center">
+                      <span className="text-sm font-bold text-blue-600">{index + 1}</span>
+                    </div>
+                    <div>
+                      <p className="font-medium text-sm">
+                        {item.name || item.vendor}
+                      </p>
+                      <p className="text-xs text-gray-600">
+                        Sold: {item.sold?.toLocaleString() || item.orders} units
+                      </p>
+                    </div>
+                  </div>
+                  <div className="text-right">
+                    <p className="font-bold text-green-600">
+                      {formatCurrency(item.revenue || item.sales)} {/* UPDATED */}
+                    </p>
+                    <p className="text-xs text-gray-600">Revenue</p>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
+      )}
     </div>
   );
 }
@@ -181,13 +604,13 @@ function ProductViewModal({ product, isOpen, onClose }) {
       <div className="space-y-6">
         {/* Product Header */}
         <div className="flex items-start space-x-4">
-          <img 
-            src={product.product?.images?.[0] || '/placeholder-product.jpg'} 
-            alt={product.product?.name}
+          <img
+            src={product.product?.images?.[0] || product.image || '/placeholder-product.jpg'}
+            alt={product.product?.name || product.name}
             className="w-20 h-20 object-cover rounded-lg border"
           />
           <div className="flex-1">
-            <h3 className="text-xl font-bold text-gray-900">{product.product?.name}</h3>
+            <h3 className="text-xl font-bold text-gray-900">{product.product?.name || product.name}</h3>
             <p className="text-gray-600 mt-1">{product.product?.description}</p>
           </div>
         </div>
@@ -196,26 +619,26 @@ function ProductViewModal({ product, isOpen, onClose }) {
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
           <div className="text-center p-3 bg-blue-50 rounded-lg">
             <p className="text-sm text-gray-600">Allocated</p>
-            <p className="text-2xl font-bold text-blue-600">{product.allocatedStock}</p>
+            <p className="text-2xl font-bold text-blue-600">{product.allocatedStock || '-'}</p>
           </div>
           <div className="text-center p-3 bg-green-50 rounded-lg">
             <p className="text-sm text-gray-600">Current</p>
-            <p className="text-2xl font-bold text-green-600">{product.currentStock}</p>
+            <p className="text-2xl font-bold text-green-600">{product.currentStock || product.totalStock}</p>
           </div>
           <div className="text-center p-3 bg-purple-50 rounded-lg">
             <p className="text-sm text-gray-600">Sold</p>
-            <p className="text-2xl font-bold text-purple-600">{product.soldStock}</p>
+            <p className="text-2xl font-bold text-purple-600">{product.soldStock || '-'}</p>
           </div>
           <div className="text-center p-3 bg-orange-50 rounded-lg">
             <p className="text-sm text-gray-600">Status</p>
-            <Badge variant={product.currentStock > 0 ? "default" : "destructive"} className="mt-1">
-              {product.currentStock > 0 ? 'In Stock' : 'Out of Stock'}
+            <Badge variant={(product.currentStock || product.totalStock) > 0 ? "default" : "destructive"} className="mt-1">
+              {(product.currentStock || product.totalStock) > 0 ? 'In Stock' : 'Out of Stock'}
             </Badge>
           </div>
         </div>
 
         {/* Variant Details */}
-        {(product.size || product.color) && (
+        {(product.size || product.color || product.fabric) && (
           <div className="border rounded-lg p-4">
             <h4 className="font-semibold text-gray-900 mb-3">Variant Details</h4>
             <div className="grid grid-cols-2 gap-4">
@@ -247,22 +670,49 @@ function ProductViewModal({ product, isOpen, onClose }) {
           <div className="space-y-2">
             <div className="flex justify-between">
               <span className="text-gray-600">Cost Price:</span>
-              <span className="font-medium">₹{product.costPrice || product.product?.costPrice}</span>
+              <span className="font-medium">{formatCurrency(product.costPrice || product.product?.costPrice)}</span> {/* UPDATED */}
             </div>
             <div className="flex justify-between">
               <span className="text-gray-600">Sale Price:</span>
-              <span className="font-medium">₹{product.salePrice || product.product?.salePrice}</span>
+              <span className="font-medium">{formatCurrency(product.salePrice || product.product?.salePrice)}</span> {/* UPDATED */}
             </div>
-            <div className="flex justify-between">
-              <span className="text-gray-600">Vendor Price:</span>
-              <span className="font-medium">₹{product.vendorPrice}</span>
-            </div>
-            <div className="flex justify-between border-t pt-2">
-              <span className="text-gray-800 font-bold">Profit Per Piece:</span>
-              <span className="font-bold text-green-600">₹{product.profitPerPiece}</span>
-            </div>
+            {product.vendorPrice && (
+              <div className="flex justify-between">
+                <span className="text-gray-600">Vendor Price:</span>
+                <span className="font-medium">{formatCurrency(product.vendorPrice)}</span> {/* UPDATED */}
+              </div>
+            )}
+            {product.profitPerPiece && (
+              <div className="flex justify-between border-t pt-2">
+                <span className="text-gray-800 font-bold">Profit Per Piece:</span>
+                <span className="font-bold text-green-600">{formatCurrency(product.profitPerPiece)}</span> {/* UPDATED */}
+              </div>
+            )}
           </div>
         </div>
+
+        {/* Vendor Information (for admin) */}
+        {product.vendor && (
+          <div className="border rounded-lg p-4">
+            <h4 className="font-semibold text-gray-900 mb-3">Vendor Information</h4>
+            <div className="space-y-2">
+              <div className="flex justify-between">
+                <span className="text-gray-600">Company:</span>
+                <span className="font-medium">{product.vendor.companyName}</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-gray-600">Contact:</span>
+                <span className="font-medium">{product.vendor.contactPerson}</span>
+              </div>
+              {product.vendor.phone && (
+                <div className="flex justify-between">
+                  <span className="text-gray-600">Phone:</span>
+                  <span className="font-medium">{product.vendor.phone}</span>
+                </div>
+              )}
+            </div>
+          </div>
+        )}
 
         {/* Action Buttons */}
         <div className="flex justify-end space-x-3 pt-4">
@@ -304,8 +754,8 @@ function VendorProducts({ products, onRequestDelete, onViewProduct }) {
           {products.slice(0, 10).map((product, index) => (
             <div key={index} className="flex items-center justify-between p-4 border rounded-lg hover:bg-gray-50 transition-colors">
               <div className="flex items-center space-x-4 flex-1">
-                <img 
-                  src={product.product?.images?.[0] || '/placeholder-product.jpg'} 
+                <img
+                  src={product.product?.images?.[0] || '/placeholder-product.jpg'}
                   alt={product.product?.name}
                   className="w-12 h-12 object-cover rounded border"
                 />
@@ -338,15 +788,15 @@ function VendorProducts({ products, onRequestDelete, onViewProduct }) {
                 <Badge variant={product.currentStock > 0 ? "default" : "destructive"}>
                   {product.currentStock > 0 ? 'In Stock' : 'Out of Stock'}
                 </Badge>
-                <Button 
-                  variant="outline" 
+                <Button
+                  variant="outline"
                   size="sm"
                   onClick={() => onViewProduct(product)}
                 >
                   <Eye className="w-4 h-4" />
                 </Button>
-                <Button 
-                  variant="outline" 
+                <Button
+                  variant="outline"
                   size="sm"
                   onClick={() => onRequestDelete(product)}
                 >
@@ -362,7 +812,7 @@ function VendorProducts({ products, onRequestDelete, onViewProduct }) {
 }
 
 // Invoices Component
-function InvoicesSection({ invoices, user, onCreateInvoice, onViewInvoice }) {
+function InvoicesSection({ invoices, user, onCreateInvoice, onViewInvoice, onEditInvoice }) {
   const getStatusColor = (status) => {
     const colors = {
       Draft: 'bg-gray-100 text-gray-800',
@@ -374,12 +824,53 @@ function InvoicesSection({ invoices, user, onCreateInvoice, onViewInvoice }) {
     return colors[status] || 'bg-gray-100 text-gray-800';
   };
 
+  const handleDownloadInvoice = async (invoiceId, invoiceNumber) => {
+    try {
+      const blob = await invoiceService.downloadInvoice(invoiceId);
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.style.display = 'none';
+      a.href = url;
+      a.download = `invoice-${invoiceNumber}.html`;
+      document.body.appendChild(a);
+      a.click();
+      window.URL.revokeObjectURL(url);
+      document.body.removeChild(a);
+      toast.success('Invoice downloaded! Open the file and click "Print Invoice" to save as PDF.');
+    } catch (error) {
+      console.error('Download failed:', error);
+      toast.error('Failed to download invoice. Please try again.');
+    }
+  };
+
+  const handlePrintInvoice = async (invoiceId) => {
+    try {
+      const response = await fetch(`/api/invoices/${invoiceId}/pdf`);
+      const htmlText = await response.text();
+
+      const printWindow = window.open('', '_blank');
+      printWindow.document.write(htmlText);
+      printWindow.document.close();
+
+      // Auto-print after loading
+      printWindow.onload = function () {
+        setTimeout(() => {
+          printWindow.print();
+        }, 500);
+      };
+
+    } catch (error) {
+      console.error('Print failed:', error);
+      toast.error('Failed to open invoice for printing.');
+    }
+  };
+
   return (
     <Card>
       <CardHeader className="flex flex-row items-center justify-between">
         <CardTitle className="flex items-center gap-2">
           <FileText className="w-5 h-5" />
-          Invoices
+          Recent Invoices
         </CardTitle>
         {!user.isVendor && (
           <Button onClick={onCreateInvoice}>
@@ -406,8 +897,7 @@ function InvoicesSection({ invoices, user, onCreateInvoice, onViewInvoice }) {
                         <span>{invoice.type?.replace('_', ' ') || 'Invoice'}</span>
                         <span>•</span>
                         <span className="flex items-center">
-                          <IndianRupee className="w-3 h-3 mr-1" />
-                          {invoice.totalAmount?.toLocaleString()}
+                          {formatCurrency(invoice.totalAmount)} {/* UPDATED */}
                         </span>
                       </div>
                       <div className="flex items-center space-x-2 mt-1 text-xs text-gray-500">
@@ -421,17 +911,39 @@ function InvoicesSection({ invoices, user, onCreateInvoice, onViewInvoice }) {
                   <Badge className={getStatusColor(invoice.status)}>
                     {invoice.status}
                   </Badge>
-                  <Button 
-                    variant="outline" 
+                  <Button
+                    variant="outline"
                     size="sm"
                     onClick={() => onViewInvoice(invoice)}
                   >
                     <Eye className="w-4 h-4 mr-1" />
                     View
                   </Button>
-                  <Button variant="outline" size="sm">
+                  {!user.isVendor && invoice.status !== 'Paid' && (
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => onEditInvoice(invoice)}
+                    >
+                      <Edit className="w-4 h-4 mr-1" />
+                      Edit
+                    </Button>
+                  )}
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => handleDownloadInvoice(invoice._id, invoice.invoiceNumber)}
+                  >
                     <Download className="w-4 h-4 mr-1" />
-                    PDF
+                    Download
+                  </Button>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => handlePrintInvoice(invoice._id)}
+                  >
+                    <Printer className="w-4 h-4 mr-1" />
+                    Print
                   </Button>
                 </div>
               </div>
@@ -452,7 +964,7 @@ function InvoicesSection({ invoices, user, onCreateInvoice, onViewInvoice }) {
 }
 
 // Invoice View Modal Component
-function InvoiceViewModal({ invoice, isOpen, onClose }) {
+function InvoiceViewModal({ invoice, isOpen, onClose, onEdit }) {
   if (!invoice) return null;
 
   return (
@@ -483,8 +995,8 @@ function InvoiceViewModal({ invoice, isOpen, onClose }) {
               <div className="flex justify-between">
                 <span className="text-gray-600">Status:</span>
                 <Badge variant={
-                  invoice.status === 'Paid' ? 'default' : 
-                  invoice.status === 'Pending' ? 'secondary' : 'outline'
+                  invoice.status === 'Paid' ? 'default' :
+                    invoice.status === 'Pending' ? 'secondary' : 'outline'
                 }>
                   {invoice.status}
                 </Badge>
@@ -521,12 +1033,10 @@ function InvoiceViewModal({ invoice, isOpen, onClose }) {
                 </div>
                 <div className="col-span-2 text-center">{item.quantity}</div>
                 <div className="col-span-2 text-right">
-                  <IndianRupee className="w-3 h-3 inline mr-1" />
-                  {item.unitPrice?.toFixed(2)}
+                  {formatCurrency(item.unitPrice)} {/* UPDATED */}
                 </div>
                 <div className="col-span-3 text-right font-medium">
-                  <IndianRupee className="w-3 h-3 inline mr-1" />
-                  {item.totalPrice?.toFixed(2)}
+                  {formatCurrency(item.totalPrice)} {/* UPDATED */}
                 </div>
               </div>
             ))}
@@ -540,22 +1050,19 @@ function InvoiceViewModal({ invoice, isOpen, onClose }) {
               <div className="flex justify-between text-sm">
                 <span className="text-gray-600">Subtotal:</span>
                 <span className="font-medium">
-                  <IndianRupee className="w-3 h-3 inline mr-1" />
-                  {invoice.subtotal?.toFixed(2)}
+                  {formatCurrency(invoice.subtotal)} {/* UPDATED */}
                 </span>
               </div>
               <div className="flex justify-between text-sm">
                 <span className="text-gray-600">Tax:</span>
                 <span className="font-medium">
-                  <IndianRupee className="w-3 h-3 inline mr-1" />
-                  {invoice.taxAmount?.toFixed(2)}
+                  {formatCurrency(invoice.taxAmount)} {/* UPDATED */}
                 </span>
               </div>
               <div className="flex justify-between border-t pt-2 font-bold text-lg">
                 <span>Total Amount:</span>
                 <span className="text-blue-600">
-                  <IndianRupee className="w-4 h-4 inline mr-1" />
-                  {invoice.totalAmount?.toFixed(2)}
+                  {formatCurrency(invoice.totalAmount)} {/* UPDATED */}
                 </span>
               </div>
             </div>
@@ -585,6 +1092,12 @@ function InvoiceViewModal({ invoice, isOpen, onClose }) {
           <Button variant="outline" onClick={onClose}>
             Close
           </Button>
+          {onEdit && invoice.status !== 'Paid' && (
+            <Button variant="outline" onClick={() => onEdit(invoice)}>
+              <Edit className="w-4 h-4 mr-2" />
+              Edit Invoice
+            </Button>
+          )}
           <Button>
             <Download className="w-4 h-4 mr-2" />
             Download PDF
@@ -602,48 +1115,89 @@ export default function Dashboard() {
   const [vendorData, setVendorData] = useState(null);
   const [invoices, setInvoices] = useState([]);
   const [loading, setLoading] = useState(true);
-  
+
+  // New data states for the 4 routes
+  const [recentActivity, setRecentActivity] = useState([]);
+  const [analyticsData, setAnalyticsData] = useState(null);
+  const [lowStockData, setLowStockData] = useState(null);
+  const [pendingRequests, setPendingRequests] = useState(null);
+
   // Modal states
   const [isVendorModalOpen, setIsVendorModalOpen] = useState(false);
   const [isAllocationModalOpen, setIsAllocationModalOpen] = useState(false);
   const [isInvoiceModalOpen, setIsInvoiceModalOpen] = useState(false);
+  const [isInvoiceEditModalOpen, setIsInvoiceEditModalOpen] = useState(false);
   const [isDeleteRequestModalOpen, setIsDeleteRequestModalOpen] = useState(false);
   const [isProductViewModalOpen, setIsProductViewModalOpen] = useState(false);
   const [isInvoiceViewModalOpen, setIsInvoiceViewModalOpen] = useState(false);
+
   const [selectedProduct, setSelectedProduct] = useState(null);
   const [selectedInvoice, setSelectedInvoice] = useState(null);
+  const [selectedInvoiceForEdit, setSelectedInvoiceForEdit] = useState(null);
 
   useEffect(() => {
     if (user && !authLoading) {
       loadDashboardData();
     }
-  }, [user, authLoading]);  
+  }, [user, authLoading]);
 
   const loadDashboardData = async () => {
     try {
       setLoading(true);
-      
-      // Load dashboard data based on user role
+
+      // Load main dashboard data
       const dashboardResponse = await dashboardService.getDashboardData();
       if (dashboardResponse.success) {
         setDashboardData(dashboardResponse.data);
-        
+
         if (user.isVendor) {
-          // ✅ VENDOR: Only show vendor's own data
           setVendorData(dashboardResponse.data.vendor);
           setInvoices(dashboardResponse.data.recentInvoices || []);
         } else {
-          // ✅ ADMIN: Show all data
           setInvoices(dashboardResponse.data.recentInvoices || []);
         }
-      } else {
-        toast.error(dashboardResponse.error || 'Failed to load dashboard data');
       }
+
+      // Load additional dashboard data from the 4 new routes
+      await loadAdditionalData();
+
     } catch (error) {
       console.error('Dashboard load error:', error);
       toast.error('Failed to load dashboard data');
     } finally {
       setLoading(false);
+    }
+  };
+
+  const loadAdditionalData = async () => {
+    try {
+      // Load recent activity
+      const activityResponse = await dashboardService.getRecentActivity(10);
+      if (activityResponse.success) {
+        setRecentActivity(activityResponse.data);
+      }
+
+      // Load analytics data
+      const analyticsResponse = await dashboardService.getSalesAnalytics('monthly');
+      if (analyticsResponse.success) {
+        setAnalyticsData(analyticsResponse.data);
+      }
+
+      // Load low stock alerts
+      const lowStockResponse = await dashboardService.getLowStockAlerts();
+      if (lowStockResponse.success) {
+        setLowStockData(lowStockResponse.data);
+      }
+
+      // Load pending requests
+      const pendingResponse = await dashboardService.getPendingRequests();
+      if (pendingResponse.success) {
+        setPendingRequests(pendingResponse.data);
+      }
+
+    } catch (error) {
+      console.error('Additional data load error:', error);
+      // Don't show toast for these as they're secondary data
     }
   };
 
@@ -660,6 +1214,11 @@ export default function Dashboard() {
   const handleViewInvoice = (invoice) => {
     setSelectedInvoice(invoice);
     setIsInvoiceViewModalOpen(true);
+  };
+
+  const handleEditInvoice = (invoice) => {
+    setSelectedInvoiceForEdit(invoice);
+    setIsInvoiceEditModalOpen(true);
   };
 
   const handleCreateInvoice = () => {
@@ -701,9 +1260,9 @@ export default function Dashboard() {
           </div>
           <div className="flex items-center space-x-4">
             <Badge variant="secondary" className="text-sm">
-              {user.isVendor 
-                ? vendorData?.companyName 
-                : user.role?.name === 'super_admin' ? 'Super Admin' : 'Admin'
+              {user.isVendor
+                ? vendorData?.companyName
+                : user.role === 'super_admin' ? 'Super Admin' : 'Admin'
               }
             </Badge>
             {!user.isVendor && (
@@ -723,9 +1282,9 @@ export default function Dashboard() {
 
         {/* Stats Section */}
         {user.isVendor ? (
-          <VendorStats 
-            vendorData={vendorData} 
-            stats={dashboardData?.stats} 
+          <VendorStats
+            vendorData={vendorData}
+            stats={dashboardData?.stats}
           />
         ) : (
           <AdminStats stats={dashboardData?.stats} />
@@ -733,8 +1292,9 @@ export default function Dashboard() {
 
         {/* Tabs Content */}
         <Tabs defaultValue="overview" className="mt-8">
-          <TabsList className="grid w-full grid-cols-3 lg:grid-cols-4">
+          <TabsList className="grid w-full grid-cols-3 lg:grid-cols-5">
             <TabsTrigger value="overview">Overview</TabsTrigger>
+            <TabsTrigger value="analytics">Analytics</TabsTrigger>
             <TabsTrigger value="products">Products</TabsTrigger>
             <TabsTrigger value="invoices">Invoices</TabsTrigger>
             {!user.isVendor && (
@@ -742,9 +1302,10 @@ export default function Dashboard() {
             )}
           </TabsList>
 
+          {/* Overview Tab */}
           <TabsContent value="overview" className="space-y-6 mt-6">
-            {/* Recent Activity & Quick Stats */}
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              {/* Recent Activity */}
               <Card>
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2">
@@ -753,146 +1314,150 @@ export default function Dashboard() {
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
-                  {invoices.length > 0 ? (
-                    <div className="space-y-3">
-                      {invoices.slice(0, 5).map((invoice, index) => (
-                        <div key={index} className="flex items-center justify-between p-3 border rounded-lg hover:bg-gray-50 cursor-pointer" onClick={() => handleViewInvoice(invoice)}>
-                          <div>
-                            <p className="font-medium text-sm">Invoice #{invoice.invoiceNumber}</p>
-                            <p className="text-xs text-gray-600">
-                              {invoice.vendor?.companyName || 'System'} • 
-                              ₹{invoice.totalAmount?.toLocaleString()} • 
-                              {new Date(invoice.createdAt).toLocaleDateString()}
-                            </p>
-                          </div>
-                          <Badge variant={
-                            invoice.status === 'Paid' ? 'default' : 
-                            invoice.status === 'Pending' ? 'secondary' : 'outline'
-                          }>
-                            {invoice.status}
-                          </Badge>
-                        </div>
-                      ))}
-                    </div>
-                  ) : (
-                    <p className="text-gray-500 text-center py-4">No recent activity</p>
-                  )}
+                  <ActivityFeed
+                    activities={recentActivity}
+                    onViewInvoice={handleViewInvoice}
+                  />
                 </CardContent>
               </Card>
-              
-              <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <BarChart3 className="w-5 h-5" />
-                    Quick Insights
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="space-y-4">
-                    {user.isVendor ? (
-                      <>
-                        <div className="flex justify-between items-center p-3 bg-blue-50 rounded-lg">
-                          <span className="text-sm font-medium">Outstanding Balance</span>
-                          <span className="font-bold">₹{dashboardData?.stats?.outstandingBalance?.toLocaleString() || 0}</span>
-                        </div>
-                        <div className="flex justify-between items-center p-3 bg-green-50 rounded-lg">
-                          <span className="text-sm font-medium">Recent Sales (7 days)</span>
-                          <span className="font-bold">₹{dashboardData?.stats?.recentSales?.toLocaleString() || 0}</span>
-                        </div>
-                      </>
-                    ) : (
-                      <>
-                        <div className="flex justify-between items-center p-3 bg-blue-50 rounded-lg">
-                          <span className="text-sm font-medium">Total Revenue</span>
-                          <span className="font-bold">₹{dashboardData?.stats?.totalSales?.toLocaleString() || 0}</span>
-                        </div>
-                        <div className="flex justify-between items-center p-3 bg-green-50 rounded-lg">
-                          <span className="text-sm font-medium">Total Profit</span>
-                          <span className="font-bold">₹{dashboardData?.stats?.totalProfit?.toLocaleString() || 0}</span>
-                        </div>
-                      </>
-                    )}
-                    
-                    <div className="space-y-2">
-                      <Button variant="outline" className="w-full justify-start" size="sm">
-                        <FileText className="w-4 h-4 mr-2" />
-                        View Detailed Reports
-                      </Button>
-                      <Button variant="outline" className="w-full justify-start" size="sm">
-                        <Download className="w-4 h-4 mr-2" />
-                        Export Data
-                      </Button>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
+
+              {/* Quick Stats & Alerts */}
+              <div className="space-y-6">
+                {/* Low Stock Alerts */}
+                <LowStockAlerts
+                  lowStockData={lowStockData}
+                  user={user}
+                  onViewProduct={handleViewProduct}
+                />
+
+                {/* Pending Requests (Admin only) */}
+                {!user.isVendor && pendingRequests && pendingRequests.count > 0 && (
+                  <PendingRequests
+                    pendingRequests={pendingRequests}
+                    user={user}
+                  />
+                )}
+              </div>
             </div>
           </TabsContent>
 
+          {/* Analytics Tab */}
+          <TabsContent value="analytics" className="space-y-6 mt-6">
+            <AnalyticsCharts analyticsData={analyticsData} />
+          </TabsContent>
+
+          {/* Products Tab */}
           <TabsContent value="products" className="space-y-6 mt-6">
             {user.isVendor ? (
-              <VendorProducts 
-                products={vendorData?.products} 
+              <VendorProducts
+                products={vendorData?.products}
                 onRequestDelete={handleDeleteRequest}
                 onViewProduct={handleViewProduct}
               />
             ) : (
-              <Card>
-                <CardHeader>
-                  <CardTitle>All Products</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="text-center py-8">
-                    <Package className="w-12 h-12 text-gray-400 mx-auto mb-4" />
-                    <p className="text-gray-500">Product management for all vendors</p>
-                    <p className="text-sm text-gray-400 mt-1">Use the management tab to allocate products</p>
-                  </div>
-                </CardContent>
-              </Card>
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <LowStockAlerts
+                  lowStockData={lowStockData}
+                  user={user}
+                  onViewProduct={handleViewProduct}
+                />
+                <Card>
+                  <CardHeader>
+                    <CardTitle>Product Management</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="text-center py-8">
+                      <Package className="w-12 h-12 text-gray-400 mx-auto mb-4" />
+                      <p className="text-gray-500">Product management for all vendors</p>
+                      <p className="text-sm text-gray-400 mt-1">Use the management tab to allocate products</p>
+                      <Button
+                        className="mt-4"
+                        onClick={() => setIsAllocationModalOpen(true)}
+                      >
+                        <Package className="w-4 h-4 mr-2" />
+                        Allocate Products
+                      </Button>
+                    </div>
+                  </CardContent>
+                </Card>
+              </div>
             )}
           </TabsContent>
 
+          {/* Invoices Tab */}
           <TabsContent value="invoices" className="space-y-6 mt-6">
-            <InvoicesSection 
+            <InvoicesSection
               invoices={invoices}
               user={user}
               onCreateInvoice={handleCreateInvoice}
               onViewInvoice={handleViewInvoice}
+              onEditInvoice={handleEditInvoice}
             />
           </TabsContent>
 
+          {/* Management Tab (Admin only) */}
           {!user.isVendor && (
             <TabsContent value="management" className="space-y-6 mt-6">
-              <Card>
-                <CardHeader>
-                  <CardTitle>Vendor Management</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="space-y-4">
-                    <p className="text-gray-600">
-                      Manage all vendors, product allocations, and system requests from this centralized panel.
-                    </p>
-                    <div className="flex flex-wrap gap-3">
-                      <Button onClick={() => setIsVendorModalOpen(true)}>
-                        <Users className="w-4 h-4 mr-2" />
-                        Manage Vendors
-                      </Button>
-                      <Button variant="outline" onClick={() => setIsAllocationModalOpen(true)}>
-                        <Package className="w-4 h-4 mr-2" />
-                        Product Allocation
-                      </Button>
-                      <Button variant="outline">
-                        <AlertCircle className="w-4 h-4 mr-2" />
-                        View Delete Requests
-                      </Button>
-                      <Button variant="outline">
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <Card>
+                  <CardHeader>
+                    <CardTitle>Vendor Management</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="space-y-4">
+                      <p className="text-gray-600">
+                        Manage all vendors, product allocations, and system requests from this centralized panel.
+                      </p>
+                      <div className="flex flex-wrap gap-3">
+                        <Button onClick={() => setIsVendorModalOpen(true)}>
+                          <Users className="w-4 h-4 mr-2" />
+                          Manage Vendors
+                        </Button>
+                        <Button variant="outline" onClick={() => setIsAllocationModalOpen(true)}>
+                          <Package className="w-4 h-4 mr-2" />
+                          Product Allocation
+                        </Button>
+                        <Button variant="outline">
+                          <AlertCircle className="w-4 h-4 mr-2" />
+                          View Delete Requests
+                        </Button>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+
+                <Card>
+                  <CardHeader>
+                    <CardTitle>System Overview</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="space-y-4">
+                      <div className="grid grid-cols-2 gap-4">
+                        <div className="text-center p-4 bg-blue-50 rounded-lg">
+                          <p className="text-2xl font-bold text-blue-600">{dashboardData?.stats?.totalVendors || 0}</p>
+                          <p className="text-sm text-gray-600">Total Vendors</p>
+                        </div>
+                        <div className="text-center p-4 bg-green-50 rounded-lg">
+                          <p className="text-2xl font-bold text-green-600">{dashboardData?.stats?.totalProducts || 0}</p>
+                          <p className="text-sm text-gray-600">Total Products</p>
+                        </div>
+                        <div className="text-center p-4 bg-purple-50 rounded-lg">
+                          <p className="text-2xl font-bold text-purple-600">{pendingRequests?.count || 0}</p>
+                          <p className="text-sm text-gray-600">Pending Requests</p>
+                        </div>
+                        <div className="text-center p-4 bg-orange-50 rounded-lg">
+                          <p className="text-2xl font-bold text-orange-600">{lowStockData?.count || 0}</p>
+                          <p className="text-sm text-gray-600">Low Stock Items</p>
+                        </div>
+                      </div>
+                      <Button variant="outline" className="w-full">
                         <BarChart3 className="w-4 h-4 mr-2" />
-                        Analytics & Reports
+                        View Detailed Reports
                       </Button>
                     </div>
-                  </div>
-                </CardContent>
-              </Card>
+                  </CardContent>
+                </Card>
+              </div>
             </TabsContent>
           )}
         </Tabs>
@@ -905,7 +1470,7 @@ export default function Dashboard() {
         title="Create New Vendor"
         size="lg"
       >
-        <VendorCreateForm 
+        <VendorCreateForm
           onSuccess={() => {
             setIsVendorModalOpen(false);
             handleModalSuccess();
@@ -920,7 +1485,7 @@ export default function Dashboard() {
         title="Allocate Products to Vendor"
         size="xl"
       >
-        <ProductAllocationForm 
+        <ProductAllocationForm
           onSuccess={() => {
             setIsAllocationModalOpen(false);
             handleModalSuccess();
@@ -935,11 +1500,36 @@ export default function Dashboard() {
         title="Create New Invoice"
         size="xl"
       >
-        <InvoiceCreateForm 
+        <InvoiceCreateForm
           onSuccess={() => {
             setIsInvoiceModalOpen(false);
             handleModalSuccess();
             toast.success('Invoice created successfully!');
+          }}
+        />
+      </Modal>
+
+      <Modal
+        isOpen={isInvoiceEditModalOpen}
+        onClose={() => {
+          setIsInvoiceEditModalOpen(false);
+          setSelectedInvoiceForEdit(null);
+        }}
+        title="Edit Invoice"
+        size="4xl"
+      >
+        <InvoiceCreateForm
+          editData={selectedInvoiceForEdit}
+          isEdit={true}
+          onSuccess={() => {
+            setIsInvoiceEditModalOpen(false);
+            setSelectedInvoiceForEdit(null);
+            handleModalSuccess();
+            toast.success('Invoice updated successfully!');
+          }}
+          onCancel={() => {
+            setIsInvoiceEditModalOpen(false);
+            setSelectedInvoiceForEdit(null);
           }}
         />
       </Modal>
@@ -961,6 +1551,11 @@ export default function Dashboard() {
         onClose={() => {
           setIsInvoiceViewModalOpen(false);
           setSelectedInvoice(null);
+        }}
+        onEdit={(invoice) => {
+          setSelectedInvoiceForEdit(invoice);
+          setIsInvoiceEditModalOpen(true);
+          setIsInvoiceViewModalOpen(false);
         }}
       />
 
@@ -1011,13 +1606,13 @@ export default function Dashboard() {
             />
           </div>
           <div className="flex justify-end space-x-3 pt-4">
-            <Button 
-              variant="outline" 
+            <Button
+              variant="outline"
               onClick={() => setIsDeleteRequestModalOpen(false)}
             >
               Cancel
             </Button>
-            <Button 
+            <Button
               variant="destructive"
               onClick={async () => {
                 try {
@@ -1044,6 +1639,3 @@ export default function Dashboard() {
     </div>
   );
 }
-
-
-

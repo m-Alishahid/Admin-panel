@@ -24,6 +24,8 @@ export async function GET(request) {
       return await getVendorDashboard(session);
     }
 
+    console.log('Session Data', session);
+    
     // Admin dashboard (only for admin users)
     if (!isAdmin(session)) {
       return NextResponse.json({ 

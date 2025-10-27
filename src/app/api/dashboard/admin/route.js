@@ -12,6 +12,8 @@ export async function GET(request) {
     await connectDB();
     
     const session = await getUniversalSession(request);
+    console.log('Session', session);
+    
     if (!session || !isAdmin(session)) {
       return NextResponse.json({ 
         success: false,
