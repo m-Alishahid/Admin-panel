@@ -356,6 +356,161 @@ productSchema.statics.getDiscountedProducts = function(limit = 10) {
   .populate('category');
 };
 
+// // ✅ GET AVAILABLE VARIANTS METHOD
+// productSchema.methods.getAvailableVariants = function() {
+//   if (!this.variants || this.variants.length === 0) {
+//     return [{ size: 'Standard', color: 'Standard', stock: this.totalStock }];
+//   }
+  
+//   const availableVariants = [];
+//   this.variants.forEach(variant => {
+//     if (variant.colors && variant.colors.length > 0) {
+//       variant.colors.forEach(colorStock => {
+//         if (colorStock.stock > 0) {
+//           availableVariants.push({
+//             size: variant.size,
+//             fabric: variant.fabric,
+//             color: colorStock.color,
+//             stock: colorStock.stock,
+//             variantId: `${variant.size}_${colorStock.color}`
+//           });
+//         }
+//       });
+//     }
+//   });
+  
+//   return availableVariants;
+// };
+
+// ✅ GET AVAILABLE VARIANTS METHOD (PERFECT VERSION)
+productSchema.methods.getAvailableVariants = function() {
+  if (!this.variants || this.variants.length === 0) {
+    return [{
+      size: 'Standard', 
+      color: 'Standard', 
+      stock: this.totalStock,
+      variantId: 'standard_standard'
+    }];
+  }
+  
+  const availableVariants = [];
+  
+  this.variants.forEach(variant => {
+    if (variant.colors && variant.colors.length > 0) {
+      variant.colors.forEach(colorStock => {
+        if (colorStock.stock > 0) {
+          availableVariants.push({
+            size: variant.size || 'Standard',
+            fabric: variant.fabric || '',
+            color: colorStock.color || 'Standard',
+            stock: colorStock.stock || 0,
+            variantId: `${variant.size}_${colorStock.color}`.replace(/\s+/g, '_')
+          });
+        }
+      });
+    } else {
+      // If no colors but has size
+      availableVariants.push({
+        size: variant.size || 'Standard',
+        fabric: variant.fabric || '',
+        color: 'Standard',
+        stock: variant.stock || this.totalStock,
+        variantId: `${variant.size}_standard`.replace(/\s+/g, '_')
+      });
+    }
+  });
+  
+  return availableVariants;
+};
+
+// ✅ GET VARIANTS BY SIZE METHOD
+productSchema.methods.getColorsBySize = function(size) {
+  if (!this.variants || this.variants.length === 0) {
+    return [];
+  }
+  
+  const variant = this.variants.find(v => v.size === size);
+  if (!variant || !variant.colors) return [];
+  
+  return variant.colors.filter(color => color.stock > 0).map(color => ({
+    color: color.color,
+    stock: color.stock
+  }));
+};
+
+// ✅ GET SIZES METHOD
+productSchema.methods.getAvailableSizes = function() {
+  if (!this.variants || this.variants.length === 0) {
+    return ['Standard'];
+  }
+  
+  const sizes = this.variants
+    .filter(variant => {
+      if (!variant.colors || variant.colors.length === 0) return true;
+      return variant.colors.some(color => color.stock > 0);
+    })
+    .map(variant => variant.size)
+    .filter(Boolean);
+  
+  return sizes.length > 0 ? sizes : ['Standard'];
+};
+
+// ✅ GET SPECIFIC VARIANT STOCK METHOD
+productSchema.methods.getVariantStock = function(size, color) {
+  if (!this.variants || this.variants.length === 0) {
+    return this.totalStock;
+  }
+  
+  const variant = this.variants.find(v => v.size === size);
+  if (!variant || !variant.colors) return 0;
+  
+  const colorStock = variant.colors.find(c => c.color === color);
+  return colorStock ? colorStock.stock : 0;
+};
+
+// ✅ UPDATE VARIANT STOCK METHOD
+productSchema.methods.updateVariantStock = function(size, color, quantity) {
+  if (!this.variants || this.variants.length === 0) {
+    this.totalStock = Math.max(0, this.totalStock - quantity);
+    return true;
+  }
+  
+  const variant = this.variants.find(v => v.size === size);
+  if (!variant || !variant.colors) return false;
+  
+  const colorStock = variant.colors.find(c => c.color === color);
+  if (!colorStock) return false;
+  
+  if (colorStock.stock < quantity) return false;
+  
+  colorStock.stock = Math.max(0, colorStock.stock - quantity);
+  
+  // Update total stock
+  this.totalStock = this.variants.reduce((total, v) => {
+    const variantStock = v.colors.reduce((colorSum, c) => colorSum + (c.stock || 0), 0);
+    return total + variantStock;
+  }, 0);
+  
+  return true;
+};
+
+// ✅ CHECK STOCK METHOD
+productSchema.methods.checkStock = function(size, color, quantity) {
+  if (!this.variants || this.variants.length === 0) {
+    return this.totalStock >= quantity;
+  }
+  
+  const variant = this.variants.find(v => v.size === (size || 'Standard'));
+  if (!variant) return false;
+  
+  if (variant.colors && variant.colors.length > 0) {
+    const colorStock = variant.colors.find(c => c.color === (color || 'Standard'));
+    return colorStock ? colorStock.stock >= quantity : false;
+  } else {
+    return variant.stock >= quantity;
+  }
+};
+
 // ✅ INDEXES for better performance
 productSchema.index({ category: 1, status: 1 });
 productSchema.index({ status: 1, createdAt: -1 });

@@ -11,11 +11,11 @@ export default function CategoryProductsClient({
   initialProducts,
   initialPagination
 }) {
-  const [products, setProducts] = useState(initialProducts);
-  const [category, setCategory] = useState(initialCategory);
+  const [products, setProducts] = useState(initialProducts || []);
+  const [category, setCategory] = useState(initialCategory || {});
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
-  const [pagination, setPagination] = useState(initialPagination);
+  const [pagination, setPagination] = useState(initialPagination || {});
   const [filters, setFilters] = useState({
     sort: 'createdAt',
     order: 'desc',
@@ -28,14 +28,18 @@ export default function CategoryProductsClient({
   const fetchCategoryProducts = useCallback(async () => {
     try {
       setLoading(true);
+      if (!categoryId) {
+        setError('Category ID missing');
+        return;
+      }
       const response = await productService.getByCategory(categoryId, filters);
 
-      if (response.success) {
-        setProducts(response.data.products);
-        setCategory(response.data.category);
-        setPagination(response.data.pagination);
+      if (response?.success) {
+        setProducts(response.data?.products || []);
+        setCategory(response.data?.category || {});
+        setPagination(response.data?.pagination || {});
       } else {
-        setError(response.error || 'Failed to fetch products');
+        setError(response?.error || 'Failed to fetch products');
       }
     } catch (err) {
       setError('Failed to load products');
@@ -51,6 +55,7 @@ export default function CategoryProductsClient({
         filters.minPrice || filters.maxPrice) {
       fetchCategoryProducts();
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [fetchCategoryProducts, filters]);
 
   const handleFilterChange = (key, value) => {
@@ -63,7 +68,9 @@ export default function CategoryProductsClient({
 
   const handlePageChange = (newPage) => {
     handleFilterChange('page', newPage);
-    window.scrollTo({ top: 0, behavior: 'smooth' });
+    if (typeof window !== 'undefined') {
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
   };
 
   const clearFilters = () => {
@@ -104,12 +111,12 @@ export default function CategoryProductsClient({
               <h2 className="text-2xl font-serif font-bold text-gray-800 mb-4">Something went wrong</h2>
               <p className="text-gray-600 mb-6 font-serif">{error}</p>
               <div className="flex gap-3 justify-center">
-                <button
-                  onClick={() => window.location.reload()}
+                <Link
+                  href="/"
                   className="bg-[#cda434] text-white px-6 py-3 rounded-sm hover:bg-[#b8932a] transition duration-300 font-serif font-semibold"
                 >
                   Back to Home
-                </button>
+                </Link>
                 <button
                   onClick={fetchCategoryProducts}
                   className="bg-gray-800 text-white px-6 py-3 rounded-sm hover:bg-gray-700 transition duration-300 font-serif"
@@ -148,11 +155,10 @@ export default function CategoryProductsClient({
             {category?.name}
           </h1>
           <p className="text-lg md:text-xl text-gray-600 max-w-3xl mx-auto font-serif leading-relaxed">
-            Discover our exquisite collection of {category?.name.toLowerCase()} clothing and accessories,
-            crafted with premium quality and elegant designs.
+            {category?.description || `Discover our exquisite collection of ${category?.name?.toLowerCase()} clothing and accessories, crafted with premium quality and elegant designs.`}
           </p>
           <div className="mt-6 flex items-center justify-center gap-4 text-sm text-gray-500 font-serif">
-            <span>{pagination.totalProducts} products</span>
+            <span>{pagination.totalProducts || products.length} products</span>
             <span>•</span>
             <span>Premium quality</span>
             <span>•</span>
@@ -224,10 +230,10 @@ export default function CategoryProductsClient({
             {/* Right Side - Results Count */}
             <div className="text-sm text-gray-600 font-serif bg-gray-50 px-3 py-2 rounded-sm">
               Showing <span className="font-semibold">{products.length}</span> of{" "}
-              <span className="font-semibold">{pagination.totalProducts}</span> products
+              <span className="font-semibold">{pagination.totalProducts || products.length}</span>
               {pagination.currentPage && (
                 <span> • Page <span className="font-semibold">{pagination.currentPage}</span> of{" "}
-                  <span className="font-semibold">{pagination.totalPages}</span></span>
+                  <span className="font-semibold">{pagination.currentPage && pagination.totalPages}</span></span>
               )}
             </div>
           </div>
@@ -249,7 +255,7 @@ export default function CategoryProductsClient({
                 No products found
               </h3>
               <p className="text-gray-600 mb-8 font-serif leading-relaxed">
-                We couldn&apos;t find any products in this category matching your filters.
+                We couldn't find any products in this category matching your filters.
                 Try adjusting your search criteria or browse other categories.
               </p>
               <div className="flex flex-col sm:flex-row gap-3 justify-center">
@@ -278,7 +284,7 @@ export default function CategoryProductsClient({
             </div>
 
             {/* Pagination */}
-            {pagination.totalPages > 1 && (
+            {(pagination.totalPages || 0) > 1 && (
               <div className="flex flex-col sm:flex-row justify-between items-center gap-4 mt-16 pt-8 border-t border-gray-200">
                 <div className="text-sm text-gray-600 font-serif">
                   Page {pagination.currentPage} of {pagination.totalPages}

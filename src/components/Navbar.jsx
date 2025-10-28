@@ -16,6 +16,7 @@ export default function Navbar() {
   const [profileOpen, setProfileOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [isSearchOpen, setIsSearchOpen] = useState(false);
+  const [isScrolled, setIsScrolled] = useState(false);
   const profileRef = useRef(null);
   const searchRef = useRef(null);
   const { isAuthenticated, user, logout } = useAuth();
@@ -46,6 +47,15 @@ export default function Navbar() {
     };
     document.addEventListener('click', handler);
     return () => document.removeEventListener('click', handler);
+  }, []);
+
+  // handle scroll for navbar transition
+  useEffect(() => {
+    const handleScroll = () => {
+      setIsScrolled(window.scrollY > 100);
+    };
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
   const handleLogout = async () => {
@@ -81,11 +91,11 @@ export default function Navbar() {
       </div>
 
       {/* Navbar Container */}
-      <div className="flex items-center justify-between px-3 sm:px-4 md:px-8 py-2 md:py-3 max-w-9x1 mx-auto">
+      <div className={`flex items-center px-3 sm:px-4 md:px-8 py-2 md:py-3 max-w-9x1 mx-auto transition-all duration-500 ease-in-out ${isScrolled ? 'justify-start' : 'justify-between'}`}>
         {/* Left Section (Rewards + User) */}
-        <div className="flex items-center gap-1 sm:gap-3">
-          <button className="hidden sm:flex border border-[var(--primary-blue)] bg-[var(--primary-blue)] text-white rounded-full px-3 py-1 text-[12px] sm:text-sm hover:bg-[var(--primary-blue-hover)] transition-colors font-serif">
-            👑 Rewards
+        <div className={`flex items-center gap-1 sm:gap-3 transition-all duration-500 ease-in-out ${isScrolled ? 'order-1' : ''}`}>
+          <button className={`hidden sm:flex border border-[var(--primary-blue)] bg-[var(--primary-blue)] text-white rounded-full hover:bg-[var(--primary-blue-hover)] transition-colors font-serif ${isScrolled ? 'px-0.1 py-0.1' : 'px-3 py-1 text-[12px] sm:text-sm'}`}>
+            👑{!isScrolled && ' Rewards'}
           </button>
 
           {/* Auth Section */}
@@ -93,11 +103,15 @@ export default function Navbar() {
             <div className="relative" ref={profileRef}>
               <button
                 onClick={() => setProfileOpen((s) => !s)}
-                className="border border-gray-300 rounded-full px-2 sm:px-3 py-1 flex items-center gap-1 hover:bg-gray-50 transition-colors font-serif text-[12px] sm:text-sm"
+                className={`border border-gray-300 rounded-full flex items-center hover:bg-gray-50 transition-colors font-serif ${isScrolled ? 'px-1 py-0.5' : 'px-2 sm:px-3 py-1 gap-1 text-[12px] sm:text-sm'}`}
               >
                 <User size={16} />
-                <span className="hidden sm:inline">{user?.firstName || 'Account'}</span>
-                <ChevronDown size={13} className="ml-1 hidden sm:inline" />
+                {!isScrolled && (
+                  <>
+                    <span className="hidden sm:inline">{user?.firstName || 'Account'}</span>
+                    <ChevronDown size={13} className="ml-1 hidden sm:inline" />
+                  </>
+                )}
               </button>
 
               {profileOpen && (
@@ -123,7 +137,7 @@ export default function Navbar() {
                       setProfileOpen(false);
                       handleLogout();
                     }}
-                    className="w-full text-left px-4 py-2 hover:bg-gray-50 text-red-500"
+                    className="w-full text-left px-1 py-2 hover:bg-gray-50 text-red-500"
                   >
                     Logout
                   </button>
@@ -133,23 +147,23 @@ export default function Navbar() {
           ) : (
             <Link
               href="/login"
-              className="border border-[var(--primary-blue)] bg-[var(--primary-blue)] text-white rounded-full px-2 sm:px-3 py-1 flex items-center gap-1 hover:bg-[var(--primary-blue-hover)] transition-colors font-serif text-[12px] sm:text-sm"
+              className={`border border-[var(--primary-blue)] bg-[var(--primary-blue)] text-white rounded-full flex items-center hover:bg-[var(--primary-blue-hover)] transition-colors font-serif ${isScrolled ? 'px-0.1 py-0.1' : 'px-2 sm:px-3 py-1 text-[12px] sm:text-sm'}`}
             >
-              <User size={14} /> <span className="hidden sm:inline">Sign In</span>
+              <User size={14} /> {!isScrolled && <span className="hidden sm:inline">Sign In</span>}
             </Link>
           )}
         </div>
 
         {/* Center Logo */}
-        <Link href="/" className="flex flex-col items-center justify-center flex-1">
+        <Link href="/" className={`flex flex-col items-center justify-center transition-all duration-500 ease-in-out ${isScrolled ? 'order-2 transform -translate-x-1 ml-10' : 'flex-1'}`}>
           <Image
-            src=""
+            src="next.svg"
             alt="TinyFashion Logo"
             width={65}
             height={45}
             className="object-contain"
           />
-          <h1 className="font-bold text-[16px] sm:text-[18px] tracking-[1.5px] font-serif text-center">
+          <h1 className={`font-bold text-[16px] sm:text-[18px] tracking-[1.5px] font-serif text-center transition-all duration-500 ease-in-out ${isScrolled ? 'transform -translate-x-4' : ''}`}>
             <span style={{ color: logoColors[0] }}>T</span>
             <span style={{ color: logoColors[1] }}>I</span>
             <span style={{ color: logoColors[2] }}>N</span>
@@ -165,14 +179,14 @@ export default function Navbar() {
         </Link>
 
         {/* Right Icons */}
-        <div className="flex items-center gap-2 sm:gap-3">
+        <div className={`flex items-center gap-2 sm:gap-3 transition-all duration-500 ease-in-out ${isScrolled ? 'order-3' : ''}`}>
           {/* Search Button */}
           <div className="relative" ref={searchRef}>
             <button
               onClick={() => setIsSearchOpen(!isSearchOpen)}
-              className="hidden md:flex items-center gap-1 border border-gray-300 rounded-full px-3 py-1 hover:bg-gray-50 transition-colors font-serif text-sm"
+              className={`hidden md:flex items-center gap-1 border border-gray-300 rounded-full hover:bg-gray-50 transition-colors font-serif ${isScrolled ? 'px-1 py-0.5' : 'px-3 py-1 text-sm'}`}
             >
-              <Search size={15} /> Search
+              <Search size={15} /> {!isScrolled && 'Search'}
             </button>
 
             {/* Search Dropdown */}
@@ -254,7 +268,7 @@ export default function Navbar() {
             {categories.map((category) => (
               <Link
                 key={category._id || category.id}
-                href={`/category/${category._id}`}
+                href={`/categories/${category._id || category.id}`}
                 className="px-6 py-3 text-gray-800 hover:bg-gray-50 hover:text-[#cda434] transition-colors font-serif uppercase text-[13px]"
                 onClick={() => setIsMenuOpen(false)}
               >

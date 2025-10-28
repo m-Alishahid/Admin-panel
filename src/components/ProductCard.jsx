@@ -25,7 +25,7 @@ export default function ProductCard({ product }) {
       <div
         className={`bg-[var(--text-white)] rounded-lg border border-[var(--text-lighter)] overflow-hidden
           transition-all duration-300 shadow-sm hover:shadow-md
-          hover:border-[${theme.colors.primary}] cursor-pointer h-70 flex flex-col`}
+          hover:border-[${theme.colors.primary}] cursor-pointer h-100 flex flex-col`}
       >
         {/* Product Image */}
         <div className="relative overflow-hidden bg-[var(--text-lighter)]" style={{ height: "16rem" }}>
@@ -39,7 +39,7 @@ export default function ProductCard({ product }) {
               unoptimized
             />
           ) : (
-            <div className="w-full h-64 bg-[var(--text-lighter)]" />
+            <div className="w-full h-96 bg-[var(--text-lighter)]" />
           )}
 
           {/* Discount Badge */}
@@ -140,7 +140,7 @@ export default function ProductCard({ product }) {
 
           {/* View Details Button */}
           <button
-            className="w-full bg-[var(--primary-blue)] hover:bg-[var(--primary-blue-hover)] text-[var(--text-white)] rounded-full py-2 font-serif font-semibold
+            className="w-full bg-[var(--primary-blue)] hover:bg-[var(--primary-blue-hover)] text-white rounded-full py-2 font-serif font-semibold
               transition-all duration-300 transform group-hover:scale-[1.02]
               text-sm flex items-center justify-center gap-2"
           >
