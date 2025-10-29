@@ -1,6 +1,6 @@
 "use client";
 import { useState, useEffect } from "react";
-import { useParams } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
 import Navbar from "../../../components/Navbar";
 import { productService } from "@/services/productService";
 import { useCart } from "@/context/CartContext";
@@ -9,6 +9,7 @@ import { toast } from "sonner";
 
 export default function ProductDetailPage() {
   const { id } = useParams();
+  const router = useRouter();
   const { addToCart } = useCart();
   const { addToWishlist, isInWishlist } = useWishlist();
   const [product, setProduct] = useState(null);
@@ -166,7 +167,8 @@ export default function ProductDetailPage() {
 
     addToCart(cartItem);
     toast.success('Proceeding to checkout...');
-    // TODO: Redirect to checkout page
+    // Redirect to checkout page using Next.js router
+    router.push('/checkout');
   };
 
   if (loading) {

@@ -121,23 +121,32 @@ export default function Navbar() {
                     className="block px-4 py-2 hover:bg-gray-50"
                     onClick={() => setProfileOpen(false)}
                   >
-                    My Account
+                    My Profile
                   </Link>
                   {user?.roleType === 'customer' && (
-                    <Link
-                      href="/orders"
-                      className="block px-4 py-2 hover:bg-gray-50"
-                      onClick={() => setProfileOpen(false)}
-                    >
-                      Orders
-                    </Link>
+                    <>
+                      <Link
+                        href="/orders"
+                        className="block px-4 py-2 hover:bg-gray-50"
+                        onClick={() => setProfileOpen(false)}
+                      >
+                        Orders
+                      </Link>
+                      <Link
+                        href="/order-tracking"
+                        className="block px-4 py-2 hover:bg-gray-50"
+                        onClick={() => setProfileOpen(false)}
+                      >
+                        Track Order
+                      </Link>
+                    </>
                   )}
                   <button
                     onClick={() => {
                       setProfileOpen(false);
                       handleLogout();
                     }}
-                    className="w-full text-left px-1 py-2 hover:bg-gray-50 text-red-500"
+                    className="w-full text-left px-4 py-2 hover:bg-gray-50 text-red-500"
                   >
                     Logout
                   </button>
@@ -219,7 +228,7 @@ export default function Navbar() {
           </div>
 
           {/* Wishlist Button */}
-          <Link href="/wishlist" className="relative flex items-center hover:text-[#cda434] transition-colors">
+          <Link href="/wishlist" className="relative flex items-center hover:text-primary-blue-hover transition-colors">
             <Heart size={18} />
             {getWishlistCount() > 0 && (
               <span className="absolute -top-2 -right-2 bg-[#1e40af] text-white text-xs rounded-full h-5 w-5 flex items-center justify-center font-bold">
@@ -229,7 +238,7 @@ export default function Navbar() {
           </Link>
 
           {/* Cart Button */}
-          <Link href="/cart" className="relative flex items-center hover:text-[#cda434] transition-colors">
+          <Link href="/cart" className="relative flex items-center hover:text-primary-blue-hover transition-colors">
             <ShoppingBag size={18} />
             {getCartItemCount() > 0 && (
               <span className="absolute -top-2 -right-2 bg-[#1e40af] text-white text-xs rounded-full h-5 w-5 flex items-center justify-center font-bold">

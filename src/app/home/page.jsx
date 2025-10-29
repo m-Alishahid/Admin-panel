@@ -14,7 +14,7 @@ export default function HomePage() {
   const [loading, setLoading] = useState(true);
   const [touchStart, setTouchStart] = useState(null);
   const [touchEnd, setTouchEnd] = useState(null);
-  const [currentCategoryIndex, setCurrentCategoryIndex] = useState(0);
+  const [showScrollbar, setShowScrollbar] = useState(false);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -87,28 +87,17 @@ export default function HomePage() {
       return true;
     });
 
-  // Touch handlers for swipe functionality
-  const minSwipeDistance = 50;
-
+  // Touch handlers for scrollbar visibility
   const onTouchStart = (e) => {
     setTouchEnd(null);
     setTouchStart(e.targetTouches[0].clientX);
+    setShowScrollbar(true);
   };
 
   const onTouchMove = (e) => setTouchEnd(e.targetTouches[0].clientX);
 
   const onTouchEnd = () => {
-    if (!touchStart || !touchEnd) return;
-    const distance = touchStart - touchEnd;
-    const isLeftSwipe = distance > minSwipeDistance;
-    const isRightSwipe = distance < -minSwipeDistance;
-
-    if (isLeftSwipe && currentCategoryIndex < categories.length - 1) {
-      setCurrentCategoryIndex(currentCategoryIndex + 1);
-    }
-    if (isRightSwipe && currentCategoryIndex > 0) {
-      setCurrentCategoryIndex(currentCategoryIndex - 1);
-    }
+    setShowScrollbar(false);
   };
 
   if (loading) {
@@ -206,9 +195,9 @@ export default function HomePage() {
               ))}
             </div>
           ) : (
-            <div className="overflow-x-auto no-scrollbar -mx-4 px-4">
+            <div className={`overflow-x-auto  -mx-4 px-4`}>
               <div
-                className="flex gap-4 snap-x snap-mandatory items-stretch"
+                className="flex gap-4 snap-x snap-mandatory items-stretch "
                 onTouchStart={onTouchStart}
                 onTouchMove={onTouchMove}
                 onTouchEnd={onTouchEnd}
