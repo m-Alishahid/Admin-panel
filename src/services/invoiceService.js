@@ -148,6 +148,7 @@ export const invoiceService = {
     return response.data;
   },
 
+
     // ✅ NEW: Mark invoice as paid
   markAsPaid: async (id) => {
     const response = await api.patch(`/invoices/${id}/pay`);
@@ -165,6 +166,26 @@ export const invoiceService = {
     const response = await api.post(`/invoices/${id}/send`);
     return response.data;
   },
+
+  // ✅ UPDATED: Download invoice as PDF
+  // downloadPDF: async (id) => {
+  //   const response = await api.get(`/invoices/${id}/pdf`, {
+  //     responseType: 'blob'
+  //   });
+    
+  //   // Create download link
+  //   const blob = new Blob([response.data], { type: 'application/pdf' });
+  //   const url = window.URL.createObjectURL(blob);
+  //   const link = document.createElement('a');
+  //   link.href = url;
+  //   link.download = `invoice-${id}.pdf`;
+  //   document.body.appendChild(link);
+  //   link.click();
+  //   document.body.removeChild(link);
+  //   window.URL.revokeObjectURL(url);
+    
+  //   return response.data;
+  // },
 
   // Download invoice as HTML (for printing as PDF)
   downloadInvoice: async (id) => {

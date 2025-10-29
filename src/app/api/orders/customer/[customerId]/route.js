@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import { getServerSession, isAdmin } from '@/lib/auth';
-import Order from '@/Models/Order';
+import Order from '@/Models/Orders';
 import connectDB from '@/lib/mongodb';
 
 // ✅ GET ORDERS BY CUSTOMER

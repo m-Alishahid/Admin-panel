@@ -2705,7 +2705,7 @@ function InvoiceViewModal({ invoice, isOpen, onClose, onEdit, user }) {
           <Button variant="outline" onClick={onClose}>
             Close
           </Button>
-          {onEdit && invoice.status !== 'paid' && (
+          {onEdit && invoice.status !== 'Paid' && (
             <Button variant="outline" onClick={() => onEdit(invoice)}>
               <Edit className="w-4 h-4 mr-2" />
               Edit Invoice

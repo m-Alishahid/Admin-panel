@@ -54,13 +54,13 @@ export async function POST(request) {
   try {
     await connectDB();
     const session = await getServerSession(request);
-    
-    if (!session) {
+    const orderData = await request.json();
+
+    // Allow guest orders without authentication
+    if (!session && !orderData.isGuestOrder) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    const orderData = await request.json();
-    
     // ✅ Validate stock before creating order
     for (let item of orderData.items) {
       const product = await Product.findById(item.product);
@@ -69,14 +69,14 @@ export async function POST(request) {
       }
 
       const hasStock = product.checkStock(
-        item.variant?.size, 
-        item.variant?.color, 
+        item.variant?.size,
+        item.variant?.color,
         item.quantity
       );
 
       if (!hasStock) {
-        return NextResponse.json({ 
-          error: `Insufficient stock for product: ${product.name}` 
+        return NextResponse.json({
+          error: `Insufficient stock for product: ${product.name}`
         }, { status: 400 });
       }
 
@@ -88,8 +88,8 @@ export async function POST(request) {
       );
 
       if (!stockUpdated) {
-        return NextResponse.json({ 
-          error: `Failed to update stock for: ${product.name}` 
+        return NextResponse.json({
+          error: `Failed to update stock for: ${product.name}`
         }, { status: 400 });
       }
 
@@ -99,8 +99,7 @@ export async function POST(request) {
     // ✅ Create order
     const order = new Order({
       ...orderData,
-      customer: session.user.id,
-      customerEmail: session.user.email
+      customer: session ? session.user.id : null // For guest orders, customer is null
     });
 
     await order.save();
