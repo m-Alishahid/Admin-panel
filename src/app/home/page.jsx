@@ -341,9 +341,20 @@ export default function HomePage() {
               <input
                 type="email"
                 placeholder="Enter your email"
-                className="flex-grow px-4 py-3 rounded-lg sm:rounded-l-lg sm:rounded-r-none text-gray-800 focus:outline-none focus:ring-2 focus:ring-[var(--primary-blue)] font-serif"
+                className="flex-grow px-4 py-3 rounded-lg sm:rounded-l-lg bg-white sm:rounded-r-none text-gray-800 focus:outline-none focus:ring-2 focus:ring-[var(--primary-blue)] font-serif"
               />
-              <button className="bg-[var(--primary-blue)] hover:bg-[var(--primary-blue-hover)] text-white px-6 py-3 rounded-lg sm:rounded-r-lg sm:rounded-l-none font-serif transition-colors duration-300">
+              <button
+                onClick={() => {
+                  const email = document.querySelector('input[type="email"]').value;
+                  if (email) {
+                    alert(`Thank you for subscribing! We'll send updates to ${email}`);
+                    document.querySelector('input[type="email"]').value = '';
+                  } else {
+                    alert('Please enter a valid email address');
+                  }
+                }}
+                className="bg-[var(--primary-blue)] hover:bg-[var(--primary-blue-hover)] text-white px-6 py-3 rounded-lg sm:rounded-r-lg sm:rounded-l-none font-serif transition-colors duration-300"
+              >
                 Subscribe
               </button>
             </div>
