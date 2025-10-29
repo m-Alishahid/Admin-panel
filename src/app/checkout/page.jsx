@@ -4,6 +4,7 @@ import { useRouter } from "next/navigation";
 import Navbar from "../../components/Navbar";
 import { useCart } from "../../context/CartContext";
 import { useAuth } from "../../context/AuthContext";
+import { orderService } from "../../services/orderService";
 
 export default function CheckoutPage() {
   const { cartItems, getCartTotal, clearCart, removeFromCart, updateQuantity } = useCart();
@@ -29,6 +30,10 @@ export default function CheckoutPage() {
     name: ""
   });
 
+  const [showModal, setShowModal] = useState(false);
+  const [orderData, setOrderData] = useState(null);
+  const [loading, setLoading] = useState(false);
+
   const subtotal = getCartTotal();
   const shipping = subtotal > 50 ? 0 : 5.99;
   const tax = subtotal * 0.08;
@@ -37,8 +42,11 @@ export default function CheckoutPage() {
   // Pre-fill form with user data if available
   useEffect(() => {
     if (user) {
+      const nameParts = user.name ? user.name.split(' ') : [];
       setFormData(prev => ({
         ...prev,
+        firstName: user.firstName || nameParts[0] || '',
+        lastName: user.lastName || nameParts.slice(1).join(' ') || '',
         email: user.email || '',
         phone: user.phone || ''
       }));
@@ -61,25 +69,128 @@ export default function CheckoutPage() {
     }));
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
+    setLoading(true);
 
-    // Generate unique order ID
-    const orderId = `ORD-${Date.now()}-${Math.random().toString(36).substr(2, 9).toUpperCase()}`;
+    try {
+      // Generate unique order ID
+      const orderId = `ORD-${Date.now()}-${Math.random().toString(36).substr(2, 9).toUpperCase()}`;
 
-    // For guest users, create a user account from customer information
-    let userId = null;
-    if (!isAuthenticated) {
-      // Create guest user ID from email and phone
-      userId = `GUEST-${formData.email}-${formData.phone}`.replace(/[^a-zA-Z0-9-_]/g, '-');
+      // For guest users, create a user account from customer information
+      let userId = null;
+      if (!isAuthenticated) {
+        // Create guest user ID from email and phone
+        userId = `GUEST-${formData.email}-${formData.phone}`.replace(/[^a-zA-Z0-9-_]/g, '-');
 
-      // Store guest user info for future reference
-      const guestUsers = JSON.parse(localStorage.getItem('guestUsers') || '[]');
-      const existingGuestUser = guestUsers.find(user => user.userId === userId);
+        // Store guest user info for future reference
+        const guestUsers = JSON.parse(localStorage.getItem('guestUsers') || '[]');
+        const existingGuestUser = guestUsers.find(user => user.userId === userId);
 
-      if (!existingGuestUser) {
-        const guestUserData = {
-          userId,
+        if (!existingGuestUser) {
+          const guestUserData = {
+            userId,
+            firstName: formData.firstName,
+            lastName: formData.lastName,
+            email: formData.email,
+            phone: formData.phone,
+            address: formData.address,
+            city: formData.city,
+            postcode: formData.postcode,
+            country: formData.country,
+            roleType: 'customer',
+            createdAt: new Date().toISOString(),
+            orders: [orderId]
+          };
+          guestUsers.push(guestUserData);
+          localStorage.setItem('guestUsers', JSON.stringify(guestUsers));
+        } else {
+          // Add order to existing guest user
+          existingGuestUser.orders = existingGuestUser.orders || [];
+          if (!existingGuestUser.orders.includes(orderId)) {
+            existingGuestUser.orders.push(orderId);
+          }
+          localStorage.setItem('guestUsers', JSON.stringify(guestUsers));
+        }
+
+        // Store userId in session for tracking
+        sessionStorage.setItem('guestUserId', userId);
+      }
+
+      // Create order object for API
+      const orderData = {
+        orderNumber: orderId, // Use orderId as orderNumber for MongoDB
+        customerEmail: formData.email,
+        customerPhone: formData.phone,
+        items: cartItems.map(item => ({
+          product: item.productId,
+          variant: {
+            size: item.size || 'Standard',
+            color: item.color || 'Standard'
+          },
+          quantity: item.quantity,
+          unitPrice: item.price,
+          totalPrice: item.price * item.quantity,
+          productSnapshot: {
+            name: item.name,
+            thumbnail: item.image
+          }
+        })),
+        pricing: {
+          subtotal: subtotal,
+          shipping: shipping,
+          tax: tax,
+          discount: 0,
+          grandTotal: total,
+          currency: 'PKR'
+        },
+        shippingAddress: {
+          fullName: isAuthenticated && user ? (user.name || `${user.firstName || ''} ${user.lastName || ''}`.trim()) : `${formData.firstName} ${formData.lastName}`.trim(),
+          phone: formData.phone,
+          email: formData.email,
+          addressLine1: formData.address,
+          city: formData.city,
+          state: formData.city, // Using city as state for simplicity
+          pincode: formData.postcode,
+          country: formData.country
+        },
+        billingAddress: {
+          fullName: isAuthenticated && user ? (user.name || `${user.firstName || ''} ${user.lastName || ''}`.trim()) : `${formData.firstName} ${formData.lastName}`.trim(),
+          phone: formData.phone,
+          email: formData.email,
+          addressLine1: formData.address,
+          city: formData.city,
+          state: formData.city,
+          pincode: formData.postcode,
+          country: formData.country
+        },
+        payment: {
+          method: paymentMethod,
+          amount: total,
+          currency: 'PKR'
+        },
+        shipping: {
+          cost: shipping
+        },
+        status: 'confirmed',
+        isGuestOrder: !isAuthenticated
+      };
+
+      // Save order to MongoDB via API
+      console.log('Sending order data:', orderData);
+      const response = await orderService.create(orderData);
+      console.log('Order creation response:', response);
+
+      // Set order data for modal
+      setOrderData({
+        ...response.order,
+        orderId: orderId,
+        subtotal: subtotal,
+        shipping: shipping,
+        tax: tax,
+        total: total,
+        paymentMethod: paymentMethod,
+        customerInfo: {
           firstName: formData.firstName,
           lastName: formData.lastName,
           email: formData.email,
@@ -87,61 +198,23 @@ export default function CheckoutPage() {
           address: formData.address,
           city: formData.city,
           postcode: formData.postcode,
-          country: formData.country,
-          roleType: 'customer',
-          createdAt: new Date().toISOString(),
-          orders: [orderId]
-        };
-        guestUsers.push(guestUserData);
-        localStorage.setItem('guestUsers', JSON.stringify(guestUsers));
-      } else {
-        // Add order to existing guest user
-        existingGuestUser.orders = existingGuestUser.orders || [];
-        if (!existingGuestUser.orders.includes(orderId)) {
-          existingGuestUser.orders.push(orderId);
-        }
-        localStorage.setItem('guestUsers', JSON.stringify(guestUsers));
-      }
+          country: formData.country
+        },
+        items: cartItems
+      });
 
-      // Store userId in session for tracking
-      sessionStorage.setItem('guestUserId', userId);
+      // Clear the cart
+      clearCart();
+
+      // Show confirmation modal
+      setShowModal(true);
+    } catch (error) {
+      console.error('Error creating order:', error);
+      console.error('Error details:', error.response?.data || error.message);
+      alert(`Failed to place order: ${error.response?.data?.error || error.message || 'Unknown error'}`);
+    } finally {
+      setLoading(false);
     }
-
-    // Create order object
-    const orderData = {
-      orderId,
-      userId: isAuthenticated ? user?.id : userId,
-      customerInfo: {
-        firstName: formData.firstName,
-        lastName: formData.lastName,
-        email: formData.email,
-        phone: formData.phone,
-        address: formData.address,
-        city: formData.city,
-        postcode: formData.postcode,
-        country: formData.country
-      },
-      items: cartItems,
-      paymentMethod,
-      subtotal,
-      shipping,
-      tax,
-      total,
-      orderDate: new Date().toISOString(),
-      status: 'confirmed',
-      isGuestOrder: !isAuthenticated
-    };
-
-    // Store order in localStorage for tracking (in a real app, this would be sent to backend)
-    const existingOrders = JSON.parse(localStorage.getItem('orders') || '[]');
-    existingOrders.push(orderData);
-    localStorage.setItem('orders', JSON.stringify(existingOrders));
-
-    // Clear the cart
-    clearCart();
-
-    // Redirect to order confirmation page
-    router.push(`/order-confirmation/${orderId}`);
   };
 
   return (
@@ -416,9 +489,10 @@ export default function CheckoutPage() {
             {/* Place Order Button */}
             <button
               type="submit"
-              className="w-full bg-blue-600 hover:bg-primary-blue-hover text-primary-foreground py-4 px-6 rounded-lg font-semibold text-lg transition-colors"
+              disabled={loading}
+              className="w-full bg-blue-600 hover:bg-primary-blue-hover text-primary-foreground py-4 px-6 rounded-lg font-semibold text-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              Place Order
+              {loading ? 'Placing Order...' : 'Place Order'}
             </button>
 
             {/* Terms and Conditions */}
@@ -435,6 +509,159 @@ export default function CheckoutPage() {
           </div>
         </form>
       </div>
+
+      {/* Order Confirmation Modal */}
+      {showModal && orderData && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg max-w-2xl w-full mx-4 max-h-[90vh] overflow-y-auto">
+            <div className="p-6">
+              {/* Header */}
+              <div className="text-center mb-6">
+                <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                  <svg className="w-8 h-8 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                  </svg>
+                </div>
+                <h2 className="text-2xl font-bold text-gray-900 mb-2">Order Confirmed!</h2>
+                <p className="text-gray-600">Thank you for your purchase. Your order has been successfully placed.</p>
+              </div>
+
+              {/* Order Details */}
+              <div className="space-y-4 mb-6">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <h3 className="font-semibold text-gray-900 mb-2">Order Information</h3>
+                    <div className="space-y-1 text-sm">
+                      <div className="flex justify-between">
+                        <span className="text-gray-600">Order ID:</span>
+                        <span className="font-semibold text-gray-900">{orderData.orderId}</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="text-gray-600">Order Date:</span>
+                        <span className="font-semibold text-gray-900">
+                          {new Date().toLocaleDateString('en-US', {
+                            year: 'numeric',
+                            month: 'long',
+                            day: 'numeric',
+                            hour: '2-digit',
+                            minute: '2-digit'
+                          })}
+                        </span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="text-gray-600">Payment Method:</span>
+                        <span className="font-semibold text-gray-900 capitalize">{orderData.paymentMethod}</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="text-gray-600">Status:</span>
+                        <span className="font-semibold text-orange-300 capitalize">pending</span>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div>
+                    <h3 className="font-semibold text-gray-900 mb-2">Shipping Address</h3>
+                    <div className="text-sm text-gray-900">
+                      <p className="font-semibold">
+                        {orderData.customerInfo.firstName} {orderData.customerInfo.lastName}
+                      </p>
+                      <p>{orderData.customerInfo.address}</p>
+                      <p>{orderData.customerInfo.city}, {orderData.customerInfo.postcode}</p>
+                      <p>{orderData.customerInfo.country}</p>
+                      <p className="mt-2">{orderData.customerInfo.phone}</p>
+                      <p>{orderData.customerInfo.email}</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Order Items */}
+              <div className="mb-6">
+                <h3 className="font-semibold text-gray-900 mb-4">Order Items</h3>
+                <div className="space-y-3">
+                  {orderData.items.map((item) => (
+                    <div key={`${item.productId}-${item.size}-${item.color}`} className="flex items-center space-x-3 border-b pb-3">
+                      <img
+                        src={item.image || "/placeholder-product.jpg"}
+                        alt={item.name}
+                        className="w-12 h-12 object-cover rounded-lg"
+                      />
+                      <div className="flex-1">
+                        <h4 className="font-medium text-gray-900">{item.name}</h4>
+                        <p className="text-sm text-gray-600">Quantity: {item.quantity}</p>
+                        {item.size && item.color && (
+                          <p className="text-xs text-gray-500">
+                            Size: {item.size}, Color: {item.color}
+                          </p>
+                        )}
+                      </div>
+                      <div className="text-right">
+                        <span className="font-semibold text-gray-900">
+                          Rs. {(item.price * item.quantity).toFixed(2)}
+                        </span>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+
+                {/* Order Totals */}
+                <div className="border-t pt-4 mt-4">
+                  <div className="space-y-2 text-sm">
+                    <div className="flex justify-between text-gray-600">
+                      <span>Subtotal</span>
+                      <span>Rs. {orderData.subtotal.toFixed(2)}</span>
+                    </div>
+                    <div className="flex justify-between text-gray-600">
+                      <span>Shipping</span>
+                      <span>{orderData.shipping === 0 ? 'Free' : `Rs. ${orderData.shipping.toFixed(2)}`}</span>
+                    </div>
+                    <div className="flex justify-between text-gray-600">
+                      <span>Tax</span>
+                      <span>Rs. {orderData.tax.toFixed(2)}</span>
+                    </div>
+                    <div className="flex justify-between text-lg font-bold text-gray-900 border-t pt-2">
+                      <span>Total</span>
+                      <span>Rs. {orderData.total.toFixed(2)}</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Action Buttons */}
+              <div className="flex flex-col sm:flex-row gap-3">
+                <button
+                  onClick={() => {
+                    setShowModal(false);
+                    router.push('/');
+                  }}
+                  className="flex-1 bg-blue-600 hover:bg-blue-700 text-white py-3 px-6 rounded-lg font-semibold transition-colors"
+                >
+                  Continue Shopping
+                </button>
+                <button
+                  onClick={() => {
+                    setShowModal(false);
+                    router.push('/order-tracking');
+                  }}
+                  className="flex-1 bg-gray-200 hover:bg-gray-300 text-gray-800 py-3 px-6 rounded-lg font-semibold transition-colors"
+                >
+                  Track Order
+                </button>
+              </div>
+
+              {/* Order Tracking Info */}
+              <div className="mt-6 bg-gray-50 rounded-lg p-4 text-center">
+                <p className="text-sm text-gray-600 mb-2">
+                  You can track your order status using the Order ID: <strong className="text-gray-900">{orderData.orderId}</strong>
+                </p>
+                <p className="text-xs text-gray-500">
+                  We'll send you email updates about your order status. For COD orders, our delivery partner will contact you before delivery.
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

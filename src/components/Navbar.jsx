@@ -258,7 +258,7 @@ export default function Navbar() {
       </div>
 
       {/* Desktop Categories */}
-      <nav className="navbar-categories hidden md:flex justify-center gap-5 text-[13.5px] font-medium tracking-wide py-3 uppercase font-serif">
+      {/* <nav className="navbar-categories hidden md:flex justify-center gap-5 text-[13.5px] font-medium tracking-wide py-3 uppercase font-serif">
         {categories.map((category) => (
           <Link
             key={category._id || category.id}
@@ -268,7 +268,22 @@ export default function Navbar() {
             {category.name}
           </Link>
         ))}
-      </nav>
+      </nav> */}
+
+      {/* Desktop Categories */}
+<nav className="navbar-categories hidden md:flex justify-center gap-5 text-[13.5px] font-medium tracking-wide py-3 uppercase font-serif">
+  {categories.map((category) => (
+    <Link
+      key={category._id}
+      // href={`/categories/${category.slug}`} // ✅ use slug here
+            href={`/categories/${category.slug || category._id}`}
+      className="hover:text-[var(--primary-blue)] transition-colors"
+    >
+      {category.name}
+    </Link>
+  ))}
+</nav>
+
 
       {/* Mobile Menu */}
       {isMenuOpen && (

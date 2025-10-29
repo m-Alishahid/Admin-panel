@@ -4,8 +4,9 @@ import { getUniversalSession, isAdmin, isVendor } from '@/lib/auth';
 import connectDB from '@/lib/mongodb';
 import Vendor from '@/Models/Vendor';
 import Product from '@/Models/Product';
-import Invoice from '@/Models/Invoice';
+import Invoice from '@/Models/Vendor';
 import User from '@/Models/User';
+import Order from '@/Models/Orders';
 
 export async function GET(request) {
   try {
@@ -141,7 +142,9 @@ async function getAdminDashboard() {
     totalProducts,
     totalUsers,
     recentInvoices,
-    lowStockProducts
+    lowStockProducts,
+    totalOrders,
+    recentOrders
   ] = await Promise.all([
     Vendor.countDocuments({ status: 'Active' }),
     Product.countDocuments({ status: 'Active' }),
@@ -151,7 +154,13 @@ async function getAdminDashboard() {
       .populate('createdBy', 'firstName lastName')
       .sort({ createdAt: -1 })
       .limit(5),
-    Product.countDocuments({ totalStock: { $lt: 10 } })
+    Product.countDocuments({ totalStock: { $lt: 10 } }),
+    Order.countDocuments(),
+    Order.find()
+      .populate('customer', 'name email')
+      .populate('items.product', 'name thumbnail')
+      .sort({ createdAt: -1 })
+      .limit(5)
   ]);
 
   // Get financial stats
@@ -211,6 +220,7 @@ async function getAdminDashboard() {
         totalSales,
         totalProfit,
         totalInvoices,
+        totalOrders,
         pendingRequests: pendingRequests[0]?.count || 0,
         lowStockProducts
       },
@@ -223,6 +233,7 @@ async function getAdminDashboard() {
         }))
       },
       recentInvoices,
+      recentOrders,
       lowStockProducts: await Product.find({ totalStock: { $lt: 10 } })
         .select('name totalStock salePrice costPrice')
         .limit(10)

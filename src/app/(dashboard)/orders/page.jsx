@@ -18,7 +18,7 @@ export default function Orders() {
       const response = await fetch('/api/orders');
       if (response.ok) {
         const data = await response.json();
-        setOrders(data);
+        setOrders(data.orders || []);
       }
     } catch (error) {
       console.error('Failed to fetch orders:', error);
@@ -134,11 +134,11 @@ export default function Orders() {
                   </td>
                   <td className="px-3 md:px-6 py-3 md:py-4">
                     <div>
-                      <div className="text-sm font-medium text-gray-900">{order.customer.name}</div>
-                      <div className="text-xs md:text-sm text-gray-500">{order.customer.email}</div>
+                      <div className="text-sm font-medium text-gray-900">{order.customer?.name || order.customerEmail || 'N/A'}</div>
+                      <div className="text-xs md:text-sm text-gray-500">{order.customer?.email || order.customerEmail || 'N/A'}</div>
                     </div>
                   </td>
-                  <td className="px-3 md:px-6 py-3 md:py-4 text-sm font-semibold text-gray-900">${order.total.toFixed(2)}</td>
+                  <td className="px-3 md:px-6 py-3 md:py-4 text-sm font-semibold text-gray-900">${(order.pricing?.grandTotal || order.total || 0).toFixed(2)}</td>
                   <td className="px-3 md:px-6 py-3 md:py-4">
                     <select
                       value={order.status}
@@ -151,7 +151,7 @@ export default function Orders() {
                       <option value="Cancelled">Cancelled</option>
                     </select>
                   </td>
-                  <td className="px-3 md:px-6 py-3 md:py-4 text-xs md:text-sm text-gray-500">{order.date}</td>
+                  <td className="px-3 md:px-6 py-3 md:py-4 text-xs md:text-sm text-gray-500">{new Date(order.createdAt).toLocaleDateString()}</td>
                   <td className="px-3 md:px-6 py-3 md:py-4">
                     <button
                       onClick={() => openModal(order)}
@@ -204,10 +204,10 @@ export default function Orders() {
                 <div className="space-y-3 md:space-y-4">
                   <h3 className="text-base md:text-lg font-medium text-gray-900">Customer Information</h3>
                   <div className="space-y-2">
-                    <p className="text-sm md:text-base"><strong>Name:</strong> {selectedOrder.customer.name}</p>
-                    <p className="text-sm md:text-base"><strong>Email:</strong> {selectedOrder.customer.email}</p>
-                    <p className="text-sm md:text-base"><strong>Phone:</strong> {selectedOrder.customer.phone}</p>
-                    <p className="text-sm md:text-base"><strong>Address:</strong> {selectedOrder.customer.address}</p>
+                    <p className="text-sm md:text-base"><strong>Name:</strong> {selectedOrder.customer?.name || selectedOrder.customerEmail || 'N/A'}</p>
+                    <p className="text-sm md:text-base"><strong>Email:</strong> {selectedOrder.customer?.email || selectedOrder.customerEmail || 'N/A'}</p>
+                    <p className="text-sm md:text-base"><strong>Phone:</strong> {selectedOrder.customer?.phone || selectedOrder.customerPhone || 'N/A'}</p>
+                    <p className="text-sm md:text-base"><strong>Address:</strong> {selectedOrder.shippingAddress?.addressLine1 || selectedOrder.customer?.address || 'N/A'}</p>
                   </div>
                 </div>
 
@@ -216,8 +216,8 @@ export default function Orders() {
                   <h3 className="text-base md:text-lg font-medium text-gray-900">Order Summary</h3>
                   <div className="space-y-2">
                     <p className="text-sm md:text-base"><strong>Status:</strong> {getStatusBadge(selectedOrder.status)}</p>
-                    <p className="text-sm md:text-base"><strong>Date:</strong> {selectedOrder.date}</p>
-                    <p className="text-sm md:text-base"><strong>Total:</strong> ${selectedOrder.total.toFixed(2)}</p>
+                    <p className="text-sm md:text-base"><strong>Date:</strong> {new Date(selectedOrder.createdAt).toLocaleDateString()}</p>
+                    <p className="text-sm md:text-base"><strong>Total:</strong> ${(selectedOrder.pricing?.grandTotal || selectedOrder.total || 0).toFixed(2)}</p>
                   </div>
                 </div>
               </div>
@@ -237,11 +237,11 @@ export default function Orders() {
                     <tbody className="bg-white divide-y divide-gray-200">
                       {selectedOrder.items.map((item, i) => (
                         <tr key={i}>
-                          <td className="px-3 md:px-4 py-2 md:py-3 text-sm">{item.productName}</td>
-                          <td className="px-3 md:px-4 py-2 md:py-3 text-sm">{item.category}</td>
-                          <td className="px-3 md:px-4 py-2 md:py-3 text-sm">${item.price.toFixed(2)}</td>
+                          <td className="px-3 md:px-4 py-2 md:py-3 text-sm">{item.productSnapshot?.name || item.productName || 'N/A'}</td>
+                          <td className="px-3 md:px-4 py-2 md:py-3 text-sm">{item.category || 'N/A'}</td>
+                          <td className="px-3 md:px-4 py-2 md:py-3 text-sm">${(item.unitPrice || item.price || 0).toFixed(2)}</td>
                           <td className="px-3 md:px-4 py-2 md:py-3 text-sm">{item.quantity}</td>
-                          <td className="px-3 md:px-4 py-2 md:py-3 text-sm font-medium">${(item.price * item.quantity).toFixed(2)}</td>
+                          <td className="px-3 md:px-4 py-2 md:py-3 text-sm font-medium">${(item.totalPrice || (item.price * item.quantity) || 0).toFixed(2)}</td>
                         </tr>
                       ))}
                     </tbody>

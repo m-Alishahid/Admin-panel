@@ -148,6 +148,13 @@ export const invoiceService = {
     return response.data;
   },
 
+
+    // ✅ NEW: Mark invoice as paid
+  markAsPaid: async (id) => {
+    const response = await api.patch(`/invoices/${id}/pay`);
+    return response.data;
+  },
+
   // Record payment
   recordPayment: async (id, paymentData) => {
     const response = await api.post(`/invoices/${id}/payment`, paymentData);
