@@ -267,7 +267,7 @@ const orderSchema = new mongoose.Schema({
     },
     currency: {
       type: String,
-      default: 'INR'
+      default: 'PKR'
     }
   },
   
@@ -470,7 +470,7 @@ orderSchema.methods.calculatePricing = function() {
     tax: this.pricing?.tax || 0,
     discount: this.pricing?.discount || 0,
     grandTotal: Math.max(0, subtotal + (this.shipping.cost || 0) + (this.pricing?.tax || 0) - (this.pricing?.discount || 0)),
-    currency: 'INR'
+    currency: 'PKR'
   };
 };
 
