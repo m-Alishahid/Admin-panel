@@ -297,9 +297,9 @@ export async function POST(request) {
     // Determine initial status
     let initialStatus = 'Draft';
     if (session.user.role === 'vendor' || session.user.isVendor) {
-      initialStatus = 'Pending Approval';
-    } else if (session.user.role === 'admin' || session.user.isAdmin) {
-      initialStatus = 'Approved';
+      initialStatus = 'pending_approval';
+    } else if (session.user.role === 'super_admin' || session.user.isAdmin) {
+      initialStatus = 'approved';
     }
 
     // Create invoice

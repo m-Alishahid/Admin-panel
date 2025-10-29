@@ -468,30 +468,103 @@ productSchema.methods.getVariantStock = function(size, color) {
   return colorStock ? colorStock.stock : 0;
 };
 
-// ✅ UPDATE VARIANT STOCK METHOD
+// // ✅ UPDATE VARIANT STOCK METHOD
+// productSchema.methods.updateVariantStock = function(size, color, quantity) {
+//   if (!this.variants || this.variants.length === 0) {
+//     this.totalStock = Math.max(0, this.totalStock - quantity);
+//     return true;
+//   }
+  
+//   const variant = this.variants.find(v => v.size === size);
+//   if (!variant || !variant.colors) return false;
+  
+//   const colorStock = variant.colors.find(c => c.color === color);
+//   if (!colorStock) return false;
+  
+//   if (colorStock.stock < quantity) return false;
+  
+//   colorStock.stock = Math.max(0, colorStock.stock - quantity);
+  
+//   // Update total stock
+//   this.totalStock = this.variants.reduce((total, v) => {
+//     const variantStock = v.colors.reduce((colorSum, c) => colorSum + (c.stock || 0), 0);
+//     return total + variantStock;
+//   }, 0);
+  
+//   return true;
+// };
+
+// ✅ UPDATE VARIANT STOCK METHOD (Product Model mein add karo)
 productSchema.methods.updateVariantStock = function(size, color, quantity) {
-  if (!this.variants || this.variants.length === 0) {
-    this.totalStock = Math.max(0, this.totalStock - quantity);
+  try {
+    console.log('🔄 Updating product variant stock:', {
+      product: this.name,
+      size: size,
+      color: color,
+      quantity: quantity
+    });
+
+    if (!this.variants || this.variants.length === 0) {
+      // If no variants, update total stock
+      if (this.totalStock < quantity) {
+        console.log('❌ Insufficient stock:', this.totalStock, 'needed:', quantity);
+        return false;
+      }
+      this.totalStock = Math.max(0, this.totalStock - quantity);
+      console.log('✅ Simple stock updated:', this.totalStock);
+      return true;
+    }
+
+    // Find the variant with matching size
+    const variant = this.variants.find(v => v.size === (size || 'Standard'));
+    if (!variant) {
+      console.log('❌ Variant not found for size:', size);
+      return false;
+    }
+
+    // If variant has colors
+    if (variant.colors && variant.colors.length > 0) {
+      const colorStock = variant.colors.find(c => c.color === (color || 'Standard'));
+      if (!colorStock) {
+        console.log('❌ Color not found:', color);
+        return false;
+      }
+
+      if (colorStock.stock < quantity) {
+        console.log('❌ Insufficient color stock:', colorStock.stock, 'needed:', quantity);
+        return false;
+      }
+
+      colorStock.stock = Math.max(0, colorStock.stock - quantity);
+      console.log('✅ Color stock updated:', colorStock.stock);
+
+    } else {
+      // If variant doesn't have colors but has direct stock
+      if (variant.stock < quantity) {
+        console.log('❌ Insufficient variant stock:', variant.stock, 'needed:', quantity);
+        return false;
+      }
+      variant.stock = Math.max(0, variant.stock - quantity);
+      console.log('✅ Variant stock updated:', variant.stock);
+    }
+
+    // ✅ UPDATE TOTAL STOCK
+    this.totalStock = this.variants.reduce((total, v) => {
+      if (v.colors && v.colors.length > 0) {
+        const variantStock = v.colors.reduce((colorSum, c) => colorSum + (c.stock || 0), 0);
+        return total + variantStock;
+      } else {
+        return total + (v.stock || 0);
+      }
+    }, 0);
+
+    console.log('✅ Total stock updated:', this.totalStock);
     return true;
+
+  } catch (error) {
+    console.error('❌ Product variant stock update error:', error);
+    return false;
   }
-  
-  const variant = this.variants.find(v => v.size === size);
-  if (!variant || !variant.colors) return false;
-  
-  const colorStock = variant.colors.find(c => c.color === color);
-  if (!colorStock) return false;
-  
-  if (colorStock.stock < quantity) return false;
-  
-  colorStock.stock = Math.max(0, colorStock.stock - quantity);
-  
-  // Update total stock
-  this.totalStock = this.variants.reduce((total, v) => {
-    const variantStock = v.colors.reduce((colorSum, c) => colorSum + (c.stock || 0), 0);
-    return total + variantStock;
-  }, 0);
-  
-  return true;
 };
 
 // ✅ CHECK STOCK METHOD

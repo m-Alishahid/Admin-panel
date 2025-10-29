@@ -1,4 +1,4 @@
-// app/api/invoices/[id]/approve/route.js
+// app/api/invoices/[id]/reject/route.js
 import { NextResponse } from 'next/server';
 import { getServerSession } from '@/lib/auth';
 import Invoice from '@/Models/Invoice';
@@ -14,48 +14,40 @@ export async function PATCH(request, { params }) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    // Only admin can approve invoices
-    if (session.user.role !== 'admin' && !session.user.isAdmin) {
+    // Only admin can reject invoices
+    if (session.user.role !== 'super_admin' && !session.user.isAdmin) {
       return NextResponse.json({ error: 'Admin access required' }, { status: 403 });
     }
 
-    const { id } = params;
-    const { approvedBy } = await request.json();
+    const { id } = await params;
+    const { rejectionReason } = await request.json();
 
     const invoice = await Invoice.findById(id);
     if (!invoice) {
       return NextResponse.json({ error: 'Invoice not found' }, { status: 404 });
     }
 
-    if (invoice.status !== 'Pending Approval') {
+    if (invoice.status !== 'pending_approval') {
       return NextResponse.json({ error: 'Invoice is not pending approval' }, { status: 400 });
     }
 
     // Update invoice status
-    invoice.status = 'Approved';
-    invoice.approvedBy = approvedBy;
-    invoice.approvedAt = new Date();
+    invoice.status = 'rejected';
+    invoice.rejectionReason = rejectionReason;
     await invoice.save();
 
-    // Update vendor stock for sales invoices
-    if (invoice.type === 'vendor_sale') {
-      await invoice.updateVendorStock();
-    }
-
-    // Update vendor invoice counts
+    // Update vendor pending invoices count
     const vendor = await Vendor.findById(invoice.vendor);
     if (vendor) {
       vendor.pendingInvoices = Math.max(0, vendor.pendingInvoices - 1);
-      vendor.paidInvoices += 1;
       await vendor.save();
     }
 
     await invoice.populate('vendor', 'companyName contactPerson');
-    await invoice.populate('approvedBy', 'firstName lastName');
 
     return NextResponse.json({
       success: true,
-      message: 'Invoice approved successfully',
+      message: 'Invoice rejected successfully',
       data: { invoice }
     });
   } catch (error) {
@@ -65,4 +57,3 @@ export async function PATCH(request, { params }) {
     }, { status: 500 });
   }
 }
-
