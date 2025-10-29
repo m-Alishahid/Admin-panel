@@ -1,10 +1,10 @@
- "use client";
+"use client";
 
-import { useState, useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import Navbar from "../../components/Navbar";
-import { orderService } from "../../services/orderService";
-import { useAuth } from "../../context/AuthContext";
+import Navbar from "@/components/Navbar";
+import { useAuth } from "@/context/AuthContext";
+import { orderService } from "@/services/orderService";
 
 export default function OrdersPage() {
   const [orders, setOrders] = useState([]);
@@ -15,17 +15,17 @@ export default function OrdersPage() {
 
   useEffect(() => {
     if (!isAuthenticated) {
-      router.push('/login');
+      router.push("/login");
       return;
     }
 
     const fetchOrders = async () => {
       try {
         const response = await orderService.getByCustomer(user.id);
-        setOrders(Array.isArray(response) ? response : response?.data || []);
-      } catch (error) {
-        console.error('Error fetching orders:', error);
-        setError('Failed to load orders');
+        setOrders(response.orders || []);
+      } catch (err) {
+        console.error(err);
+        setError("Failed to load your orders.");
       } finally {
         setLoading(false);
       }
@@ -34,40 +34,26 @@ export default function OrdersPage() {
     fetchOrders();
   }, [isAuthenticated, user, router]);
 
-  if (!isAuthenticated) {
-    return null; // Will redirect in useEffect
-  }
-
   if (loading) {
     return (
-      <div className="min-h-screen bg-background">
-        <Navbar />
-        <div className="flex justify-center items-center min-h-[60vh]">
-          <div className="text-center">
-            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto"></div>
-            <p className="mt-4 text-muted-foreground">Loading your orders...</p>
-          </div>
-        </div>
+      <div className="min-h-screen flex flex-col items-center justify-center">
+        <div className="animate-spin h-10 w-10 border-4 border-primary border-t-transparent rounded-full"></div>
+        <p className="mt-4 text-muted-foreground">Loading your orders...</p>
       </div>
     );
   }
 
   if (error) {
     return (
-      <div className="min-h-screen bg-background">
-        <Navbar />
-        <div className="flex justify-center items-center min-h-[60vh]">
-          <div className="text-center">
-            <h1 className="text-2xl font-bold text-foreground mb-4">Error</h1>
-            <p className="text-muted-foreground mb-6">{error}</p>
-            <button
-              onClick={() => router.push('/')}
-              className="bg-primary hover:bg-primary/90 text-primary-foreground px-6 py-2 rounded-lg font-semibold"
-            >
-              Go to Home
-            </button>
-          </div>
-        </div>
+      <div className="min-h-screen flex flex-col items-center justify-center text-center">
+        <h2 className="text-2xl font-semibold text-foreground mb-2">Error</h2>
+        <p className="text-muted-foreground mb-4">{error}</p>
+        <button
+          onClick={() => router.push("/")}
+          className="px-6 py-2 rounded-lg bg-primary text-primary-foreground font-semibold hover:bg-primary/90"
+        >
+          Go Home
+        </button>
       </div>
     );
   }
@@ -76,24 +62,20 @@ export default function OrdersPage() {
     <div className="min-h-screen bg-background">
       <Navbar />
 
-      <div className="max-w-6xl mx-auto px-6 py-8">
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold text-foreground mb-2">My Orders</h1>
-          <p className="text-muted-foreground">View and track all your previous orders</p>
-        </div>
+      <div className="max-w-6xl mx-auto px-6 py-10">
+        <h1 className="text-3xl font-bold text-foreground mb-2">My Orders</h1>
+        <p className="text-muted-foreground mb-10">
+          Track all your orders and delivery updates
+        </p>
 
         {orders.length === 0 ? (
-          <div className="text-center py-12">
-            <div className="w-24 h-24 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
-              <svg className="w-12 h-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
-              </svg>
-            </div>
-            <h2 className="text-xl font-semibold text-foreground mb-2">No orders yet</h2>
-            <p className="text-muted-foreground mb-6">You haven't placed any orders yet. Start shopping to see your orders here!</p>
+          <div className="text-center py-20">
+            <p className="text-xl font-semibold text-muted-foreground">
+              You haven’t placed any orders yet.
+            </p>
             <button
-              onClick={() => router.push('/')}
-              className="bg-primary hover:bg-primary/90 text-primary-foreground px-8 py-3 rounded-lg font-semibold transition-colors"
+              onClick={() => router.push("/")}
+              className="mt-6 bg-primary hover:bg-primary/90 text-primary-foreground px-6 py-3 rounded-lg font-semibold"
             >
               Start Shopping
             </button>
@@ -101,80 +83,116 @@ export default function OrdersPage() {
         ) : (
           <div className="space-y-6">
             {orders.map((order) => (
-              <div key={order._id} className="bg-card rounded-lg shadow-sm p-6">
-                <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between mb-4">
-                  <div className="mb-4 lg:mb-0">
-                    <div className="flex items-center gap-4 mb-2">
-                      <h3 className="text-lg font-semibold text-card-foreground">
-                        Order #{order.orderId}
+              <div
+                key={order._id}
+                className="bg-card rounded-2xl shadow-sm p-6 border border-border"
+              >
+                {/* Header */}
+                <div className="flex flex-col md:flex-row md:justify-between md:items-center mb-4">
+                  <div>
+                    <div className="flex items-center gap-3">
+                      <h3 className="text-lg font-semibold text-foreground">
+                        Order ID: <span className="text-muted-foreground">{order.orderNumber}</span>
                       </h3>
-                      <span className={`px-3 py-1 rounded-full text-xs font-medium ${
-                        order.status === 'pending' ? 'bg-yellow-100 text-yellow-800' :
-                        order.status === 'confirmed' ? 'bg-green-100 text-green-800' :
-                        order.status === 'shipped' ? 'bg-blue-100 text-blue-800' :
-                        order.status === 'delivered' ? 'bg-green-100 text-green-800' :
-                        order.status === 'cancelled' ? 'bg-red-100 text-red-800' :
-                        'bg-gray-100 text-gray-800'
-                      }`}>
-                        {order.status.charAt(0).toUpperCase() + order.status.slice(1)}
+                      <span
+                        className={`px-3 py-1 text-xs font-medium rounded-full ${
+                          order.status === "confirmed"
+                            ? "bg-green-100 text-green-700"
+                            : order.status === "pending"
+                            ? "bg-yellow-100 text-yellow-700"
+                            : order.status === "cancelled"
+                            ? "bg-red-100 text-red-700"
+                            : "bg-blue-100 text-blue-700"
+                        }`}
+                      >
+                        {order.statusText || order.status}
                       </span>
                     </div>
-                    <p className="text-sm text-muted-foreground">
-                      Ordered on {new Date(order.orderDate).toLocaleDateString('en-US', {
-                        year: 'numeric',
-                        month: 'long',
-                        day: 'numeric',
-                        hour: '2-digit',
-                        minute: '2-digit'
+                    <p className="text-sm text-muted-foreground mt-1">
+                      Ordered on{" "}
+                      {new Date(order.createdAt).toLocaleDateString("en-US", {
+                        year: "numeric",
+                        month: "long",
+                        day: "numeric",
+                        hour: "2-digit",
+                        minute: "2-digit",
                       })}
                     </p>
                   </div>
-                  <div className="flex gap-3">
+
+                  <div className="flex gap-3 mt-3 md:mt-0">
                     <button
-                      onClick={() => router.push(`/order-confirmation/${order.orderId}`)}
-                      className="bg-primary hover:bg-primary/90 text-primary-foreground px-4 py-2 rounded-lg font-semibold text-sm transition-colors"
+                      onClick={() => router.push(`/order/${order._id}`)}
+                      className="px-4 py-2 rounded-lg text-sm bg-primary text-primary-foreground hover:bg-primary/90"
                     >
-                      View Details
+                      Details
                     </button>
                     <button
-                      onClick={() => router.push('/order-tracking')}
-                      className="border border-primary text-primary hover:bg-primary hover:text-primary-foreground px-4 py-2 rounded-lg font-semibold text-sm transition-colors"
+                      onClick={() => router.push(`/order-tracking/${order._id}`)}
+                      className="px-4 py-2 rounded-lg text-sm border border-primary text-primary hover:bg-primary hover:text-primary-foreground"
                     >
-                      Track Order
+                      Track
                     </button>
                   </div>
                 </div>
 
+                {/* Shipment Info */}
+                <div className="flex flex-wrap items-center gap-3 text-sm text-muted-foreground mb-4">
+                  <span>
+                    📍 {order.shippingAddress?.city}, {order.shippingAddress?.country}
+                  </span>
+                  <span className="text-gray-400">→</span>
+                  <span>🏠 {order.shippingAddress?.fullName}</span>
+
+                  {order.timeline?.confirmedAt && (
+                    <span className="ml-auto text-xs bg-green-50 text-green-700 px-3 py-1 rounded-full">
+                      Estimated arrival:{" "}
+                      {new Date(order.timeline.confirmedAt)
+                        .toLocaleDateString("en-US", {
+                          month: "short",
+                          day: "numeric",
+                          year: "numeric",
+                        })}
+                    </span>
+                  )}
+                </div>
+
+                {/* Items */}
                 <div className="border-t pt-4">
-                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                    {order.items.slice(0, 3).map((item) => (
-                      <div key={`${item.productId}-${item.size}-${item.color}`} className="flex items-center space-x-3">
+                  <div className="grid sm:grid-cols-2 md:grid-cols-3 gap-4">
+                    {order.items.map((item, index) => (
+                      <div
+                        key={index}
+                        className="flex items-center gap-3 border rounded-lg p-3"
+                      >
                         <img
-                          src={item.image || "/placeholder-product.jpg"}
+                          src={item.thumbnail}
                           alt={item.name}
-                          className="w-12 h-12 object-cover rounded-lg"
+                          className="w-14 h-14 object-cover rounded-lg"
                         />
                         <div className="flex-1 min-w-0">
-                          <h4 className="text-sm font-medium text-foreground truncate">{item.name}</h4>
-                          <p className="text-xs text-muted-foreground">Qty: {item.quantity}</p>
+                          <h4 className="text-sm font-medium truncate text-foreground">
+                            {item.name}
+                          </h4>
+                          <p className="text-xs text-muted-foreground">
+                            {item.size ? `Size: ${item.size}` : ""}{" "}
+                            {item.color ? `| ${item.color}` : ""}
+                          </p>
+                          <p className="text-xs text-muted-foreground">
+                            Qty: {item.quantity}
+                          </p>
                         </div>
                       </div>
                     ))}
-                    {order.items.length > 3 && (
-                      <div className="flex items-center justify-center">
-                        <span className="text-sm text-muted-foreground">
-                          +{order.items.length - 3} more items
-                        </span>
-                      </div>
-                    )}
                   </div>
 
-                  <div className="mt-4 flex justify-between items-center">
+                  {/* Summary */}
+                  <div className="flex justify-between items-center mt-4">
                     <span className="text-sm text-muted-foreground">
-                      {order.items.length} item{order.items.length !== 1 ? 's' : ''}
+                      Total Items: {order.totalItems}
                     </span>
                     <span className="text-lg font-bold text-foreground">
-                      Rs. {order.total.toFixed(2)}
+                      Rs. {order.pricing?.grandTotal?.toFixed(2)}
                     </span>
                   </div>
                 </div>

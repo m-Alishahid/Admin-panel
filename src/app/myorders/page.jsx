@@ -21,7 +21,9 @@ export default function UserOrdersPage() {
 
     const fetchOrders = async () => {
       try {
-        const response = await orderService.getByCustomer(user.id);
+        const response = await orderService.getByCustomer(user._id);
+        console.log('My Orders', response);
+        
         setOrders(Array.isArray(response) ? response : response?.data || []);
       } catch (error) {
         console.error('Error fetching orders:', error);

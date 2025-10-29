@@ -1,3 +1,4 @@
+// src/app/api/orders/customer/customerId/route.js
 import { NextResponse } from 'next/server';
 import { getServerSession, isAdmin } from '@/lib/auth';
 import Order from '@/Models/Orders';

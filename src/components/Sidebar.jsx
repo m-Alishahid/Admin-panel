@@ -29,7 +29,7 @@ const Sidebar = ({ isOpen, toggleSidebar, isMobile }) => {
     { href: "/users", label: "Users", icon: <FiUsers /> },
     { href: "/category", label: "Categories", icon: <FiList /> },
     { href: "/products", label: "Products", icon: <FiBox /> },
-        { href: "/vendors", label: "Vendors", icon: <User2 /> },
+        // { href: "/vendors", label: "Vendors", icon: <User2 /> },
     { href: "/orders", label: "Orders", icon: <FiShoppingBag /> },
     { href: "/api", label: "API", icon: <FiLink /> },
   ];
