@@ -678,7 +678,8 @@ export function OrderDetailsSheet({ order, isOpen, onClose, onStatusUpdate }: Or
                 { value: 'processing', label: 'Processing', color: 'bg-purple-500' },
                 { value: 'shipped', label: 'Shipped', color: 'bg-orange-500' },
                 { value: 'delivered', label: 'Delivered', color: 'bg-green-500' },
-                { value: 'cancelled', label: 'Cancel', color: 'bg-red-500' }
+                { value: 'cancelled', label: 'Cancel', color: 'bg-red-500' },
+                { value: 'returned', label: 'Returned', color: 'bg-pink-500' }
               ].map((status) => (
                 <button
                   key={status.value}
