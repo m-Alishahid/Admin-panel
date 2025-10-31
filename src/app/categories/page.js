@@ -11,6 +11,7 @@ export default function CategoryProductsPage() {
   const params = useParams();
   const router = useRouter();
   const categoryId = params.categoryId;
+  const categorySlug = params.categorySlug;
 
   const [products, setProducts] = useState([]);
   const [category, setCategory] = useState(null);
@@ -29,7 +30,7 @@ export default function CategoryProductsPage() {
   const fetchCategoryProducts = useCallback(async () => {
     try {
       setLoading(true);
-      const response = await productService.getByCategory(categoryId, filters);
+      const response = await productService.getByCategory(categoryId || categorySlug, filters);
 
       if (response.success) {
         setProducts(response.data.products);
