@@ -5,6 +5,8 @@ import Navbar from "@/components/Navbar";
 import ProductCard from "@/components/ProductCard"; // Import ProductCard component
 import { productService } from "@/services/productService";
 import { categoryService } from "@/services/categoryService";
+import Footer from '@/components/Footer';
+import Reviews from '@/components/Reviews';
 
 export default function HomePage() {
   const [currentSlide, setCurrentSlide] = useState(0);
@@ -47,7 +49,7 @@ export default function HomePage() {
   const slides = [
     {
       video: "/video1.mp4",
-      title: "It's Snuggle Season",
+      title: "Winter Collection",
       subtitle: "As the nights draw in, our cosiest collections come out to play."
     }
   ];
@@ -104,15 +106,15 @@ export default function HomePage() {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[var(--primary-blue)] mx-auto"></div>
-          <p className="mt-4 text-gray-600 font-serif">Loading...</p>
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-gray-600 mx-auto"></div>
+          <p className="mt-4 text-gray-700 font-medium">Loading...</p>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-blue-50">
+    <div className="min-h-screen bg-gray-50">
       <Navbar />
 
       {/* Hero Video Section */}
@@ -152,16 +154,16 @@ export default function HomePage() {
       </section>
 
       {/* Categories Horizontal Scroll */}
-      <section className="bg-blue-100 py-8 md:py-12">
+      <section className="bg-gray-100 py-8 md:py-12">
         <div className="container mx-auto px-4">
-          <h2 className="text-2xl sm:text-3xl font-serif font-bold text-center text-black mb-6">
+          <h2 className="text-2xl sm:text-3xl font-serif font-bold text-center text-gray-800 mb-6">
             Shop by Category
           </h2>
 
           {categories.length < 5 ? (
             <div className="flex justify-center gap-6">
               {categories.map((category, index) => (
-                <div key={category._id || category.id} className="flex-shrink-0 w-64 md:w-72 bg-blue-50 p-6 rounded-lg shadow-sm hover:shadow-md transition-shadow duration-300">
+                <div key={category._id || category.id} className="flex-shrink-0 w-64 md:w-72 bg-gray-50 p-6 rounded-lg shadow-sm hover:shadow-md transition-shadow duration-300">
                   <div
                     role="button"
                     onClick={() => setSelectedCategory(category.name)}
@@ -175,11 +177,8 @@ export default function HomePage() {
                           className="w-full h-full object-cover"
                         />
                       ) : (
-                        <div className="text-3xl md:text-4xl">
-                          {category.name.toLowerCase().includes('girl') ? '👗' :
-                            category.name.toLowerCase().includes('boy') ? '👔' :
-                              category.name.toLowerCase().includes('baby') ? '🍼' :
-                                category.name.toLowerCase().includes('accessories') ? '🧣' : '👕'}
+                        <div className="text-3xl md:text-4xl text-gray-400">
+                          {/* No emoji, just empty or placeholder */}
                         </div>
                       )}
                     </div>
@@ -205,7 +204,7 @@ export default function HomePage() {
                 {/* "All" Category Card - Same size as other categories */}
 
                 {categories.map((category, index) => (
-                  <div key={category._id || category.id} className="flex-shrink-0 snap-start w-48 md:w-56 bg-blue-50 p-4 rounded-lg shadow-sm hover:shadow-md transition-shadow duration-300">
+                  <div key={category._id || category.id} className="flex-shrink-0 snap-start w-48 md:w-56 bg-gray-50 p-4 rounded-lg shadow-sm hover:shadow-md transition-shadow duration-300">
                     <div
                       role="button"
                       onClick={() => setSelectedCategory(category.name)}
@@ -219,11 +218,8 @@ export default function HomePage() {
                             className="w-full h-full object-cover"
                           />
                         ) : (
-                          <div className="text-2xl md:text-3xl">
-                            {category.name.toLowerCase().includes('girl') ? '👗' :
-                              category.name.toLowerCase().includes('boy') ? '👔' :
-                                category.name.toLowerCase().includes('baby') ? '🍼' :
-                                  category.name.toLowerCase().includes('accessories') ? '🧣' : '👕'}
+                          <div className="text-2xl md:text-3xl text-gray-400">
+                            {/* No emoji, just empty or placeholder */}
                           </div>
                         )}
                       </div>
@@ -277,17 +273,14 @@ export default function HomePage() {
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             <div className="text-center p-6 bg-white rounded-lg shadow-sm hover:shadow-md transition-shadow duration-300">
-              <div className="text-5xl mb-3">❄️</div>
               <h3 className="text-xl font-serif font-semibold mb-1 text-gray-800">Cozy Winter Wear</h3>
               <p className="text-gray-600 font-serif">Warm jackets, sweaters, and boots perfect for chilly days.</p>
             </div>
             <div className="text-center p-6 bg-white rounded-lg shadow-sm hover:shadow-md transition-shadow duration-300">
-              <div className="text-5xl mb-3">🎄</div>
               <h3 className="text-xl font-serif font-semibold mb-1 text-gray-800">Holiday Collection</h3>
               <p className="text-gray-600 font-serif">Festive outfits and party dresses for special occasions.</p>
             </div>
             <div className="text-center p-6 bg-white rounded-lg shadow-sm hover:shadow-md transition-shadow duration-300">
-              <div className="text-5xl mb-3">🧣</div>
               <h3 className="text-xl font-serif font-semibold mb-1 text-gray-800">Accessories</h3>
               <p className="text-gray-600 font-serif">Scarves, hats, and gloves to complete the winter look.</p>
             </div>
@@ -305,7 +298,7 @@ export default function HomePage() {
       </section>
 
       {/* Reviews */}
-      <section className="bg-white py-8 md:py-12">
+      {/* <section className="bg-white py-8 md:py-12">
         <div className="container mx-auto px-4">
           <h2 className="text-2xl md:text-4xl font-serif font-bold text-center mb-6 text-gray-800">
             What Parents Say
@@ -325,19 +318,27 @@ export default function HomePage() {
             ))}
           </div>
         </div>
-      </section>
+      </section> */}
+<Reviews />
+
+
+
+
+
+
+
 
       {/* Newsletter */}
-      <section className="bg-black text-white py-8 md:py-12">
+      <section className="bg-white text-black py-8 md:py-12">
         <div className="container mx-auto px-4 text-center">
           <h2 className="text-2xl md:text-4xl font-serif font-bold mb-3">
             Stay in Style
           </h2>
-          <p className="text-base md:text-lg mb-6 max-w-2xl mx-auto font-serif text-gray-300">
+          <p className="text-base md:text-lg mb-6 max-w-2xl mx-auto font-serif text-gray-700">
             Subscribe to our newsletter for the latest luxury kidswear updates and exclusive offers.
           </p>
           <div className="max-w-md mx-auto">
-            <div className="flex flex-col sm:flex-row gap-3">
+            <div className="flex flex-col sm:flex-row gap-3 text-gray-700">
               <input
                 type="email"
                 placeholder="Enter your email"
@@ -363,7 +364,7 @@ export default function HomePage() {
       </section>
 
       {/* Footer */}
-      <footer className="bg-black text-white py-8">
+      {/* <footer className="bg-black text-white py-8">
         <div className="container mx-auto px-4">
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
             <div>
@@ -408,7 +409,10 @@ export default function HomePage() {
             </p>
           </div>
         </div>
-      </footer>
+      </footer> */}
+
+<Footer />
+
     </div>
   );
 }
