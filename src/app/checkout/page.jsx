@@ -210,8 +210,8 @@ export default function CheckoutPage() {
       setShowModal(true);
     } catch (error) {
       console.error('Error creating order:', error);
-      console.error('Error details:', error.response?.data || error.message);
-      alert(`Failed to place order: ${error.response?.data?.error || error.message || 'Unknown error'}`);
+      console.error('Error details:', error?.response?.data || error.message);
+      alert(`Failed to place order: ${error?.response?.data?.error || error.message || 'Unknown error'}`);
     } finally {
       setLoading(false);
     }

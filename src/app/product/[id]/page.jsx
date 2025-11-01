@@ -307,7 +307,6 @@ export default function ProductDetailPage() {
                           }`}
                         >
                           {size}
-                          {!hasStock && " (Out of Stock)"}
                         </button>
                       );
                     })}
@@ -336,7 +335,6 @@ export default function ProductDetailPage() {
                         }`}
                       >
                         {color.name}
-                        {!color.inStock && " (Out of Stock)"}
                       </button>
                     ))}
                   </div>
@@ -398,32 +396,40 @@ export default function ProductDetailPage() {
                   <span>❤️</span>
                   {isInWishlist(product._id) ? 'In Wishlist' : 'Add to Wishlist'}
                 </button>
-                <button
-                  onClick={handleAddToCart}
-                  disabled={currentStock === 0 || (product.requiresSize && !selectedSize) || (product.requiresColor && !selectedColor)}
-                  className="flex-1 border border-blue-800 bg-blue-800 text-white rounded-full py-3 font-serif font-semibold hover:bg-blue-900 hover:border-blue-900 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
-                >
-                  <span>🛒</span>
-                  Add to Cart
-                </button>
-                <button
-                  onClick={handleBuyNow}
-                  disabled={currentStock === 0 || (product.requiresSize && !selectedSize) || (product.requiresColor && !selectedColor)}
-                  className="flex-1 border border-gray-800 bg-gray-800 text-white rounded-full py-3 font-serif font-semibold hover:bg-gray-700 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
-                >
-                  <span>⚡</span>
-                  Buy Now
-                </button>
+                {currentStock === 0 ? (
+                  <div className="flex-[2] flex items-center justify-center">
+                    <span className="text-red-600 font-serif font-semibold text-lg">Out of Stock</span>
+                  </div>
+                ) : (
+                  <>
+                    <button
+                      onClick={handleAddToCart}
+                      disabled={(product.requiresSize && !selectedSize) || (product.requiresColor && !selectedColor)}
+                      className="flex-1 border border-blue-800 bg-blue-800 text-white rounded-full py-3 font-serif font-semibold hover:bg-blue-900 hover:border-blue-900 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                    >
+                      <span>🛒</span>
+                      Add to Cart
+                    </button>
+                    <button
+                      onClick={handleBuyNow}
+                      disabled={(product.requiresSize && !selectedSize) || (product.requiresColor && !selectedColor)}
+                      className="flex-1 border border-gray-800 bg-gray-800 text-white rounded-full py-3 font-serif font-semibold hover:bg-gray-700 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                    >
+                      <span>⚡</span>
+                      Buy Now
+                    </button>
+                  </>
+                )}
               </div>
             </div>
 
             {/* Product Information */}
             <div className="border-t pt-6 space-y-4">
               <div className="grid grid-cols-2 gap-4 text-sm">
-                <div>
+                {/* <div>
                   <span className="font-medium text-gray-700 font-serif">Category:</span>
                   <span className="text-gray-600 font-serif capitalize">{product.category?.name || 'N/A'}</span>
-                </div>
+                </div> */}
               </div>
             </div>
           </div>
