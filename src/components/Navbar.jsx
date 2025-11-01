@@ -108,7 +108,7 @@ export default function Navbar() {
                 <User size={16} />
                 {!isScrolled && (
                   <>
-                    <span className="hidden sm:inline">{user?.firstName || 'Account'}</span>
+                    <span className="hidden sm:inline">{user?.firstName && user?.lastName ? `${user.firstName} ${user.lastName}` : user?.firstName || 'Account'}</span>
                     <ChevronDown size={13} className="ml-1 hidden sm:inline" />
                   </>
                 )}
