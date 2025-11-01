@@ -13,6 +13,8 @@ export const categoryService = {
   //   return response.data;
   // },
 
+
+  
   getById: async (idOrSlug) => {
     const res = await api.get(`/categories/${idOrSlug}`);
     return res.data;
